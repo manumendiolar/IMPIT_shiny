@@ -4,11 +4,12 @@
 
 
 # packages
-library(shiny)
-library(shinythemes)
+library(shinydashboard)
+library(dashboardthemes)
+library(shinydashboardPlus)
+library(shinyWidgets)
 library(tidyverse)
 library(DT)
-
 
 # source
 source("./source/mydetect_event.R")
@@ -22,41 +23,59 @@ source("./source/fun_w1.R")
 source("./source/fun_w2.R")
 source("./source/fun_w3.R")
 
+setBackgroundImage(src = NULL, shinydashboard = TRUE)
 
 
-# Server
+# Define server for app
 server <- function(input, output, session) {
   
   #
-  # main page: loading data
+  # HOME tab
   #
+  output$myimage <- renderImage({
+    # filename is ./www/myimage.jpeg
+    filename <- normalizePath(file.path('./www',
+                                        paste('myimage', input$n, '.jpeg', sep='')))
+    # Return a list containing the filename
+    list(src = filename)
+  }, deleteFile = FALSE)
+  
+  
+  #
+  # DATA tab
+  #
+  
+  # read data file with env. signal info
   data_input <- reactive({
     req(input$csv_input)
     inFile <- input$csv_input
     read.csv(inFile$datapath)
   })
   
+  # update time and env variables
   observeEvent(data_input(),{
     choices <- c("Not selected", names(data_input()))
     updateSelectInput(inputId = "time_var", choices = choices)
     updateSelectInput(inputId = "env_var", choices = choices)
     
   })
-  
   time_var <- eventReactive(input$run_button_data, input$time_var)
   env_var <- eventReactive(input$run_button_data, input$env_var)
   
+  # construct data table
   output$contents_data <- DT::renderDataTable({ 
-    DT::datatable(data_input(), options = list(lengthMenu=c(5,10,30,50), pageLength=10), rownames=FALSE) %>%
+    DT::datatable(data_input(), options = list(lengthMenu=c(5,10,30,50), pageLength=5), rownames=FALSE) %>%
       formatRound(c(2), 2) #%>% formatStyle(columns = c(1:2), 'text-align' = 'left')
   })
   
-  output$envSummary <- renderPrint({
-    cat(paste0("Statistics summary of ",names(data_input())[2]),"\n")
-    cat("\n")
-    summary(data_input()[ ,input$env_var])
-  })
+  # construct summary 
+  # output$envSummary <- renderPrint({
+  #   cat(paste0("Statistics summary of ",names(data_input())[2]),"\n")
+  #   cat("\n")
+  #   summary(data_input()[ ,input$env_var])
+  # })
   
+  # basic data plot (when user click button)
   observeEvent(input$run_button_data,{
     output$envPlot <- renderPlot({
       x <- data_input()[ ,input$time_var]
@@ -75,17 +94,21 @@ server <- function(input, output, session) {
   })
   
   
+  
   #
-  # second page: episodes computation
+  # EPISODES tab
   #
+  
   state <- reactiveValues()
   
+  # depending on generate / upload episode file
   observeEvent(input$run_button_epi,{
     
     if (input$choice_epifile == '1'){
       
       # compute episodes/update if necessary 
       state$episodes <- mydetect_event(data_input(), input$thres_above, input$thres, input$duration_min)
+      
     } else {
       
       # load episode list if already available
@@ -94,46 +117,58 @@ server <- function(input, output, session) {
         inFile <- input$epifile_input
         ext <- tools::file_ext(inFile$datapath)
         
-        validate(need(ext %in% c("csv","RData"), "Please upload a csv or RData file"))
+        validate(need(ext %in% c("csv"), "Please upload a csv file"))
         
         if (ext == "csv") {
           read.csv(inFile$datapath)
         } else {
-          print("This doesn't work for RData files...")
-          load_Rdata(inFile$datapath)
+          print("This doesn't work for this file extention...")
         }
       })
       state$episodes <- epifile_input()
     }
     
-    # Check for timing focus
+    # check for timing focus
     if (input$choice_timfoc){
       
-      state$start_day <- ifelse(input$start_timfoc_day %in% c(1,2,3,4,5,6,7,8,9), 
-                                paste0("0",input$start_timfoc_day), paste0(input$start_timfoc_day))
-      state$start_month <- ifelse(input$start_timfoc_month %in% c(1,2,3,4,5,6,7,8,9), 
-                                  paste0("0",input$start_timfoc_month), paste0(input$start_timfoc_month))
-      state$end_day <- ifelse(input$end_timfoc_day %in% c(1,2,3,4,5,6,7,8,9), 
-                              paste0("0",input$end_timfoc_day), paste0(input$end_timfoc_day))
-      state$end_month <- ifelse(input$end_timfoc_month %in% c(1,2,3,4,5,6,7,8,9), 
-                                paste0("0",input$end_timfoc_month), paste0(input$end_timfoc_month))
+      # update format of start date
+      state$start_day <- ifelse(input$start_timfoc_day %in% seq(1,9,1), paste0("0",input$start_timfoc_day), paste0(input$start_timfoc_day))
+      state$start_month <- ifelse(input$start_timfoc_month %in% seq(1,9,1), paste0("0",input$start_timfoc_month), paste0(input$start_timfoc_month))
       
+      # update format of end date
+      state$end_day <- ifelse(input$end_timfoc_day %in% seq(1,9,1), paste0("0",input$end_timfoc_day), paste0(input$end_timfoc_day))
+      state$end_month <- ifelse(input$end_timfoc_month %in% seq(1,9,1), paste0("0",input$end_timfoc_month), paste0(input$end_timfoc_month))
+      
+      # gather as a vector
       state$period_timfoc <- c(paste0(state$start_month,"/",state$start_day), paste0(state$end_month,"/",state$end_day))
       
+      # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
     } else {
+      # keep the same
       state$episodes <- state$episodes
     }
   })
   
-  # print table with episodes
+  
+  # Table episodes: print
   output$contents_epi <- DT::renderDataTable({ 
-    DT::datatable(state$episodes, rownames=FALSE) %>%
+    DT::datatable(state$episodes, rownames=FALSE, options = list(pageLength=5)) %>%
       formatRound(c(9:12), 2)
   }) 
   
-  # print plot of episodes
+  # Table episodes: download .csv
+  output$downloadTable_epi <- downloadHandler(
+    filename = function() {
+      paste0("Table_episodes.csv")
+    },
+    content = function(file) {
+      write.csv(state$episodes, file)
+    }
+  )
+  
+  # Plot episodes: print
   observeEvent(input$run_button_epi,{
     
     output$plot_epi <- renderPlot({
@@ -145,7 +180,7 @@ server <- function(input, output, session) {
       d2 <- as.Date(tail(df$x,1))
       
       
-      ggplot(df, aes(x, y)) +
+      state$plot_epi <- ggplot(df, aes(x, y)) +
         geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
         geom_point( color="orange", size=3) +
         labs(x="date_start", y="intensity_mean", title="Lolli plot events") +
@@ -154,14 +189,29 @@ server <- function(input, output, session) {
         theme(panel.grid.major.x = element_blank(),
               panel.border = element_blank(),
               axis.ticks.x = element_blank()) 
+      
+      state$plot_epi
+      
     })
   })
   
+  # Plot episodes: download .png
+  output$downloadPlot_epi <- downloadHandler(
+    filename = function(){
+      paste0("Plot_episodes",'.png')
+    },
+    content = function(file){
+      ggsave(file, plot = state$plot_epi, width = 26, height = 12, units = "cm", dpi = 300)
+    }
+  )
+  
+  
   
   #
-  # third page: index computation
+  # INDEX tab
   #
-  # Index computation
+  
+  # computing index
   observeEvent(input$run_button_index,{
     
     state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
@@ -205,18 +255,28 @@ server <- function(input, output, session) {
   
   observeEvent(input$run_button_index,{
     
-    # print table with episodes
+    # Table index: print
     output$contents_index <- DT::renderDataTable({ 
-      DT::datatable(state$contents_index, rownames=FALSE) %>%
+      DT::datatable(state$contents_index, rownames=FALSE, options = list(pageLength=5)) %>%
         formatRound(c(2), 2)
     }) 
     
-    # print plot index
+    # Table index: download .csv
+    output$downloadTable_index <- downloadHandler(
+      filename = function() {
+        paste0("Table_index.csv")
+      },
+      content = function(file) {
+        write.csv(state$contents_index, file)
+      }
+    )
+    
+    # Plot index: print
     output$plot_index <- renderPlot({
       y1 <- head(state$contents_index$time,1)
       y2 <- tail(state$contents_index$time,1)
       
-      ggplot(state$contents_index, aes(time, index)) +
+      state$plot_index <- ggplot(state$contents_index, aes(time, index)) +
         geom_line() +
         labs(x = "Time", y = "Index", title = paste0("IMPIT index for ",as.character(input$env_var)," signal")) +
         scale_x_continuous(breaks=seq(y1, y2, 2), limits=c(y1, y2)) +
@@ -224,40 +284,53 @@ server <- function(input, output, session) {
         theme(panel.grid.major.x = element_blank(),
               panel.border = element_blank(),
               axis.ticks.x = element_blank())
+      
+      state$plot_index
     })
+    
+    # Plot index: download .png
+    output$downloadPlot_index <- downloadHandler(
+      filename = function(){
+        paste0("Plot_index",'.png')
+      },
+      content = function(file){
+        ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
+      }
+    )
+    
   })
   
   
+  
   #
-  # fourth page: application
+  # APPLICATION tab
   #
+  
   # load response data
   data_resp <- reactive({
     req(input$resp_file)
     inFile <- input$resp_file
     read.csv(inFile$datapath)
   })
-  
   # choose response variable
   observeEvent(data_resp(),{
     choices <- c("Not selected", names(data_resp()))
     updateSelectInput(inputId = "resp_time_var", choices = choices)
     updateSelectInput(inputId = "resp_var", choices = choices)
   })
+  resp_var <- eventReactive(input$run_button_app_resp, input$resp_var)
+  resp_time_var <- eventReactive(input$run_button_app_resp, input$resp_time_var)
   
-  resp_var <- eventReactive(input$run_button_application, input$resp_var)
-  resp_time_var <- eventReactive(input$run_button_application, input$resp_time_var)
-  
-  observeEvent(input$run_button_application,{
+  observeEvent(input$run_button_app_resp,{
     
-    # print response data table for checking
-    output$contents_application <- DT::renderDataTable({ 
-      DT::datatable(data_resp(), rownames=FALSE) %>%
+    # Table Response: print
+    output$contents_app_resp <- DT::renderDataTable({ 
+      DT::datatable(data_resp(), rownames=FALSE, options = list(pageLength=5)) %>%
         formatRound(c(2:5), 2)
     })
     
-    # print response plot 
-    output$plot_resp_application <- renderPlot({
+    # Plot Response: print 
+    output$plot_app_resp <- renderPlot({
       
       state$dep_time <-  as.numeric(data_resp()[ ,input$resp_time_var])
       state$dep_var <- as.numeric(data_resp()[ ,input$resp_var])
@@ -266,7 +339,7 @@ server <- function(input, output, session) {
       
       df_resp <- data.frame(time = state$dep_time, resp = state$dep_var)
       
-      ggplot(df_resp, aes(time, resp)) +
+      state$plot_app_resp <- ggplot(df_resp, aes(time, resp)) +
         geom_line() +
         labs(x = as.character(input$resp_time_var), 
              y = as.character(input$resp_var), 
@@ -276,14 +349,66 @@ server <- function(input, output, session) {
         theme(panel.grid.major.x = element_blank(),
               panel.border = element_blank(),
               axis.ticks.x = element_blank())
+      
+      state$plot_app_resp
+    })
+  })
+  
+  
+  # load index data
+  data_index <- reactive({
+    req(input$index_file)
+    inFile <- input$index_file
+    read.csv(inFile$datapath)
+  })
+  # choose index variable
+  observeEvent(data_index(),{
+    choices <- c("Not selected", names(data_index()))
+    updateSelectInput(inputId = "index_time_var", choices = choices)
+    updateSelectInput(inputId = "index_var", choices = choices)
+  })
+  index_var <- eventReactive(input$run_button_app_index, input$index_var)
+  index_time_var <- eventReactive(input$run_button_app_index, input$index_time_var)
+  
+  observeEvent(input$run_button_app_index,{
+    
+    # Table Index: print
+    output$contents_app_index <- DT::renderDataTable({ 
+      DT::datatable(data_index(), rownames=FALSE, options = list(pageLength=5))#%>%       formatRound(c(2:5), 2)
     })
     
+    # Plot Index: print 
+    output$plot_app_index <- renderPlot({
+      
+      state$ind_time <-  as.numeric(data_index()[ ,input$index_time_var])
+      state$ind_var <- as.numeric(data_index()[ ,input$index_var])
+      t1 <- head(state$ind_time,1)
+      t2 <- tail(state$ind_time,1)
+      
+      df_index <- data.frame(time = state$ind_time, index = state$ind_var)
+      
+      state$plot_app_index <- ggplot(df_index, aes(time, index)) +
+        geom_line() +
+        labs(x = as.character(input$index_time_var), 
+             y = as.character(input$index_var), 
+             title = "Index (Independent Variable)") +
+        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1, t2)) +
+        theme_light() +
+        theme(panel.grid.major.x = element_blank(),
+              panel.border = element_blank(),
+              axis.ticks.x = element_blank())
+      
+      state$plot_app_index
+    })
+  })
+  
+  observeEvent(input$run_button_application,{
     
-    # print regression 
+    # Plot Regression: print 
     output$plot_corr_application <- renderPlot({
       
       # keep independent variable
-      state$indep_var <- as.numeric(state$index)
+      state$indep_var <- as.numeric(state$ind_var)
       
       # linear model
       mod <- lm(state$dep_var ~ state$indep_var)
@@ -313,7 +438,7 @@ server <- function(input, output, session) {
                          paste0("Corr = ", round(res.LR$corr,2),", Rsq = ",round(res.LR$R2,2),", p value < 0.001"),
                          paste0("Corr = ", round(res.LR$corr,2),", Rsq = ",round(res.LR$R2,2),", p value = ",round(res.LR$pVal,3)))
       
-      ggplot(data = data.frame(yrs.lab = state$dep_time, xx = state$indep_var, yy = state$dep_var), aes(x = xx, y = yy)) +
+      state$plot_corr_application <- ggplot(data = data.frame(yrs.lab = state$dep_time, xx = state$indep_var, yy = state$dep_var), aes(x = xx, y = yy)) +
         geom_smooth(method ='lm', se = TRUE, col = col1, alpha = 0.25) +
         geom_text(aes(label = yrs.lab), size = 3.5) +
         labs(y = as.character(input$resp_var),
@@ -327,25 +452,24 @@ server <- function(input, output, session) {
               plot.title = element_text(size = 12, face = 1),
               plot.subtitle = element_text(size = 11, face = 2, colour = col2))
       
+      state$plot_corr_application
+      
     }, height = 500, width = 500 )
+    
+    # Plot Regression: download .png
+    output$downloadPlot_app <- downloadHandler(
+      filename = function(){
+        paste0("Plot_application",'.png')
+      },
+      content = function(file){
+        ggsave(file, plot = state$plot_corr_application, width = 14, height = 14, units = "cm", dpi = 300)
+      }
+    )
     
   })
   
-  # Download plot
-  output$downloadPlot_application <- downloadHandler(
-    filename = function(){
-      paste('test', '.png', sep = '')
-    },
-    content = function(file){
-      req(plot_corr_application())
-      ggsave(file, plot = plot_corr_application(), device = 'png')
-    }
-  )
   
   
 }
 
-
-
-
-
+#shinyApp(ui, server)

@@ -2,6 +2,7 @@
 # the 'Run App' button above.
 # Manuela M.
 
+# another comment 
 
 # packages
 library(shiny)

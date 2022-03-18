@@ -6,6 +6,7 @@
 library(shinydashboard)
 library(dashboardthemes)
 library(shinydashboardPlus)
+library(shinyFiles)
 library(shinyhelper)
 library(tidyverse)
 library(DT)
@@ -104,7 +105,7 @@ ui <- dashboardPage(
             icon = icon("upload"),
             width = 4,
             height = "500px",
-            helper(fileInput("csv_input","Select CSV File to Import",accept=".csv"),
+            helper(fileInput("csv_input","Select CSV File to Import",accept=".csv", placeholder = "ex: soi_monthly.csv"),
                    icon = "question", 
                    size = "m",
                    title = "Data format", 

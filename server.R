@@ -25,9 +25,21 @@ source("./source/fun_w3.R")
 
 setBackgroundImage(src = NULL, shinydashboard = TRUE)
 
+# Attach the folder where the 'QU-GENE' engine and QuLinePlus are stored.
+IMPIT_base <- paste0(getwd(),"/")
+
+
 
 # Define server for app
 server <- function(input, output, session) {
+  
+  #
+  # Helpfiles
+  #
+  # uses 'helpfiles' directory by default
+  # in this example, we use the withMathJax parameter to render formulae
+  observe_helpers(session = getDefaultReactiveDomain(),
+                  help_dir = paste0(IMPIT_base,"helpfiles"), withMathJax = TRUE)
   
   #
   # HOME tab

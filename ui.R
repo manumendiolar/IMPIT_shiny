@@ -99,7 +99,7 @@ ui <- dashboardPage(
         tabName = "upload_data",
         fluidRow(
           box(
-            title = "Source",
+            title = "Required Data",
             id = "box_source_data",
             collapsible = TRUE,
             icon = icon("upload"),
@@ -113,7 +113,7 @@ ui <- dashboardPage(
                    content = "source_data_help")
           ),
           box(
-            title = "Data",
+            title = "Check data",
             id = "box_table_data",
             collapsible = TRUE,
             icon = icon("file-import"),
@@ -128,25 +128,25 @@ ui <- dashboardPage(
         tabName = "descriptives_data",
         fluidRow(
           box(
-            title = "Plot", 
-            id = "box_plot_data",
-            collapsible = TRUE,
-            icon = icon("chart-line"),
-            width = 7,
-            height = "500px",
-            plotOutput("envPlot", height = 250)
-          ),
-          box(
             title = "Controls",
             id = "box_controls_data",
             collapsible = TRUE,
             icon = icon("cog"),
-            width = 4,
+            width = 3,
             height = "500px",
             selectInput("time_var","Time Variable",choices=c("Not selected")),
             selectInput("env_var","Environmental Variable",choices=c("Not selected")),
             dateRangeInput("daterange", "Date range for plot (yyyy-mm-dd)", start="2000-01-01", end="2020-01-01"),
             actionButton("run_button_data", "Plot", icon=icon("play"))
+          ),
+          box(
+            title = "Plot", 
+            id = "box_plot_data",
+            collapsible = TRUE,
+            icon = icon("chart-line"),
+            width = 8,
+            height = "500px",
+            plotOutput("envPlot", height = 275)
           )
         )
       ),

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Source data should be stored as a `CSV` format with two columns and header.
 
 * The first column is for the time variable (could be year, month, day, etc.), and the second column for the environmental signal.
@@ -38,4 +37,3 @@ $$\\begin{array}{cc} \\hline \\text{Date} & \\text{soi_monthly}
 \\\\ \\hline \\text{01/01/1950} & 17.6
 \\\\ \\hline \\vdots & \\vdots
 \\\\ \\hline \\text{01/02/2022} & 8.2 \\\\ \\hline \\end{array}$$
->>>>>>> 3580feebf7aa6417a338ca5593ea2e69d160e9e1

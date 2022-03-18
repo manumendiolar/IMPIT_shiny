@@ -6,6 +6,7 @@
 library(shinydashboard)
 library(dashboardthemes)
 library(shinydashboardPlus)
+library(shinyhelper)
 library(tidyverse)
 library(DT)
 
@@ -87,7 +88,7 @@ ui <- dashboardPage(
             title = "Workflow",
             align = "center", 
             solidHeader = F,
-            img(src = "roadmap.png",style="width: 75%"))
+            img(src = "images/roadmap.png",style="width: 75%"))
         )
       ),
       
@@ -103,7 +104,12 @@ ui <- dashboardPage(
             icon = icon("upload"),
             width = 4,
             height = "500px",
-            fileInput("csv_input","Select CSV File to Import",accept=".csv")
+            helper(fileInput("csv_input","Select CSV File to Import",accept=".csv"),
+                   icon = "question", 
+                   size = "m",
+                   title = "Data format", 
+                   type = "markdown", 
+                   content = "source_data_help")
           ),
           box(
             title = "Data",
@@ -350,7 +356,25 @@ ui <- dashboardPage(
         tabName = "about",
         h4("Created with R Shiny"),
         br(),
-        "2022 January"
+        "2022 March",
+        
+        fluidRow(
+          box(
+            width = 12,
+            title = "About us",
+            solidHeader = F
+            
+          )
+        ),
+        fluidRow(
+          box(
+            width = 12,
+            title = "Rsession",
+            solidHeader = F
+            
+            )
+        ),
+        
       )
     )
   )

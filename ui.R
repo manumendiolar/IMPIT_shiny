@@ -178,8 +178,8 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "input.choice_epifile == '1'",
               checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold:", choices=list("up-episodes?"=1, "down-episodes?"=2), selected = NULL),
-              numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf),
-              numericInput('duration_min', 'Minimum duration of each episode:', 1, min = 1, max = Inf),
+              fluidRow(column(4, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
+              fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf)))
             )
           ),
           box(
@@ -193,15 +193,33 @@ ui <- dashboardPage(
             checkboxInput("choice_timfoc", "Timing", value = FALSE),
             conditionalPanel(
               condition = "input.choice_timfoc",
-              strong("Starts:"),
+              strong("When does the special season start?"),
               br(),
-              div(style="display:inline-block",textInput("start_timfoc_day", label="day", value=1)),
-              div(style="display:inline-block",textInput("start_timfoc_month", label="month", value = 1)),
+              fluidRow(column(4, selectInput("start_timfoc_day", "", 
+                                             choices=c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16",
+                                                       "17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"),
+                                             selected = "1")
+                              ),
+                       column(4, selectInput("start_timfoc_month", "", 
+                                             choices=c("January","February","March","April","May","June","July",
+                                                       "August","September","October","November","December"),
+                                             selected = "January")
+                              )
+              ),
               br(),
-              strong("Ends:"),
+              strong("When does the special season end?"),
               br(),
-              div(style="display:inline-block",textInput("end_timfoc_day", label="day", value=1)),
-              div(style="display:inline-block",textInput("end_timfoc_month", label="month", value = 1)),
+              fluidRow(column(4, selectInput("end_timfoc_day", "", 
+                                             choices=c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16",
+                                                       "17","18","19","20","21","22","23","24","25","26","27","28","29","30","31"),
+                                             selected = "1")
+                              ),
+                       column(4, selectInput("end_timfoc_month", "", 
+                                             choices=c("January","February","March","April","May","June","July",
+                                                       "August","September","October","November","December"),
+                                             selected = "January")
+                              )
+              )
             ),
             actionButton("run_button_epi", "Run", icon=icon("play"))
           )
@@ -230,7 +248,9 @@ ui <- dashboardPage(
         )
       ),
       
+      #
       # Index tab ==========
+      #
       tabItem(
         tabName = "index",
         fluidRow(
@@ -241,6 +261,16 @@ ui <- dashboardPage(
             icon = icon("user-cog"),
             width = 10,
             height = "600px",
+            
+            # Index period
+            box(
+              title = "Index period", width = 3, height = "500px",
+              br(),
+              div(style="display:inline-block",numericInput("period_index_start", label="From", value=1980)),
+              div(style="display:inline-block",numericInput("period_index_end", label="To", value = 2019))
+              #dateRangeInput("daterange_index", "Date range for plot (yyyy-mm-dd)", start="1900-01-01", end="2020-01-01")
+            ),
+            
             box(
               title = "Intensity", width = 3, 
               selectInput("choice_intensity", "Intensity", choices = c("mean","min","max","log"), selected = "mean")
@@ -252,19 +282,14 @@ ui <- dashboardPage(
               sliderInput("c_w2", label = "Recency (c)", min = 0, max = 1, value = 0),
               conditionalPanel(
                 condition = "input.choice_timfoc",
-                sliderInput("d_w3", label = "Timing focus (d)", min = 0, max = 15, value = 2)
+                sliderInput("d_w3", label = "Timing (d)", min = 0, max = 15, value = 2)
               )
             ),
             box(
               title = "Memory", width = 3, 
               numericInput("m", label = "in years", min = 1, max = 40, value = 1)
-            ),
-            box(
-              title = "Index period", width = 3, height = "500px",
-              br(),
-              div(style="display:inline-block",numericInput("period_index_start", label="From", value=1980)),
-              div(style="display:inline-block",numericInput("period_index_end", label="To", value = 2019))
             )
+  
           ),
           box(
             width = 2, 
@@ -293,12 +318,49 @@ ui <- dashboardPage(
         )
       ),
       
-      # Application tab =====
+      #
+      # Application tab ==========
+      #
       tabItem(
         tabName = "application",
         
         fluidRow(
           
+          box(
+            title = "Source IMPIT index",
+            id = "box_app_data_index",
+            collapsible = TRUE,
+            icon = icon("upload"),
+            width = 4,
+            height = "500px",
+            fileInput("index_file","Select CSV to Import", accept=c(".csv",".RData")),
+            selectInput("index_time_var","Time Variable", choices=c("Not selected")),
+            selectInput("index_var","Variable", choices=c("Not selected")),
+            #sliderInput("index_periodInput", "Period", 1950, 2020, c(1988, 2019), pre = "year "),
+            #dateRangeInput("daterange_index_app", "Date range (yyyy-mm-dd):", start="1950-01-01", end="2022-01-01"),
+            actionButton("run_button_app_index", "Plot", icon=icon("play"))
+          ),
+          box(
+            title = "Explore trend in IMPIT index",
+            id = "box_app_data_index_exp",
+            collapsible = TRUE,
+            icon = icon("chart"),
+            width = 8,
+            height = "500px",
+            tabsetPanel(
+              tabPanel("Table",
+                       div(DT::dataTableOutput("contents_app_index"), style = "font-size: 100%; width: 100%")
+                       ),
+              tabPanel("Plot",
+                       plotOutput("plot_app_index"),
+                       br(),
+                       downloadButton("downloadPlot_app_index", "Download Plot"), style = "margin-top: 25px;"
+                       )
+            )
+          )
+        ),
+        
+        fluidRow(
           box(
             title = "Source response",
             id = "box_app_data_resp",
@@ -309,64 +371,36 @@ ui <- dashboardPage(
             fileInput("resp_file","Select CSV to Import", accept=c(".csv",".RData")),
             selectInput("resp_time_var","Time Variable", choices=c("Not selected")),
             selectInput("resp_var","Response Variable", choices=c("Not selected")),
-            sliderInput("resp_periodInput", "Period", 1950, 2020, c(1988, 2019), pre = "year "),
-            actionButton("run_button_app_resp", "Plot response", icon=icon("play"))
+            #sliderInput("resp_periodInput", "Period", 1950, 2020, c(1988, 2019), pre = "year "),
+            actionButton("run_button_application", "Run analysis", icon=icon("play"))
           ),
+
           box(
-            title = "Source index",
-            id = "box_app_data_index",
-            collapsible = TRUE,
-            icon = icon("upload"),
-            width = 4,
-            height = "500px",
-            fileInput("index_file","Select CSV to Import", accept=c(".csv",".RData")),
-            selectInput("index_time_var","Time Variable", choices=c("Not selected")),
-            selectInput("index_var","Variable", choices=c("Not selected")),
-            sliderInput("index_periodInput", "Period", 1950, 2020, c(1988, 2019), pre = "year "),
-            actionButton("run_button_app_index", "Plot index", icon=icon("play"))
-          ),
-          box(
-            title = "Check inputs",
-            id = "box_app_data_index_exp",
+            title = "Explore association between IMPIT index and response variable",
+            id = "box_app_data",
             collapsible = TRUE,
             icon = icon("chart"),
             width = 8,
-            #height = "500px",
+            height = "700px",
             tabsetPanel(
               tabPanel("Table",
-                       fluidRow(column(10, div(DT::dataTableOutput("contents_app_resp"), style = "font-size: 100%; width: 50%"),
-                                       br(),
-                                       br(),
-                                       div(DT::dataTableOutput("contents_app_index"), style = "font-size: 100%; width: 50%")
+                       div(DT::dataTableOutput("contents_app_resp"), style = "font-size: 100%; width: 50%")
                        ),
-                       column( 3, downloadButton("downloadTable_app_resp", "Download Table"), style = "margin-top: 25px;")
-                       )
-              ),
               tabPanel("Plot",
-                       fluidRow(column(10, plotOutput("plot_app_resp"),
-                                       plotOutput("plot_app_index")
+                       plotOutput("plot_app_resp"),
+                       br(),
+                       downloadButton("downloadPlot_app_resp", "Download Plot")
                        ),
-                       column( 3,  downloadButton("downloadPlot_app_resp", "Download Plot"), style = "margin-top: 25px;")
-                       )
-              )
-            )
-          ),
-          box(
-            title = "Application",
-            id = "box_app_data",
-            collapsible = TRUE,
-            icon = icon("upload"),
-            width = 4,
-            #height = "500px",
-            actionButton("run_button_application", "Run analysis", icon=icon("play")),
-            tabPanel("Analysis",
-                     fluidRow(column(10, plotOutput("plot_corr_application", width = "40%")),
+              tabPanel("Correlation analysis",
+                     fluidRow(column(10, plotOutput("plot_corr_application", width = "100%")),
                               column( 3,  downloadButton("downloadPlot_app", "Download Plot"), style = "margin-top: 25px;")
                      )
+              )
             )
           )
         )
       ),
+      
       
       # sixth tab content
       tabItem(
@@ -380,6 +414,12 @@ ui <- dashboardPage(
             width = 12,
             title = "About us",
             solidHeader = F
+            # userDescription(
+            #   title = "Manuela Mendiolar",
+            #   subtitle = "lead Developer",
+            #   type = 2,
+            #   image = "images/UQ_Manuela_.jpg",
+            # )
             
           )
         ),
@@ -390,10 +430,11 @@ ui <- dashboardPage(
             solidHeader = F
             
             )
-        ),
+        )
         
       )
     )
   )
 )
+
 

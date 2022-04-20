@@ -47,9 +47,6 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
       menuItem("Data", tabName = "data", icon = icon("database")
-               #startExpanded = FALSE,
-               #menuSubItem("Upload", tabName = "upload_data", icon = icon("file-upload")),
-               #menuSubItem("Descriptives", tabName = "descriptives_data", icon = icon("chart-bar"))
       ),
       menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs")),
       menuItem("Index", tabName = "index", icon = icon("chart-line")),

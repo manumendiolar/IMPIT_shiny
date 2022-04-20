@@ -14,8 +14,8 @@
 #
 # episodes : episode input with 5 extra columns 
 #            overlap                 : logical value indicating if there was overlapping (TRUE) or not (FALSE)
-#            overlap_duration_days   : integer value with duration of the overlap in days 
-#            overlap_duration_months : integer value with duration of the overlap in months
+#            overlap_days            : integer value with duration of the overlap in days 
+#            overlap__months         : integer value with duration of the overlap in months
 #            overlap_date_start      : character with format "YYYY/mm/dd" for the date when the overlap starts
 #            overlap_date_end        : character with format "YYYY/mm/dd" for the date when the overlap ends
 
@@ -29,8 +29,8 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
 
   # pre-allocate
   episodes$overlap <- FALSE
-  episodes$overlap_duration_days <- 0
-  episodes$overlap_duration_months <- 0
+  episodes$overlap_days <- 0
+  episodes$overlap_months <- 0
   episodes$overlap_date_start <- 0
   episodes$overlap_date_end <- 0
   
@@ -83,8 +83,8 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
     # add overlap info to episodes data frame
     if (overlap) {
       episodes$overlap[ii] <- overlap
-      episodes$overlap_duration_days[ii] <- overlap_duration_days
-      episodes$overlap_duration_months[ii] <- overlap_duration_months
+      episodes$overlap_days[ii] <- overlap_duration_days
+      episodes$overlap_months[ii] <- overlap_duration_months
       episodes$overlap_date_start[ii] <- min(dates_overlap[ ,1])
       episodes$overlap_date_end[ii] <- max(dates_overlap[ ,2])
     }
@@ -94,7 +94,7 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
   col_names <- c("event_no","duration",
                  "date_start","date_peak","date_end",
                  "intensity_mean","intensity_median","intensity_max","intensity_min","intensity_log",
-                 "overlap")
+                 "overlap","overlap_days","overlap_months")
   
   # keep only columns we need
   episodes <- episodes[ ,col_names]

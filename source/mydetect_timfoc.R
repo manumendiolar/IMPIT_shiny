@@ -90,6 +90,15 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
     }
   }
   
+  # columns we want
+  col_names <- c("event_no","duration",
+                 "date_start","date_peak","date_end",
+                 "intensity_mean","intensity_median","intensity_max","intensity_min","intensity_log",
+                 "overlap")
+  
+  # keep only columns we need
+  episodes <- episodes[ ,col_names]
+  
   return(episodes)
 }
 

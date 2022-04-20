@@ -120,8 +120,15 @@ server <- function(input, output, session) {
     
     if (input$choice_epifile == '1'){
       
+      # check for up or dwn episodes
+      if (input$choice_thres == '1'){
+        thres_above <- TRUE
+      } else{
+        thres_above <- FALSE
+      }
+      
       # compute episodes/update if necessary 
-      state$episodes <- mydetect_event(data_input(), input$thres_above, input$thres, input$duration_min)
+      state$episodes <- mydetect_event(data_input(), thres_above, input$thres, input$duration_min)
       
     } else {
       
@@ -169,7 +176,7 @@ server <- function(input, output, session) {
   # Table episodes: print
   output$contents_epi <- DT::renderDataTable({ 
     DT::datatable(state$episodes, rownames=FALSE, options = list(pageLength=5)) %>%
-      formatRound(c(9:12), 2)
+      formatRound(c(6:10), 2)
   }) 
   
   # Table episodes: download .csv
@@ -193,16 +200,40 @@ server <- function(input, output, session) {
       d1 <- as.Date(head(df$x,1))
       d2 <- as.Date(tail(df$x,1))
       
+      if (input$choice_timfoc){
+        df$z <- state$episodes$overlap
+        df$z <- as.factor(df$z)
+        
+        state$plot_epi <- ggplot(df, aes(x, y, col = z)) +
+          geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
+          geom_point( size=3) +
+          labs(x="date_start", 
+               y="intensity_mean", 
+               title="Lolli plot events",
+               col="Overlap") +
+          scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1, d2), date_labels="%Y") +
+          scale_color_manual(values = c("orange","blue")) +
+          theme_light() +
+          theme(panel.grid.major.x = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.text.x = element_text(size = 9, angle = 45, hjust = 1),
+                axis.text.y = element_text(size = 9), 
+                legend.position = "right") 
+      } else {
+        state$plot_epi <- ggplot(df, aes(x, y)) +
+          geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
+          geom_point( color="orange", size=3) +
+          labs(x="date_start", y="intensity_mean", title="Lolli plot events") +
+          scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1, d2), date_labels="%Y") +
+          theme_light() +
+          theme(panel.grid.major.x = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.text.x = element_text(size = 9, angle = 45, hjust = 1),
+                axis.text.y = element_text(size = 9)) 
+      }
       
-      state$plot_epi <- ggplot(df, aes(x, y)) +
-        geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
-        geom_point( color="orange", size=3) +
-        labs(x="date_start", y="intensity_mean", title="Lolli plot events") +
-        scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1, d2), date_labels="%Y") +
-        theme_light() +
-        theme(panel.grid.major.x = element_blank(),
-              panel.border = element_blank(),
-              axis.ticks.x = element_blank()) 
       
       state$plot_epi
       

@@ -27,25 +27,29 @@ source("./source/fun_w3.R")
 # Define UI for app
 ui <- dashboardPage(
   
+  ###
   ### Header
+  ###
   dashboardHeader(
     # changing logo
     title = shinyDashboardLogo(
       theme = "blue_gradient",
       boldText = "IMPIT",
       mainText = "app",
-      badgeText = "v1.1"
+      badgeText = "v1.0"
     )
   ),
   
+  ###
   ### Sidebar content
+  ###
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home", tabName = "home", icon = icon("home")),
-      menuItem("Data", tabName = "data", icon = icon("database"),
-               startExpanded = FALSE,
-               menuSubItem("Upload", tabName = "upload_data", icon = icon("file-upload")),
-               menuSubItem("Descriptives", tabName = "descriptives_data", icon = icon("chart-bar"))
+      menuItem("Data", tabName = "data", icon = icon("database")
+               #startExpanded = FALSE,
+               #menuSubItem("Upload", tabName = "upload_data", icon = icon("file-upload")),
+               #menuSubItem("Descriptives", tabName = "descriptives_data", icon = icon("chart-bar"))
       ),
       menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs")),
       menuItem("Index", tabName = "index", icon = icon("chart-line")),
@@ -55,7 +59,9 @@ ui <- dashboardPage(
   ),
   
   
+  ###
   ### Body content
+  ###
   dashboardBody(
     
     # changing theme
@@ -66,7 +72,9 @@ ui <- dashboardPage(
     # contents
     tabItems(
       
-      # Home tab =====
+      #
+      # Home tab ==========
+      #
       tabItem(
         tabName = "home",
         h2("IMPIT web-app"),
@@ -76,9 +84,9 @@ ui <- dashboardPage(
             width = 12,
             title = "Description",
             solidHeader = F,
-            h5("An intuitive R-Shiny web-app that simplifies the construction of IMPIT indices. This app combines the analytic framework developed in (IMPIT paper, 2022) with the visual power offered by R."),
+            h5("An intuitive R-Shiny app that simplifies the construction of IMPIT indices. This app combines the analytic framework developed in (IMPIT paper, 2022) with the visual power offered by R."),
             h5(" IMPIT tool has a friendly workflow for importing raw data, exploring, defining and computing basic episodes reports and constructing IMPIT indices."),
-            h5(" The user can choose between a menu of intensity and relative weight functions, as well as the freedom to define user functions."),
+            h5(" The user can choose between a menu of intensity and relative weight functions."),
             h5(" The results are indices and their corresponding visualization with the aim of constituiting a useful data analysis exploratory tool.")
           )
         ),
@@ -89,21 +97,23 @@ ui <- dashboardPage(
             title = "Workflow",
             align = "center", 
             solidHeader = F,
-            img(src = "images/roadmap.png",style="width: 75%"))
+            img(src = "images/roadmap.png",style="width: 80%"))
         )
       ),
       
-      # Data tab =====
-      # data-upload 
+      #
+      # Data tab ==========
+      #
       tabItem(
-        tabName = "upload_data",
+        tabName = "data",
+        # data-upload row 
         fluidRow(
           box(
             title = "Required Data",
             id = "box_source_data",
             collapsible = TRUE,
             icon = icon("upload"),
-            width = 4,
+            width = 3,
             height = "500px",
             helper(fileInput("csv_input","Select CSV File to Import",accept=".csv", placeholder = "ex: soi_monthly.csv"),
                    icon = "question", 
@@ -117,15 +127,11 @@ ui <- dashboardPage(
             id = "box_table_data",
             collapsible = TRUE,
             icon = icon("file-import"),
-            width = 10,
+            width = 8,
             height = "500px",
             div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")
-          )
-        )
-      ),
-      # data-descriptives
-      tabItem(
-        tabName = "descriptives_data",
+          )),
+        # descriptives row
         fluidRow(
           box(
             title = "Controls",
@@ -151,10 +157,31 @@ ui <- dashboardPage(
         )
       ),
       
-      # Episodes tab =====
+      #
+      # Episodes tab ==========
+      #
       tabItem(
         tabName = "episodes",
         fluidRow(
+          box(
+            title = "List of episodes", 
+            id = "box_list_epi",
+            collapsible = TRUE,
+            icon = icon("cogs"),
+            width = 4,
+            height = "500px",
+            checkboxGroupInput("choice_epifile", "You can generate or upload the list of episodes:", choices=list("generate?"=1, "upload?"=2), selected=NULL),
+            conditionalPanel(
+              condition = "input.choice_epifile == '2'",
+              fileInput("epifile_input","Select CSV or RData File to Import",accept=c(".csv",".RData"))
+            ),
+            conditionalPanel(
+              condition = "input.choice_epifile == '1'",
+              checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold:", choices=list("up-episodes?"=1, "down-episodes?"=2), selected = NULL),
+              numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf),
+              numericInput('duration_min', 'Minimum duration of each episode:', 1, min = 1, max = Inf),
+            )
+          ),
           box(
             title = "Set up", 
             id = "box_setup_epi",
@@ -162,41 +189,30 @@ ui <- dashboardPage(
             icon = icon("cogs"),
             width = 4,
             height = "500px",
-            checkboxGroupInput("choice_epifile", "List of episodes", choices=list("generate"=1, "upload"=2), selected=NULL),
-            conditionalPanel(
-              condition = "input.choice_epifile == '2'",
-              fileInput("epifile_input","Select CSV or RData File to Import",accept=c(".csv",".RData"))
-            ),
-            conditionalPanel(
-              condition = "input.choice_epifile == '1'",
-              numericInput('thres', 'Threshold', 8, min = -Inf, max = Inf),
-              checkboxInput("thres_above", "Above", value = FALSE),
-              numericInput('duration_min', 'Minimum duration', 1, min = 1, max = Inf)
-            ),
             checkboxGroupInput("unit_var", "Time units", choices=list("days"=1, "months"=2, "years"=3), selected=NULL),
             checkboxInput("choice_timfoc", "Timing focus", value = FALSE),
             conditionalPanel(
               condition = "input.choice_timfoc",
-              strong("Starts"),
+              strong("Starts:"),
               br(),
               div(style="display:inline-block",textInput("start_timfoc_day", label="day", value=1)),
-              div(style="display:inline-block",textInput("start_timfoc_month", label="month", value = 5)),
-              div(style="display:inline-block",textInput("start_timfoc_year", label="year", value = 5)),
+              div(style="display:inline-block",textInput("start_timfoc_month", label="month", value = 1)),
               br(),
-              strong("Ends"),
+              strong("Ends:"),
               br(),
               div(style="display:inline-block",textInput("end_timfoc_day", label="day", value=1)),
-              div(style="display:inline-block",textInput("end_timfoc_month", label="month", value = 5)),
-              div(style="display:inline-block",textInput("end_timfoc_year", label="year", value = 5))
+              div(style="display:inline-block",textInput("end_timfoc_month", label="month", value = 1)),
             ),
-            actionButton("run_button_epi", "Compute episodes", icon=icon("play"))
-          ),
+            actionButton("run_button_epi", "Run", icon=icon("play"))
+          )
+        ),
+        fluidRow(
           box(
             title = "Episodes",
             id = "box_table_epi",
             collapsible = TRUE,
             icon = icon("tasks"),
-            width = 10,
+            width = 11,
             height = "250px",
             tabsetPanel(
               tabPanel("Table", 
@@ -214,7 +230,7 @@ ui <- dashboardPage(
         )
       ),
       
-      # Index tab =====
+      # Index tab ==========
       tabItem(
         tabName = "index",
         fluidRow(

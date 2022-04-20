@@ -33,15 +33,15 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
 
   
   # prepare data
-  names(dat) <- c("date","SOI")
+  names(dat) <- c("date","EnvSignal")
   dat <- dat %>%  mutate(date = as.Date(date,"%d/%m/%Y"))
   dat <- dat[order(dat$date), ] # order rows according to date
   
   # identify episodes (detect "blocks" of values exceeding thresh)
   if (thres_above) {
-    aa <- which(dat$SOI >= thres)
+    aa <- which(dat$EnvSignal >= thres)
   } else {
-    aa <- which(dat$SOI < thres)
+    aa <- which(dat$EnvSignal < thres)
   }
   
   if (length(aa) > 0) {
@@ -70,6 +70,7 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
                          date_peak           = character(no_events),
                          date_end            = character(no_events),
                          intensity_mean      = numeric(no_events),
+                         intensity_median    = numeric(no_events),
                          intensity_max       = numeric(no_events),
                          intensity_min       = numeric(no_events),
                          intensity_log       = numeric(no_events)
@@ -94,10 +95,11 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
     date_end <- dat[index_end, ]$date
     
     # a couple of intensities (we could also put a function here) 
-    intensity_mean <- mean(t(dat[ind[[ii]],2]))
-    intensity_max <- max(t(dat[ind[[ii]],2]))
-    intensity_min <- min(t(dat[ind[[ii]],2]))
-    intensity_log <- ifelse(thres_above, log(sum(dat[ind[[ii]],2])), -log(abs(sum(dat[ind[[ii]],2]))))
+    intensity_mean   <- mean(t(dat[ind[[ii]],2]))
+    intensity_median <- median(t(dat[ind[[ii]],2]))
+    intensity_max    <- max(t(dat[ind[[ii]],2]))
+    intensity_min    <- min(t(dat[ind[[ii]],2]))
+    intensity_log    <- ifelse(thres_above, log(sum(dat[ind[[ii]],2])), -log(abs(sum(dat[ind[[ii]],2]))))
     
     # save info
     episodes$event_no[ii] <- ii
@@ -109,11 +111,20 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
     episodes$date_peak[ii] <- as.character(date_peak)
     episodes$date_end[ii] <- as.character(date_end)
     episodes$intensity_mean[ii] <- intensity_mean
+    episodes$intensity_median[ii] <- intensity_median
     episodes$intensity_max[ii] <- intensity_max
     episodes$intensity_min[ii] <- intensity_min
     episodes$intensity_log[ii] <- intensity_log
     
   }
+  
+  # columns we want
+  col_names <- c("event_no","duration",
+                 "date_start","date_peak","date_end",
+                 "intensity_mean","intensity_median","intensity_max","intensity_min","intensity_log")
+
+  # keep only the columns specified above 
+  episodes <- episodes[ ,col_names]
   
   return(episodes)
   

@@ -12,6 +12,8 @@ library(shinyhelper)
 library(shinyWidgets)
 library(tidyverse)
 library(DT)
+library(glue)
+library(ggtext)
 
 # source
 source("./source/mydetect_event.R")
@@ -118,7 +120,7 @@ server <- function(input, output, session) {
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi,{
     
-    if (input$choice_epifile == '1'){
+   if (input$choice_epifile == '1'){
       
       # check for up or dwn episodes
       if (input$choice_thres == '1'){
@@ -151,14 +153,29 @@ server <- function(input, output, session) {
     
     # check for timing focus
     if (input$choice_timfoc){
+
+      # check format timing start date
+      start_timfoc_day <- as.character(input$start_timfoc_day)
+      start_timfoc_month <- factor(input$start_timfoc_month,
+                                   levels = c("January","February","March","April","May","June","July",
+                                              "August","September","October","November","December"))
+      start_timfoc_month <- as.integer(start_timfoc_month)
+      
+      # check format timing end date
+      end_timfoc_day <- as.character(input$end_timfoc_day)
+      end_timfoc_month <- factor(input$end_timfoc_month,
+                                   levels = c("January","February","March","April","May","June","July",
+                                              "August","September","October","November","December"))
+      end_timfoc_month <- as.integer(end_timfoc_month)
+      
       
       # update format of start date
-      state$start_day <- ifelse(input$start_timfoc_day %in% seq(1,9,1), paste0("0",input$start_timfoc_day), paste0(input$start_timfoc_day))
-      state$start_month <- ifelse(input$start_timfoc_month %in% seq(1,9,1), paste0("0",input$start_timfoc_month), paste0(input$start_timfoc_month))
+      state$start_day <- ifelse(start_timfoc_day %in% seq(1,9,1), paste0("0",start_timfoc_day), paste0(start_timfoc_day))
+      state$start_month <- ifelse(start_timfoc_month %in% seq(1,9,1), paste0("0",start_timfoc_month), paste0(start_timfoc_month))
       
       # update format of end date
-      state$end_day <- ifelse(input$end_timfoc_day %in% seq(1,9,1), paste0("0",input$end_timfoc_day), paste0(input$end_timfoc_day))
-      state$end_month <- ifelse(input$end_timfoc_month %in% seq(1,9,1), paste0("0",input$end_timfoc_month), paste0(input$end_timfoc_month))
+      state$end_day <- ifelse(end_timfoc_day %in% seq(1,9,1), paste0("0",end_timfoc_day), paste0(end_timfoc_day))
+      state$end_month <- ifelse(end_timfoc_month %in% seq(1,9,1), paste0("0",end_timfoc_month), paste0(end_timfoc_month))
       
       # gather as a vector
       state$period_timfoc <- c(paste0(state$start_month,"/",state$start_day), paste0(state$end_month,"/",state$end_day))
@@ -177,7 +194,7 @@ server <- function(input, output, session) {
   output$contents_epi <- DT::renderDataTable({ 
     DT::datatable(state$episodes, rownames=FALSE, options = list(pageLength=5)) %>%
       formatRound(c(6:10), 2)
-  }) 
+  })
   
   # Table episodes: download .csv
   output$downloadTable_epi <- downloadHandler(
@@ -263,6 +280,13 @@ server <- function(input, output, session) {
     state$intensity <- input$choice_intensity
     state$period_index <- seq(input$period_index_start, input$period_index_end, 1)
     
+    
+    # daterange_index_start <- as.Date(input$daterange_index[1])
+    # daterange_index_end <- as.Date(input$daterange_index[2])
+    # period_index_start <- lubridate::year(daterange_index_start)
+    # period_index_end <- lubridate::year(daterange_index_end)
+    #state$period_index <- seq(period_index_start, period_index_end, 1)
+    
     if (input$choice_timfoc){
       
       if (state$unit_var == 'days') {
@@ -322,13 +346,20 @@ server <- function(input, output, session) {
       y2 <- tail(state$contents_index$time,1)
       
       state$plot_index <- ggplot(state$contents_index, aes(time, index)) +
-        geom_line() +
-        labs(x = "Time", y = "Index", title = paste0("IMPIT index for ",as.character(input$env_var)," signal")) +
+        geom_line( ) +
+        # geom_smooth( method = "lm", alpha = 0.05, level = 0.95, aes(colour="Lin. Reg.", fill="Lin. Reg.", lty="Lin. Reg.")) + 
+        # geom_smooth( method = "lm", alpha = 0.05, level = 0.95, formula = y ~ poly(x, 2), aes(colour="Cuad. Reg.", fill="Cuad. Reg.", lty="Cuad. Reg.")) + 
+        # scale_colour_manual(name="", values = c("seagreen","darkorchid")) +
+        # scale_fill_manual(name="", values = c("seagreen","darkorchid")) +
+        # scale_linetype_manual(name="", values = c(2,3)) +
+        # labs(x = "Time", y = "IMPIT index") +
         scale_x_continuous(breaks=seq(y1, y2, 2), limits=c(y1, y2)) +
         theme_light() +
         theme(panel.grid.major.x = element_blank(),
               panel.border = element_blank(),
-              axis.ticks.x = element_blank())
+              axis.ticks.x = element_blank(),
+              axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+              axis.text.y = element_text(size = 10))
       
       state$plot_index
     })
@@ -351,55 +382,6 @@ server <- function(input, output, session) {
   # APPLICATION tab
   #
   
-  # load response data
-  data_resp <- reactive({
-    req(input$resp_file)
-    inFile <- input$resp_file
-    read.csv(inFile$datapath)
-  })
-  # choose response variable
-  observeEvent(data_resp(),{
-    choices <- c("Not selected", names(data_resp()))
-    updateSelectInput(inputId = "resp_time_var", choices = choices)
-    updateSelectInput(inputId = "resp_var", choices = choices)
-  })
-  resp_var <- eventReactive(input$run_button_app_resp, input$resp_var)
-  resp_time_var <- eventReactive(input$run_button_app_resp, input$resp_time_var)
-  
-  observeEvent(input$run_button_app_resp,{
-    
-    # Table Response: print
-    output$contents_app_resp <- DT::renderDataTable({ 
-      DT::datatable(data_resp(), rownames=FALSE, options = list(pageLength=5)) %>%
-        formatRound(c(2:5), 2)
-    })
-    
-    # Plot Response: print 
-    output$plot_app_resp <- renderPlot({
-      
-      state$dep_time <-  as.numeric(data_resp()[ ,input$resp_time_var])
-      state$dep_var <- as.numeric(data_resp()[ ,input$resp_var])
-      t1 <- head(state$dep_time,1)
-      t2 <- tail(state$dep_time,1)
-      
-      df_resp <- data.frame(time = state$dep_time, resp = state$dep_var)
-      
-      state$plot_app_resp <- ggplot(df_resp, aes(time, resp)) +
-        geom_line() +
-        labs(x = as.character(input$resp_time_var), 
-             y = as.character(input$resp_var), 
-             title = "Response Variable") +
-        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1, t2)) +
-        theme_light() +
-        theme(panel.grid.major.x = element_blank(),
-              panel.border = element_blank(),
-              axis.ticks.x = element_blank())
-      
-      state$plot_app_resp
-    })
-  })
-  
-  
   # load index data
   data_index <- reactive({
     req(input$index_file)
@@ -419,7 +401,8 @@ server <- function(input, output, session) {
     
     # Table Index: print
     output$contents_app_index <- DT::renderDataTable({ 
-      DT::datatable(data_index(), rownames=FALSE, options = list(pageLength=5))#%>%       formatRound(c(2:5), 2)
+      DT::datatable(data_index(), rownames=FALSE, options = list(pageLength=5)) %>%
+        formatRound(c(2), 2)
     })
     
     # Plot Index: print 
@@ -429,77 +412,133 @@ server <- function(input, output, session) {
       state$ind_var <- as.numeric(data_index()[ ,input$index_var])
       t1 <- head(state$ind_time,1)
       t2 <- tail(state$ind_time,1)
-      
+
       df_index <- data.frame(time = state$ind_time, index = state$ind_var)
       
       state$plot_app_index <- ggplot(df_index, aes(time, index)) +
         geom_line() +
-        labs(x = as.character(input$index_time_var), 
-             y = as.character(input$index_var), 
-             title = "Index (Independent Variable)") +
-        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1, t2)) +
+        geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 1), aes(colour="Linear", fill="Linear", lty="Linear")) + 
+        geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 2), aes(colour="Cuadratic", fill="Cuadratic", lty="Cuadratic")) + 
+        scale_colour_manual(name="Regression", values = c("seagreen","darkorchid")) +
+        scale_fill_manual(name="Regression", values = c("seagreen","darkorchid")) +
+        scale_linetype_manual(name="Regression", values = c(3,2)) +
+        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1,t2)) +
+        labs(x = "Time", 
+             y = "IMPIT index") +
         theme_light() +
         theme(panel.grid.major.x = element_blank(),
               panel.border = element_blank(),
-              axis.ticks.x = element_blank())
-      
+              axis.ticks.x = element_blank(),
+              axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+              axis.text.y = element_text(size = 10))
+
       state$plot_app_index
     })
   })
   
+  
+  # load response data
+  data_resp <- reactive({
+    req(input$resp_file)
+    inFile <- input$resp_file
+    read.csv(inFile$datapath)
+  })
+  # choose response variable
+  observeEvent(data_resp(),{
+    choices <- c("Not selected", names(data_resp()))
+    updateSelectInput(inputId = "resp_time_var", choices = choices)
+    updateSelectInput(inputId = "resp_var", choices = choices)
+  })
+  resp_var <- eventReactive(input$run_button_app_resp, input$resp_var)
+  resp_time_var <- eventReactive(input$run_button_app_resp, input$resp_time_var)
+  
   observeEvent(input$run_button_application,{
+    
+    # Table Response: print
+    output$contents_app_resp <- DT::renderDataTable({ 
+      DT::datatable(data_resp(), rownames=FALSE, options = list(pageLength=5)) %>%
+        formatRound(c(2), 2)
+    })
+    
+    # Plot Response: print 
+    output$plot_app_resp <- renderPlot({
+      
+      state$dep_time <-  as.numeric(data_resp()[ ,input$resp_time_var])
+      state$dep_var <- as.numeric(data_resp()[ ,input$resp_var])
+      t1 <- head(state$dep_time,1)
+      t2 <- tail(state$dep_time,1)
+      
+      df_resp <- data.frame(time = state$dep_time, resp = state$dep_var)
+      
+      state$plot_app_resp <- ggplot(df_resp, aes(time, resp)) +
+        geom_line() +
+        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1, t2)) +
+        labs(x = "Time", 
+             y = "Response variable") +
+        theme_light() +
+        theme(panel.grid.major.x = element_blank(),
+              panel.border = element_blank(),
+              axis.ticks.x = element_blank(),
+              axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+              axis.text.y = element_text(size = 10))
+      
+      state$plot_app_resp
+    })
     
     # Plot Regression: print 
     output$plot_corr_application <- renderPlot({
       
-      # keep independent variable
-      state$indep_var <- as.numeric(state$ind_var)
+      # keep vars
+      xx <- as.numeric(state$ind_var)
+      yy <- log(as.numeric(state$dep_var))
       
       # linear model
-      mod <- lm(state$dep_var ~ state$indep_var)
-      CI90 <- confint(mod, "state$indep_var", level = 0.90)
-      CI95 <- confint(mod, "state$indep_var", level = 0.95)
-      cor.out95 <- cor.test(state$dep_var, state$indep_var, alternative="two.sided", conf.level=0.95, method="pearson")
-      cor.out90 <- cor.test(state$dep_var, state$indep_var, alternative="two.sided", conf.level=0.90, method="pearson")
-      
+      mod <- lm(yy ~ xx)
+      CI95 <- confint(mod, "xx", level = 0.95)
+      cor.out95 <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")
+     
       # data frame with results of LR
       res.LR <-  data.frame(slope = as.numeric(coef(mod)[2]), 
-                            lb90 = CI90[ ,1], 
-                            ub90 = CI90[ ,2], 
                             lb95 = CI95[ ,1], 
                             ub95 = CI95[ ,2],
                             R2 = as.numeric(summary(mod)$r.squared), 
                             pVal = as.numeric(anova(mod)$'Pr(>F)'[1]), 
                             corr = as.numeric(cor.out95$estimate), 
-                            corr.lb90 = as.numeric(cor.out90$conf.int[1]),
-                            corr.ub90 = as.numeric(cor.out90$conf.int[2]),
                             corr.lb95 = as.numeric(cor.out95$conf.int[1]),
                             corr.ub95 = as.numeric(cor.out95$conf.int[2]))
       
-      # extra for plotting
-      col1 <- ifelse( res.LR$pVal > 0.10, "black", ifelse( res.LR$pVal > 0.05, "magenta", "green"))
-      col2 <- ifelse( res.LR$pVal > 0.10, "black", ifelse( res.LR$pVal > 0.05, "magenta", "green4"))
-      subtitle <- ifelse(round(res.LR$pVal,3) < 0.001,
-                         paste0("Corr = ", round(res.LR$corr,2),", Rsq = ",round(res.LR$R2,2),", p value < 0.001"),
-                         paste0("Corr = ", round(res.LR$corr,2),", Rsq = ",round(res.LR$R2,2),", p value = ",round(res.LR$pVal,3)))
+      res.LR <- res.LR %>% 
+        mutate(
+          # location of text label in data coordinates
+          xx= max(xx), yy = max(yy),
+          # text label containing corr and r^2 value 
+          labelR2 =  glue("Corr = {round(corr, 2)}<br>*R*<sup>2</sup> = {round(R2, 2)} ")
+        )
       
-      state$plot_corr_application <- ggplot(data = data.frame(yrs.lab = state$dep_time, xx = state$indep_var, yy = state$dep_var), aes(x = xx, y = yy)) +
-        geom_smooth(method ='lm', se = TRUE, col = col1, alpha = 0.25) +
-        geom_text(aes(label = yrs.lab), size = 3.5) +
-        labs(y = as.character(input$resp_var),
-             x = "IMPIT index", 
-             title = "Correlation analysis",
-             subtitle = subtitle) +
-        theme_light() +
-        theme(panel.grid.major.x = element_blank(),
-              panel.border = element_blank(),
-              axis.ticks.x = element_blank(),
-              plot.title = element_text(size = 12, face = 1),
-              plot.subtitle = element_text(size = 11, face = 2, colour = col2))
+      
+      # extra for plotting
+      col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
+      col.ann <- "#08519C"
+      col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
+      size.num <- 3
+      size.ann <- 3
+      year.text <- substr(as.character(state$dep_time), nchar(as.character(state$dep_time))-2+1, nchar(as.character(state$dep_time)))
+      #c("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18")
+      
+      state$plot_corr_application <- ggplot(data = data.frame(xx, yy), aes(x = xx, y = yy)) +
+        geom_smooth(method ='lm', se = TRUE, col = col.reg, alpha = 0.25) +
+        geom_text(aes(label = year.text), size = size.num) +
+        labs(x = "IMPIT index", y = "log( SCPUE )") +
+        geom_richtext(data =  res.LR, aes(label = labelR2),
+                      fill = after_scale(alpha(col.box,.2)),
+                      color =  col.box,
+                      text.colour = "black",
+                      size = 3.1, hjust = 1, vjust = 1) +
+        theme_bw(base_size = 11)
       
       state$plot_corr_application
       
-    }, height = 500, width = 500 )
+    }, height = 450, width = 450 )
     
     # Plot Regression: download .png
     output$downloadPlot_app <- downloadHandler(

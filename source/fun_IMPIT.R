@@ -122,7 +122,14 @@ fun_IMPIT <- function(episodes, unit, yrs, m, a, b, c, d, intensity, time_focus=
         nk <- sub$duration[kk]
         
         # duration of overlapping with special season if time_focus
-        if (time_focus) { tk <- sub$overlap_duration_months[kk] }
+        if (time_focus) { 
+          if (unit == "months") {
+            tk <- sub$overlap_months[kk] 
+          } else {
+            tk <- sub$overlap_days[kk]
+          }
+        }
+          
         
         # keep intensity 
         IEk <- c(IEk, as.numeric(sub[kk, paste0("intensity_",intensity)]))

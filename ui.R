@@ -190,7 +190,7 @@ ui <- dashboardPage(
             width = 4,
             height = "500px",
             checkboxGroupInput("unit_var", "Time units", choices=list("days"=1, "months"=2, "years"=3), selected=NULL),
-            checkboxInput("choice_timfoc", "Timing focus", value = FALSE),
+            checkboxInput("choice_timfoc", "Timing", value = FALSE),
             conditionalPanel(
               condition = "input.choice_timfoc",
               strong("Starts:"),

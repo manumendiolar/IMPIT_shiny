@@ -109,7 +109,8 @@ ui <- dashboardPage(
         # data-upload row 
         fluidRow(
           box(
-            title = "Required Data",
+            title = "Required Data", 
+            status="purple",
             id = "box_source_data",
             collapsible = TRUE,
             icon = icon("upload"),
@@ -124,6 +125,7 @@ ui <- dashboardPage(
           ),
           box(
             title = "Check data",
+            status="purple",
             id = "box_table_data",
             collapsible = TRUE,
             icon = icon("file-import"),
@@ -135,6 +137,7 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Controls",
+            status="purple",
             id = "box_controls_data",
             collapsible = TRUE,
             icon = icon("cog"),
@@ -147,6 +150,7 @@ ui <- dashboardPage(
           ),
           box(
             title = "Plot", 
+            status="purple",
             id = "box_plot_data",
             collapsible = TRUE,
             icon = icon("chart-line"),
@@ -165,6 +169,7 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "List of episodes", 
+            status="navy",
             id = "box_list_epi",
             collapsible = TRUE,
             icon = icon("cogs"),
@@ -184,6 +189,7 @@ ui <- dashboardPage(
           ),
           box(
             title = "Set up", 
+            status="navy",
             id = "box_setup_epi",
             collapsible = TRUE,
             icon = icon("cogs"),
@@ -227,6 +233,7 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Episodes",
+            status="navy",
             id = "box_table_epi",
             collapsible = TRUE,
             icon = icon("tasks"),
@@ -254,68 +261,69 @@ ui <- dashboardPage(
       tabItem(
         tabName = "index",
         fluidRow(
-          box(
-            title = "Set up", 
-            id = "box_setup_index",
-            collapsible = TRUE,
-            icon = icon("user-cog"),
-            width = 10,
-            height = "600px",
-            
-            # Index period
-            box(
-              title = "Index period", width = 3, height = "500px",
-              br(),
-              div(style="display:inline-block",numericInput("period_index_start", label="From", value=1980)),
-              div(style="display:inline-block",numericInput("period_index_end", label="To", value = 2019))
-              #dateRangeInput("daterange_index", "Date range for plot (yyyy-mm-dd)", start="1900-01-01", end="2020-01-01")
-            ),
-            
-            box(
-              title = "Intensity", width = 3, 
-              selectInput("choice_intensity", "Intensity", choices = c("mean","min","max","log"), selected = "mean")
-            ),
-            box(
-              title = "Weight", width = 3, 
-              sliderInput('a_w1', label = 'Persistence (a)', min = 1, max = 5, value = 2),
-              sliderInput("b_w2", label = "Recency (b)", min = 0, max = 5, value = 0),
-              sliderInput("c_w2", label = "Recency (c)", min = 0, max = 1, value = 0),
-              conditionalPanel(
-                condition = "input.choice_timfoc",
-                sliderInput("d_w3", label = "Timing (d)", min = 0, max = 15, value = 2)
-              )
-            ),
-            box(
-              title = "Memory", width = 3, 
-              numericInput("m", label = "in years", min = 1, max = 40, value = 1)
-            )
-  
+          # title = "Set up", 
+          # id = "box_setup_index",
+          # collapsible = TRUE,
+          # icon = icon("user-cog"),
+          # width = 3,
+          # height = "600px",
+          column(width = 3,
+                 box(
+                   title="Set up", width=NULL, status="primary", icon = icon("user-cog"), solidHeader=TRUE,
+                 box(
+                   title="Index period", width=NULL, status="primary", collapsible = TRUE, collapsed=TRUE,
+                   dateRangeInput("daterange_index", "Date range (yyyy-mm-dd):", start="1900-01-01", end="2020-01-01")
+                 ),
+                 box(
+                   title="Memory", width=NULL, status="primary", collapsible = TRUE, collapsed=TRUE,
+                   numericInput("m", label = "Years: ", min = 1, max = 40, value = 1)
+                 ),
+                 box(
+                   title="Intensity", width=NULL, status="primary", collapsible = TRUE, collapsed=TRUE,
+                   selectInput("choice_intensity", "", choices = c("mean","median","min","max","log"), selected = "mean")
+                 ),
+                 box(
+                   title="Weights", width=NULL, status="primary", collapsible = TRUE, collapsed=TRUE,
+                   sliderInput('a_w1', label = 'Persistence (a)', min = 1, max = 5, value = 2),
+                   sliderInput("b_w2", label = "Recency (b)", min = 0, max = 5, value = 0),
+                   sliderInput("c_w2", label = "Recency (c)", min = 0, max = 1, value = 0),
+                   conditionalPanel(
+                     condition = "input.choice_timfoc",
+                     h5("Timing weight"),
+                     numericInput("d_w3", label = "Parameter d", min = 0, max = 15, value = 1)
+                   )
+                 ),
+                 actionButton("run_button_index", "Compute index", icon=icon("play")) 
+                
+                 )
           ),
-          box(
-            width = 2, 
-            actionButton("run_button_index", "Compute index", icon=icon("play"))
-          ),
-          box(
-            title = "IMPIT index",
-            id = "box_table_epi",
-            collapsible = TRUE,
-            icon = icon("tasks"),
-            width = 10,
-            height = "250px",
-            tabsetPanel(
-              tabPanel("Table", 
-                       fluidRow(column(10, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 50%")),
-                                column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
-                       )
-              ),
-              tabPanel("Plot", 
-                       fluidRow(column(10, plotOutput("plot_index", width = "100%")),
-                                column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
-                       )
-              )
+          column(width=8,
+                 box(
+                   title = "IMPIT index",
+                   width = NULL,
+                   status="primary",
+                   id = "box_table_epi",
+                   collapsible = TRUE,
+                   icon = icon("tasks"),
+                   height = "250px",
+                   solidHeader=TRUE,
+                   tabsetPanel(
+                     tabPanel("Table", 
+                              fluidRow(column(10, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 50%")),
+                                       column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+                              )
+                     ),
+                     tabPanel("Plot", 
+                              fluidRow(column(10, plotOutput("plot_index", width = "100%")),
+                                       column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
+                              )
+                     )
+                   )
+                 )
             )
           )
-        )
+         
+
       ),
       
       #
@@ -328,6 +336,8 @@ ui <- dashboardPage(
           
           box(
             title = "Source IMPIT index",
+            status="success",
+            solidHeader = TRUE,
             id = "box_app_data_index",
             collapsible = TRUE,
             icon = icon("upload"),
@@ -342,6 +352,7 @@ ui <- dashboardPage(
           ),
           box(
             title = "Explore trend in IMPIT index",
+            status="success",
             id = "box_app_data_index_exp",
             collapsible = TRUE,
             icon = icon("chart"),
@@ -363,6 +374,8 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Source response",
+            status="success",
+            solidHeader = TRUE,
             id = "box_app_data_resp",
             collapsible = TRUE,
             icon = icon("upload"),
@@ -377,6 +390,7 @@ ui <- dashboardPage(
 
           box(
             title = "Explore association between IMPIT index and response variable",
+            status="success",
             id = "box_app_data",
             collapsible = TRUE,
             icon = icon("chart"),

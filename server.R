@@ -278,14 +278,9 @@ server <- function(input, output, session) {
     
     state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
     state$intensity <- input$choice_intensity
-    state$period_index <- seq(input$period_index_start, input$period_index_end, 1)
-    
-    
-    # daterange_index_start <- as.Date(input$daterange_index[1])
-    # daterange_index_end <- as.Date(input$daterange_index[2])
-    # period_index_start <- lubridate::year(daterange_index_start)
-    # period_index_end <- lubridate::year(daterange_index_end)
-    #state$period_index <- seq(period_index_start, period_index_end, 1)
+    period_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
+    period_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
+    state$period_index <- seq(period_index_start, period_index_end, 1)
     
     if (input$choice_timfoc){
       

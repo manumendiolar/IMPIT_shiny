@@ -416,17 +416,17 @@ server <- function(input, output, session) {
   
   
   # IMPIT index: line plot
-  output$plot_app_index <- renderPlotly({
-    
-    #data_index_name <- colnames(data_index())
-      
-    # Set x and y axis and display data in line plot using plotly
-    plot_ly(data = data_index) %>%
-        add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>% 
-        layout(xaxis = list(title="Time"),
-               yaxis = list(title="IMPIT index"))
-   
-  }) 
+  # output$plot_app_index <- renderPlotly({
+  #   
+  #   #data_index_name <- colnames(data_index())
+  #     
+  #   # Set x and y axis and display data in line plot using plotly
+  #   plot_ly(data = data_index) %>%
+  #       add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>% 
+  #       layout(xaxis = list(title="Time"),
+  #              yaxis = list(title="IMPIT index"))
+  #  
+  # }) 
   
   # choose index variable
   observeEvent(data_index(),{

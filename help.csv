@@ -1,0 +1,5 @@
+step,text
+1,Import any raw data commonly used in environmental science.
+2,Define simple episodes within the IMPIT app framework (up/down with respect to a threshold) or upload an episode file. 
+3,Choose an intensity function among a list and the relative importance weights for the episodes as well as a memory time window and compute IMPIT index.
+4,Upload the IMPIT index and explore trend and/or its association with another variable.

@@ -306,65 +306,60 @@ ui <- dashboardPage(
         
         fluidRow(
           
-          # column set up index
-          column(width = 3,
-                 box(
-                   title="Set up", width=NULL, status="primary", icon = icon("user-cog"), solidHeader=TRUE,
-                   box(
-                     title="Index period", width=NULL, status="primary", collapsible=TRUE, collapsed=TRUE,
-                     dateRangeInput("daterange_index", "Date range (yyyy-mm-dd):", start="1900-01-01", end="2020-01-01")
-                      ),
-                   box(
-                     title="Memory", width=NULL, status="primary", collapsible=TRUE, collapsed=TRUE,
-                     numericInput("m", label = "Years: ", min=1, max=40, value=1)
-                     ),
-                   box(
-                     title="Intensity", width=NULL, status="primary", collapsible=TRUE, collapsed=TRUE,
-                     selectInput("choice_intensity", "", 
-                                 choices = c("mean","median","min","max","log"), 
-                                 selected = "mean")
-                     ),
-                   box(
-                     title="Weights", width=NULL, status="primary", collapsible=TRUE, collapsed=TRUE,
-                     sliderInput('a_w1', label = 'Persistence (a)', min=1, max=5, value=2),
-                     sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0),
-                     sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0),
-                     conditionalPanel(
-                       condition = "input.choice_timfoc",
-                       h5("Timing weight"),
-                       numericInput("d_w3", label = "Parameter d", min=0, max=15, value=1)
-                       )
-                     ),
-                 actionButton("run_button_index", "Compute index", icon=icon("play")) 
-                )
-          ),
+          # Set up index
+          column(
+            width = 3,
+            box(
+              title="Set up", 
+              width=NULL, 
+              #status="primary", 
+              icon = icon("user-cog"), 
+              solidHeader=TRUE,
+              collapsible = T,
+              
+              numericInput("m", label = "Memory ", min=1, max=40, value=1),
+              selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
+              h5(strong("Weights")),
+              sliderInput('a_w1', label = 'Persistence (a)', min=1, max=5, value=2),
+              sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0),
+              sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0),
+              conditionalPanel(
+                condition = "input.choice_timfoc == '1'",
+                numericInput("d_w3", label = "Timing (d)", min=0, max=15, value=1)
+              ),
+              br(),
+              dateRangeInput("daterange_index", "Index period (yyyy-mm-dd):", start="1900-01-01", end="2020-01-01"),
+              br(),
+              actionButton("run_button_index", "Compute", icon=icon("play"))
+              )
+            ),
           
-          # column index outcome
-          column(width = 8,
-                 box(
-                   title = "IMPIT index",
-                   width = NULL,
-                   status="primary",
-                   id = "box_table_epi",
-                   collapsible = TRUE,
-                   icon = icon("tasks"),
-                   height = "250px",
-                   solidHeader=TRUE,
-                   # two tabs: table and plot
-                   tabsetPanel(
-                     tabPanel("Table", 
-                              fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
-                                       column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
-                                      )
-                              ),
-                     tabPanel("Plot", 
-                              fluidRow(column(12, plotOutput("plot_index", width = "100%")),
-                                       column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
-                                      )
-                             )
-                     )
+          # IMPIT index: exploratory
+          column(
+            width = 8,
+            box(
+              title = "IMPIT index",
+              width = NULL,
+              #status="primary",
+              id = "box_table_epi",
+              collapsible = T,
+              icon = icon("tasks"),
+              height = "500px",
+              solidHeader=T,
+              tabsetPanel(
+                tabPanel("Table",
+                   fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+                            column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+                            )
+                   ),
+                tabPanel("Plot", 
+                   fluidRow(column(12, plotlyOutput("plot_index", width = "100%")),
+                            column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
+                            )
                    )
-                 )
+                )
+              )
+            )
           )
       ),
       

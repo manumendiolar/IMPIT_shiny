@@ -291,14 +291,24 @@ server <- function(input, output, session) {
   
   observeEvent(input$run_button_index,{
     
+    # keep unit choice
     state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
+    # keep intensity choice
     state$intensity <- input$choice_intensity
-    period_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
-    period_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
-    state$period_index <- seq(period_index_start, period_index_end, 1)
+    # build vector of dates (index period)
+    yr_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
+    yr_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
+    state$yrs_index <- seq(yr_index_start, yr_index_end, 1)
     
-    if (input$choice_timfoc){
-      
+    
+    # compute d and tau (total units of special timing)
+    state$d <- NULL
+    state$tau <- NULL
+    state$choice_timfoc <- FALSE
+    
+    if (input$choice_timfoc == '1'){
+      state$choice_timfoc <- TRUE
+      state$d <- input$d_w3
       if (state$unit_var == 'days') {
         state$tau <- as.Date(paste0("2000","/",state$period_timfoc[2])) - as.Date(paste0("2000","/",state$period_timfoc[1]))
       } else {
@@ -308,27 +318,22 @@ server <- function(input, output, session) {
           state$tau <- as.integer(input$end_timfoc_year) - as.integer(input$start_timfoc_year) + 1
         }
       }
-      state$tau <- as.integer(state$tau)
-      state$d <- input$d_w3
-    } else {
-      
-      state$d <- NULL
-      state$tau <- NULL
     }
     
+    # compute IMPIT index
     state$index <- fun_IMPIT(episodes = state$episodes,
                              unit = state$unit_var,
-                             yrs = state$period_index,
+                             yrs = state$yrs_index,
                              m = input$m,
                              a = input$a_w1,
                              b = input$b_w2,
                              c = input$c_w2,
                              d = state$d,
                              intensity = state$intensity,
-                             time_focus = input$choice_timfoc,
+                             time_focus = state$choice_timfoc,
                              tau = state$tau)
     
-    state$contents_index <- data.frame(time = state$period_index, index = state$index)
+    state$contents_index <- data.frame(time = state$yrs_index, index = state$index)
     
   })
   
@@ -336,14 +341,22 @@ server <- function(input, output, session) {
     
     # Table index: print
     output$contents_index <- DT::renderDataTable({ 
-      DT::datatable(state$contents_index, rownames=FALSE, options = list(pageLength=5)) %>%
+      DT::datatable(state$contents_index, 
+                    rownames=F, 
+                    options = list(
+                      pageLength=10,
+                      autoWidth = T,
+                      searching = T,
+                      search = list(regex=T, caseInsensitive=T)
+                      )
+                    ) %>%
         formatRound(c(2), 2)
     }) 
     
     # Table index: download .csv
     output$downloadTable_index <- downloadHandler(
       filename = function() {
-        paste0("Table_index.csv")
+        paste0("IMPIT_index_table.csv")
       },
       content = function(file) {
         write.csv(state$contents_index, file)
@@ -351,33 +364,21 @@ server <- function(input, output, session) {
     )
     
     # Plot index: print
-    output$plot_index <- renderPlot({
-      y1 <- head(state$contents_index$time,1)
-      y2 <- tail(state$contents_index$time,1)
+    output$plot_index <- renderPlotly({
       
-      state$plot_index <- ggplot(state$contents_index, aes(time, index)) +
-        geom_line( ) +
-        # geom_smooth( method = "lm", alpha = 0.05, level = 0.95, aes(colour="Lin. Reg.", fill="Lin. Reg.", lty="Lin. Reg.")) + 
-        # geom_smooth( method = "lm", alpha = 0.05, level = 0.95, formula = y ~ poly(x, 2), aes(colour="Cuad. Reg.", fill="Cuad. Reg.", lty="Cuad. Reg.")) + 
-        # scale_colour_manual(name="", values = c("seagreen","darkorchid")) +
-        # scale_fill_manual(name="", values = c("seagreen","darkorchid")) +
-        # scale_linetype_manual(name="", values = c(2,3)) +
-        # labs(x = "Time", y = "IMPIT index") +
-        scale_x_continuous(breaks=seq(y1, y2, 2), limits=c(y1, y2)) +
-        theme_light() +
-        theme(panel.grid.major.x = element_blank(),
-              panel.border = element_blank(),
-              axis.ticks.x = element_blank(),
-              axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
-              axis.text.y = element_text(size = 10))
+      state$plot_index <- plot_ly(data = state$contents_index) %>%
+        add_lines(x = ~time, y = ~index) %>% 
+        layout(xaxis = list(title="Year"),
+               yaxis = list(title="IMPIT index"))
       
       state$plot_index
     })
     
+    
     # Plot index: download .png
     output$downloadPlot_index <- downloadHandler(
       filename = function(){
-        paste0("Plot_index",'.png')
+        paste0("IMPIT_index_plot",'.png')
       },
       content = function(file){
         ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
@@ -388,16 +389,45 @@ server <- function(input, output, session) {
   
   
   
-  #
-  # APPLICATION tab
-  #
+  # APPLICATION TAB ---------------------------------------------------------
   
-  # load index data
-  data_index <- reactive({
-    req(input$index_file)
-    inFile <- input$index_file
-    read.csv(inFile$datapath)
+  # Import IMPIT index 
+  data_index <- eventReactive(input$index_file,
+    {
+      if (is.null(input$index_file)) return(NULL)
+      inFile <- input$index_file
+      read.csv(inFile$datapath)
+    }
+  )
+  
+  # IMPIT index: table 
+  output$contents_app_index <- DT::renderDataTable({ 
+    DT::datatable(data_index(),
+                  options = list(
+                    pageLength=10,
+                    autoWidth=T,  
+                    searching=T,
+                    search=list(regex=T, caseInsensitive=T)
+                  ),
+                  rownames = F) %>%
+      formatRound(c(2), 2) %>%
+      formatStyle(columns=c(1:2), 'text-align'='centre')
   })
+  
+  
+  # IMPIT index: line plot
+  output$plot_app_index <- renderPlotly({
+    
+    #data_index_name <- colnames(data_index())
+      
+    # Set x and y axis and display data in line plot using plotly
+    plot_ly(data = data_index) %>%
+        add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>% 
+        layout(xaxis = list(title="Time"),
+               yaxis = list(title="IMPIT index"))
+   
+  }) 
+  
   # choose index variable
   observeEvent(data_index(),{
     choices <- c("Not selected", names(data_index()))

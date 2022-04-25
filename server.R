@@ -14,6 +14,9 @@ library(tidyverse)
 library(DT)
 library(glue)
 library(ggtext)
+library(shinyjs)
+library(plotly)
+
 
 # source
 source("./source/mydetect_event.R")
@@ -33,87 +36,98 @@ setBackgroundImage(src = NULL, shinydashboard = TRUE)
 IMPIT_base <- paste0(getwd(),"/")
 
 
+choices_days <- as.character(1:31)
+choices_months <- c("January","February","March","April","May","June","July","August","September","October","November","December") 
+
+
 
 # Define server for app
 server <- function(input, output, session) {
   
-  #
-  # Helpfiles
-  #
+  
+  # HELPFILES ---------------------------------------------------------------
+  
   # uses 'helpfiles' directory by default
   # in this example, we use the withMathJax parameter to render formulae
   observe_helpers(session = getDefaultReactiveDomain(),
                   help_dir = paste0(IMPIT_base,"helpfiles"), withMathJax = TRUE)
   
-  #
-  # HOME tab
-  #
+  
+  
+  
+  # HOME TAB ----------------------------------------------------------------
+ 
   output$myimage <- renderImage({
     # filename is ./www/myimage.jpeg
-    filename <- normalizePath(file.path('./www',
-                                        paste('myimage', input$n, '.jpeg', sep='')))
+    filename <- normalizePath(file.path('./www',paste('myimage', input$n, '.jpeg', sep='')))
     # Return a list containing the filename
     list(src = filename)
   }, deleteFile = FALSE)
   
   
-  #
-  # DATA tab
-  #
   
-  # read data file with env. signal info
-  data_input <- reactive({
-    req(input$csv_input)
-    inFile <- input$csv_input
-    read.csv(inFile$datapath)
-  })
   
-  # update time and env variables
-  observeEvent(data_input(),{
-    choices <- c("Not selected", names(data_input()))
-    updateSelectInput(inputId = "time_var", choices = choices)
-    updateSelectInput(inputId = "env_var", choices = choices)
-    
-  })
-  time_var <- eventReactive(input$run_button_data, input$time_var)
-  env_var <- eventReactive(input$run_button_data, input$env_var)
+  # DATA TAB ----------------------------------------------------------------
   
-  # construct data table
-  output$contents_data <- DT::renderDataTable({ 
-    DT::datatable(data_input(), options = list(lengthMenu=c(5,10,30,50), pageLength=5), rownames=FALSE) %>%
-      formatRound(c(2), 2) #%>% formatStyle(columns = c(1:2), 'text-align' = 'left')
-  })
-  
-  # construct summary 
-  # output$envSummary <- renderPrint({
-  #   cat(paste0("Statistics summary of ",names(data_input())[2]),"\n")
-  #   cat("\n")
-  #   summary(data_input()[ ,input$env_var])
-  # })
-  
-  # basic data plot (when user click button)
-  observeEvent(input$run_button_data,{
-    output$envPlot <- renderPlot({
-      x <- data_input()[ ,input$time_var]
-      x <- lubridate::dmy(x)
-      y <- data_input()[ ,input$env_var]
+  # Import environmental data 
+  data_input <- eventReactive(input$csv_input,
+    {
+      if (is.null(input$csv_input)) retunr(NULL)
       
-      df <- data.frame(x,y)
-      date1 <- as.Date(input$daterange[1])
-      date2 <- as.Date(input$daterange[2])
-      ggplot(data=df, aes(x,y)) + 
-        geom_line() + 
-        labs(x=as.character(input$time_var), y=as.character(input$env_var)) +
-        scale_x_date(breaks=seq(date1, date2, by="5 years"), limits=c(date1, date2), date_labels="%Y") +
-        theme_light() 
-    })
+      inFile <- input$csv_input
+      read.csv(inFile$datapath)
+    }
+  )
+  
+  # 
+  # # update time and env variables
+  # observeEvent(data_input(),{
+  #   choices <- c("Not selected", names(data_input()))
+  #   updateSelectInput(inputId = "time_var", choices = choices)
+  #   updateSelectInput(inputId = "env_var", choices = choices)
+  #   
+  # })
+  # time_var <- eventReactive(input$run_button_data, input$time_var)
+  # env_var <- eventReactive(input$run_button_data, input$env_var)
+  # 
+  
+  # Environmental data: table
+  output$contents_data <- DT::renderDataTable({ 
+    DT::datatable(data_input(),
+                  options = list(
+                    pageLength=10,
+                    lengthMenu=c(5,10,30,50), 
+                    autoWidth=T,  
+                    searching=T,
+                    search=list(regex=T, caseInsensitive=T)
+                    ),
+                  rownames = F) %>%
+      formatRound(c(2), 2) %>%
+      formatStyle(columns=c(1:2), 'text-align'='centre')
   })
   
   
+  # Environmental data: line plot
+  output$envPlot <- renderPlotly({
+    
+    withProgress(message = 'Creating plot', style = 'notification', value = 0.1, {
+      Sys.sleep(0.5)
+      
+      data_input_name <- colnames(data_input())
+      
+      # Set x and y axis and display data in line plot using plotly
+      plot_ly( x = ~as.Date(data_input()[ ,1], format = "%d/%m/%Y"), y = ~data_input()[ ,2]) %>%
+        add_lines() %>% 
+        layout(xaxis = list(title=data_input_name[1],titlefont=list(size=12)),
+               yaxis = list(title=data_input_name[2],titlefont=list(size=12)))
+    }
+    )
+  }) 
+    
+
   
-  #
-  # EPISODES tab
-  #
+  
+  # EPISODES TAB ------------------------------------------------------------
   
   state <- reactiveValues()
   
@@ -135,37 +149,34 @@ server <- function(input, output, session) {
     } else {
       
       # load episode list if already available
-      epifile_input <- reactive({
-        req(input$epifile_input)
-        inFile <- input$epifile_input
-        ext <- tools::file_ext(inFile$datapath)
-        
-        validate(need(ext %in% c("csv"), "Please upload a csv file"))
-        
-        if (ext == "csv") {
-          read.csv(inFile$datapath)
-        } else {
-          print("This doesn't work for this file extention...")
+      epifile_input <- eventreactive(input$epifile_input,
+        {
+          inFile <- input$epifile_input
+          ext <- tools::file_ext(inFile$datapath)
+          validate(need(ext %in% c("csv"), "Please upload a csv file"))
+          
+          if (ext == "csv") {
+            read.csv(inFile$datapath, header=T, stringsAsFactors=T)
+          } else {
+            print("This doesn't work for this file extention...")
+          }
         }
-      })
+      )
+      
       state$episodes <- epifile_input()
     }
     
     # check for timing focus
-    if (input$choice_timfoc){
+    if (input$choice_timfoc == '1'){
 
       # check format timing start date
       start_timfoc_day <- as.character(input$start_timfoc_day)
-      start_timfoc_month <- factor(input$start_timfoc_month,
-                                   levels = c("January","February","March","April","May","June","July",
-                                              "August","September","October","November","December"))
+      start_timfoc_month <- factor(input$start_timfoc_month, levels = choices_months)
       start_timfoc_month <- as.integer(start_timfoc_month)
       
       # check format timing end date
       end_timfoc_day <- as.character(input$end_timfoc_day)
-      end_timfoc_month <- factor(input$end_timfoc_month,
-                                   levels = c("January","February","March","April","May","June","July",
-                                              "August","September","October","November","December"))
+      end_timfoc_month <- factor(input$end_timfoc_month, levels = choices_months)
       end_timfoc_month <- as.integer(end_timfoc_month)
       
       
@@ -190,77 +201,83 @@ server <- function(input, output, session) {
   })
   
   
-  # Table episodes: print
+  # Episodes: table print
   output$contents_epi <- DT::renderDataTable({ 
-    DT::datatable(state$episodes, rownames=FALSE, options = list(pageLength=5)) %>%
-      formatRound(c(6:10), 2)
-  })
+    DT::datatable(state$episodes, 
+                  rownames=F, 
+                  options = list(
+                    pageLength=10,
+                    autoWidth=F,
+                    scrollX = T,
+                    searching=T,
+                    search = list(regex=T, caseInsensitive=T)
+                    )
+                  ) %>%
+    formatRound(c(6:10), 2)
+    })
   
-  # Table episodes: download .csv
+  
+  # Episodes: table download .csv
   output$downloadTable_epi <- downloadHandler(
     filename = function() {
-      paste0("Table_episodes.csv")
+      paste0("Episodes_table.csv")
     },
     content = function(file) {
       write.csv(state$episodes, file)
     }
   )
   
-  # Plot episodes: print
-  observeEvent(input$run_button_epi,{
+  
+  # Episodes: plot print
+  output$plot_epi <- renderPlotly({
     
-    output$plot_epi <- renderPlot({
-      x <- state$episodes$date_start
-      y <- state$episodes$intensity_mean
-      df <- data.frame(x,y)
-      df$x <- as.Date(df$x)
-      d1 <- as.Date(head(df$x,1))
-      d2 <- as.Date(tail(df$x,1))
+    x <- state$episodes$date_start
+    y <- state$episodes$intensity_mean
+    df <- data.frame(x,y)
+    df$x <- as.Date(df$x)
+    d1 <- as.Date(head(df$x,1))
+    d2 <- as.Date(tail(df$x,1))
       
-      if (input$choice_timfoc){
-        df$z <- state$episodes$overlap
-        df$z <- as.factor(df$z)
-        
-        state$plot_epi <- ggplot(df, aes(x, y, col = z)) +
-          geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
-          geom_point( size=3) +
-          labs(x="date_start", 
-               y="intensity_mean", 
-               title="Lolli plot events",
-               col="Overlap") +
-          scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1, d2), date_labels="%Y") +
-          scale_color_manual(values = c("orange","blue")) +
-          theme_light() +
-          theme(panel.grid.major.x = element_blank(),
-                panel.border = element_blank(),
-                axis.ticks.x = element_blank(),
-                axis.text.x = element_text(size = 9, angle = 45, hjust = 1),
-                axis.text.y = element_text(size = 9), 
-                legend.position = "right") 
+    
+    if (input$choice_timfoc == '1'){
+      df$z <- state$episodes$overlap
+      df$z <- as.factor(df$z)
+      
+      # if there is timing we add colour  
+      lolliEp <- ggplot(df, aes(x, y, col = z)) +
+        geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
+        geom_point(size=2) +
+        labs(x="date_start", y="intensity_mean", title="Lollipop chart", col="Overlap") +
+        scale_color_manual(values = c("orange","blue"), labels=c("no","yes"))
       } else {
-        state$plot_epi <- ggplot(df, aes(x, y)) +
+        
+        lolliEp <- ggplot(df, aes(x, y)) +
           geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
-          geom_point( color="orange", size=3) +
-          labs(x="date_start", y="intensity_mean", title="Lolli plot events") +
-          scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1, d2), date_labels="%Y") +
-          theme_light() +
-          theme(panel.grid.major.x = element_blank(),
-                panel.border = element_blank(),
-                axis.ticks.x = element_blank(),
-                axis.text.x = element_text(size = 9, angle = 45, hjust = 1),
-                axis.text.y = element_text(size = 9)) 
+          geom_point(color="orange", size=2) +
+          labs(x="date_start", y="intensity_mean", title="Lollipop chart") 
       }
+    
+    state$plot_epi <- lolliEp +
+      scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
+      theme_light() +
+      theme(
+        panel.grid.major.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(size= 9, angle=45, hjust=1),
+        axis.text.y = element_text(size=9), 
+        legend.position="right"
+        )
       
-      
-      state$plot_epi
+    ggplotly(state$plot_epi)
       
     })
-  })
   
-  # Plot episodes: download .png
+  
+  # Episdes: plot download .png
   output$downloadPlot_epi <- downloadHandler(
     filename = function(){
-      paste0("Plot_episodes",'.png')
+      paste0("Episodes_LolliChart",'.png')
     },
     content = function(file){
       ggsave(file, plot = state$plot_epi, width = 26, height = 12, units = "cm", dpi = 300)
@@ -269,11 +286,9 @@ server <- function(input, output, session) {
   
   
   
-  #
-  # INDEX tab
-  #
   
-  # computing index
+  # INDEX TAB ---------------------------------------------------------------
+  
   observeEvent(input$run_button_index,{
     
     state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))

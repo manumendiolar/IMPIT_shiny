@@ -6,7 +6,7 @@ Source data should be stored as a `CSV` format with two columns and header.
 ***
 CSV Format:
 
-$$\\scriptsize\\begin{array}{cc} \\hline \\text{Time} & \\text{Value} \\\\ \\hline \\cdot & \\cdot \\\\ \\hline \\end{array}$$
+$$\\scriptsize\\begin{array}{cc} \\hline \\text{Date} & \\text{SOI} \\\\ \\hline \\cdot & \\cdot \\\\ \\hline \\end{array}$$
 
 
 *** 

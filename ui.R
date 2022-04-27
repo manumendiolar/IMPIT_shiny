@@ -373,91 +373,105 @@ ui <- dashboardPage(
         # Explore IMPIT index trend row
         fluidRow(
           
-          # upload IMPIT index values
+          # Import IMPIT index values
           box(
             title = "Source IMPIT index",
-            status="success",
-            solidHeader = TRUE,
+            #status="success",
+            solidHeader = T,
             id = "box_app_data_index",
-            collapsible = TRUE,
+            collapsible = T,
             icon = icon("upload"),
             width = 3,
             height = "500px",
-            fileInput("index_file","Select CSV to Import", accept=c(".csv",".RData")),
-            selectInput("index_time_var","Time Variable", choices=c("Not selected")),
-            selectInput("index_var","Variable", choices=c("Not selected")),
-            #sliderInput("index_periodInput", "Period", 1950, 2020, c(1988, 2019), pre = "year "),
-            #dateRangeInput("daterange_index_app", "Date range (yyyy-mm-dd):", start="1950-01-01", end="2022-01-01"),
-            actionButton("run_button_app_index", "Plot", icon=icon("play"))
+            #fileInput("index_file","Select CSV File to Import", accept=".csv", placeholder="ex: impit_index.csv")#,
+            helper(fileInput("index_file","Select CSV File to Import",
+                             accept=".csv",
+                             placeholder = "ex: impit_index.csv"),
+                   icon = "question",
+                   size = "m",
+                   title = "Data format",
+                   type = "markdown",
+                   content = "source_data_impit_help")
+            #dateRangeInput("daterange_app_index", "Date range (yyyy-mm-dd):", start="1950-01-01", end="2022-01-01"),
+            #actionButton("run_button_app_index", "Submit", icon=icon("play"))
           ),
           
           # IMPIT index table and plot 
           box(
             title = "Explore trend in IMPIT index",
-            status="success",
+            #status="success",
             id = "box_app_data_index_exp",
-            collapsible = TRUE,
+            collapsible = T,
             icon = icon("chart"),
             width = 8,
             height = "500px",
             tabsetPanel(
-              tabPanel("Table",
-                       div(DT::dataTableOutput("contents_app_index"), style = "font-size: 100%; width: 100%")
-                       ),
+              tabPanel("Table", div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")),
               tabPanel("Plot",
-                       plotOutput("plot_app_index"),
-                       br(),
-                       downloadButton("downloadPlot_app_index", "Download Plot"), style = "margin-top: 25px;"
+                fluidRow(column(2, br(), checkboxGroupInput("choiceReg", label = "Regression", 
+                                                            choices = c("Linear"=1,"Quadratic"=2,"Loess"=3),
+                                                            selected = "Linear")
+                                ),
+                         column(10, plotlyOutput("plot_app_index", width = "100%")),
+                         ),
+                fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;")
                        )
+                )
               )
             )
           ),
         
         # Explore association between IMPIT index and other variable
         fluidRow(
-          
-          # upload other variable
-          box(
-            title = "Source response",
-            status="success",
-            solidHeader = TRUE,
-            id = "box_app_data_resp",
-            collapsible = TRUE,
-            icon = icon("upload"),
-            width = 3,
-            height = "500px",
-            fileInput("resp_file","Select CSV to Import", accept=c(".csv",".RData")),
-            selectInput("resp_time_var","Time Variable", choices=c("Not selected")),
-            selectInput("resp_var","Response Variable", choices=c("Not selected")),
-            #sliderInput("resp_periodInput", "Period", 1950, 2020, c(1988, 2019), pre = "year "),
-            actionButton("run_button_application", "Run analysis", icon=icon("play"))
-          ),
-
-          # table and plot of other variable (to check) and correlation analysis with IMPIT index
-          box(
-            title = "Explore association between IMPIT index and response variable",
-            status="success",
-            id = "box_app_data",
-            collapsible = TRUE,
-            icon = icon("chart"),
-            width = 8,
-            height = "700px",
-            tabsetPanel(
-              tabPanel("Table",
-                       div(DT::dataTableOutput("contents_app_resp"), style = "font-size: 100%; width: 50%")
-                       ),
-              tabPanel("Plot",
-                       plotOutput("plot_app_resp"),
-                       br(),
-                       downloadButton("downloadPlot_app_resp", "Download Plot")
-                       ),
-              tabPanel("Correlation analysis",
-                     fluidRow(column(10, plotOutput("plot_corr_application", width = "100%")),
-                              column( 3,  downloadButton("downloadPlot_app", "Download Plot"), style = "margin-top: 25px;")
-                             )
-                       )
-              )
-            )
+          # 
+          # # upload other variable
+          # box(
+          #   title = "Source response",
+          #   #status="success",
+          #   solidHeader = T,
+          #   id = "box_app_data_resp",
+          #   collapsible = T,
+          #   icon = icon("upload"),
+          #   width = 3,
+          #   height = "500px",
+          #   fileInput("resp_file","Select CSV File to Import", accept=".csv", placeholder="ex: resp_variable.csv"),
+          #   # helper(fileInput("resp_file","Select CSV File to Import",
+          #   #                  accept=".csv",
+          #   #                  placeholder = "ex: resp_variable.csv"),
+          #   #        icon = "question",
+          #   #        size = "m",
+          #   #        title = "Data format",
+          #   #        type = "markdown",
+          #   #        content = "source_data_resp_help"),
+          #   selectInput("resp_var_time","Select time variable:", choices=c("Not selected")),
+          #   selectInput("resp_var","Select response variable:", choices=c("Not selected")),
+          #   #dateRangeInput("daterange_app_resp", "Choose date range to explore association:", start="1950-01-01", end="2022-01-01"),
+          #   actionButton("run_button_app_resp", "Submit", icon=icon("play"))
+          #   ),
+          # 
+          # # table and plot of other variable (to check) and correlation analysis with IMPIT index
+          # box(
+          #   title = "Explore association between IMPIT index and response variable",
+          #   #status="success",
+          #   id = "box_app_data",
+          #   collapsible = T,
+          #   icon = icon("chart"),
+          #   width = 8,
+          #   height = "500px",
+          #   tabsetPanel(
+          #     tabPanel("Table", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
+          #     tabPanel("Plot", 
+          #              fluidRow(column(12, plotlyOutput("plot_app_resp", width = "100%")),
+          #                       column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;")
+          #                      )
+          #             ),
+          #     tabPanel("Correlation analysis",
+          #            fluidRow(column(10, plotOutput("plot_corr_application", width="100%")),
+          #                     column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;")
+          #                     )
+          #            )
+          #     )
+          #   )
           )
         ),
       

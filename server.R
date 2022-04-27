@@ -392,20 +392,21 @@ server <- function(input, output, session) {
   # APPLICATION TAB ---------------------------------------------------------
   
   # Import IMPIT index 
-  data_index <- eventReactive(input$index_file,
-    {
-      if (is.null(input$index_file)) return(NULL)
-      inFile <- input$index_file
-      read.csv(inFile$datapath)
-    }
-  )
+  data_index <- eventReactive(input$index_file, {
+    
+    if (is.null(input$index_file)) return(NULL)
+    
+    read.csv(file=input$index_file$datapath,
+             header=T, 
+             stringsAsFactors=F)
+  })
   
-  # IMPIT index: table 
-  output$contents_app_index <- DT::renderDataTable({ 
+  # IMPIT index: table
+  output$contents_app_index <- DT::renderDataTable({
     DT::datatable(data_index(),
                   options = list(
                     pageLength=10,
-                    autoWidth=T,  
+                    autoWidth=T,
                     searching=T,
                     search=list(regex=T, caseInsensitive=T)
                   ),
@@ -413,184 +414,277 @@ server <- function(input, output, session) {
       formatRound(c(2), 2) %>%
       formatStyle(columns=c(1:2), 'text-align'='centre')
   })
-  
+    
   
   # IMPIT index: line plot
-  # output$plot_app_index <- renderPlotly({
+  output$plot_app_index <- renderPlotly({
+ 
+    #data_index_name <- colnames(data_index())
+
+    # Set x and y axis and display data in line plot using plotly
+    plot_ly(data = data_index()) %>%
+      add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>%
+      layout(xaxis = list(title="Time"),
+             yaxis = list(title="IMPIT index"))
+    })
+  
+  # IMPIT index + linear trend
+  observeEvent(input$choiceReg, {
+    
+    xx <- data_index()[ ,1]
+    yy <- data_index()[ ,2]
+    df_index <- data.frame(xx, yy)
+    t1 <- head(xx,1)
+    t2 <- tail(xx,1)
+    
+    if (input$choiceReg == '1'){
+      
+      output$plot_app_index <- renderPlotly({
+        
+        pLin <- ggplot(df_index, aes(xx, yy)) +
+          geom_line() +
+          geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 1), col = "seagreen") +
+          scale_x_continuous(breaks = seq(t1, t2, 2), limits = c(t1,t2)) +
+          labs(x = "Time", y = "IMPIT index") +
+          theme_light() +
+          theme(panel.grid.major.x = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+                axis.text.y = element_text(size = 10))
+        
+        ggplotly(pLin)
+      })
+  } else {
+    
+    if (input$choiceReg == '2'){
+      
+      output$plot_app_index <- renderPlotly({
+        
+        pQuad <- ggplot(df_index, aes(xx, yy)) +
+          geom_line() +
+          geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 2), col = "darkorchid") +
+          scale_x_continuous(breaks = seq(t1, t2, 2), limits = c(t1,t2)) +
+          labs(x = "Time", y = "IMPIT index") +
+          theme_light() +
+          theme(panel.grid.major.x = element_blank(),
+                panel.border = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+                axis.text.y = element_text(size = 10))
+      
+        ggplotly(pQuad)
+      })
+    } else{
+      
+      output$plot_app_index <- renderPlotly({
+      
+      #data_index_name <- colnames(data_index())
+      
+      # Set x and y axis and display data in line plot using plotly
+      plot_ly(data = data_index()) %>%
+        add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>%
+        layout(xaxis = list(title="Time"),
+               yaxis = list(title="IMPIT index"))
+      })
+      
+    }
+  }
+    
+  })
+  
+  
+  # # IMPIT index + quadratic trend
+
+  
+  # observeEvent(input$choiceReg,{
   #   
-  #   #data_index_name <- colnames(data_index())
+  #   xx <- data_index()[ ,1]
+  #   yy <- data_index()[ ,2]
+  #   
+  #   yi = 1:length(xx)
+  #   m1 = lm(xx~yy)
+  #   m2 = lm(xx~yy+I(yy^2))
+  #   m3 = lm(xx~yy+I(yy^2)+I(yy^3))
+  #   
+  #   fig_index <- plot_ly(data = data_index()) %>%
+  #     add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>%
+  #     layout(xaxis = list(title="Time"),
+  #            yaxis = list(title="IMPIT index"))
+  #   
+  #   if (input$choiceReg == "Linear"){
   #     
-  #   # Set x and y axis and display data in line plot using plotly
-  #   plot_ly(data = data_index) %>%
-  #       add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>% 
-  #       layout(xaxis = list(title="Time"),
-  #              yaxis = list(title="IMPIT index"))
-  #  
-  # }) 
+  #     fig_index.Linear <- add_lines(fig_index, x=xx, y=predict(m1), col="orange", name="Linear")
+  #     fig_index.Linear
+  #   }
+  #   
+  #   
+  # })
+  
   
   # choose index variable
-  observeEvent(data_index(),{
-    choices <- c("Not selected", names(data_index()))
-    updateSelectInput(inputId = "index_time_var", choices = choices)
-    updateSelectInput(inputId = "index_var", choices = choices)
-  })
-  index_var <- eventReactive(input$run_button_app_index, input$index_var)
-  index_time_var <- eventReactive(input$run_button_app_index, input$index_time_var)
-  
-  observeEvent(input$run_button_app_index,{
-    
-    # Table Index: print
-    output$contents_app_index <- DT::renderDataTable({ 
-      DT::datatable(data_index(), rownames=FALSE, options = list(pageLength=5)) %>%
-        formatRound(c(2), 2)
-    })
-    
-    # Plot Index: print 
-    output$plot_app_index <- renderPlot({
-      
-      state$ind_time <-  as.numeric(data_index()[ ,input$index_time_var])
-      state$ind_var <- as.numeric(data_index()[ ,input$index_var])
-      t1 <- head(state$ind_time,1)
-      t2 <- tail(state$ind_time,1)
-
-      df_index <- data.frame(time = state$ind_time, index = state$ind_var)
-      
-      state$plot_app_index <- ggplot(df_index, aes(time, index)) +
-        geom_line() +
-        geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 1), aes(colour="Linear", fill="Linear", lty="Linear")) + 
-        geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 2), aes(colour="Cuadratic", fill="Cuadratic", lty="Cuadratic")) + 
-        scale_colour_manual(name="Regression", values = c("seagreen","darkorchid")) +
-        scale_fill_manual(name="Regression", values = c("seagreen","darkorchid")) +
-        scale_linetype_manual(name="Regression", values = c(3,2)) +
-        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1,t2)) +
-        labs(x = "Time", 
-             y = "IMPIT index") +
-        theme_light() +
-        theme(panel.grid.major.x = element_blank(),
-              panel.border = element_blank(),
-              axis.ticks.x = element_blank(),
-              axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
-              axis.text.y = element_text(size = 10))
-
-      state$plot_app_index
-    })
-  })
-  
-  
-  # load response data
-  data_resp <- reactive({
-    req(input$resp_file)
-    inFile <- input$resp_file
-    read.csv(inFile$datapath)
-  })
-  # choose response variable
-  observeEvent(data_resp(),{
-    choices <- c("Not selected", names(data_resp()))
-    updateSelectInput(inputId = "resp_time_var", choices = choices)
-    updateSelectInput(inputId = "resp_var", choices = choices)
-  })
-  resp_var <- eventReactive(input$run_button_app_resp, input$resp_var)
-  resp_time_var <- eventReactive(input$run_button_app_resp, input$resp_time_var)
-  
-  observeEvent(input$run_button_application,{
-    
-    # Table Response: print
-    output$contents_app_resp <- DT::renderDataTable({ 
-      DT::datatable(data_resp(), rownames=FALSE, options = list(pageLength=5)) %>%
-        formatRound(c(2), 2)
-    })
-    
-    # Plot Response: print 
-    output$plot_app_resp <- renderPlot({
-      
-      state$dep_time <-  as.numeric(data_resp()[ ,input$resp_time_var])
-      state$dep_var <- as.numeric(data_resp()[ ,input$resp_var])
-      t1 <- head(state$dep_time,1)
-      t2 <- tail(state$dep_time,1)
-      
-      df_resp <- data.frame(time = state$dep_time, resp = state$dep_var)
-      
-      state$plot_app_resp <- ggplot(df_resp, aes(time, resp)) +
-        geom_line() +
-        scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1, t2)) +
-        labs(x = "Time", 
-             y = "Response variable") +
-        theme_light() +
-        theme(panel.grid.major.x = element_blank(),
-              panel.border = element_blank(),
-              axis.ticks.x = element_blank(),
-              axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
-              axis.text.y = element_text(size = 10))
-      
-      state$plot_app_resp
-    })
-    
-    # Plot Regression: print 
-    output$plot_corr_application <- renderPlot({
-      
-      # keep vars
-      xx <- as.numeric(state$ind_var)
-      yy <- log(as.numeric(state$dep_var))
-      
-      # linear model
-      mod <- lm(yy ~ xx)
-      CI95 <- confint(mod, "xx", level = 0.95)
-      cor.out95 <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")
-     
-      # data frame with results of LR
-      res.LR <-  data.frame(slope = as.numeric(coef(mod)[2]), 
-                            lb95 = CI95[ ,1], 
-                            ub95 = CI95[ ,2],
-                            R2 = as.numeric(summary(mod)$r.squared), 
-                            pVal = as.numeric(anova(mod)$'Pr(>F)'[1]), 
-                            corr = as.numeric(cor.out95$estimate), 
-                            corr.lb95 = as.numeric(cor.out95$conf.int[1]),
-                            corr.ub95 = as.numeric(cor.out95$conf.int[2]))
-      
-      res.LR <- res.LR %>% 
-        mutate(
-          # location of text label in data coordinates
-          xx= max(xx), yy = max(yy),
-          # text label containing corr and r^2 value 
-          labelR2 =  glue("Corr = {round(corr, 2)}<br>*R*<sup>2</sup> = {round(R2, 2)} ")
-        )
-      
-      
-      # extra for plotting
-      col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
-      col.ann <- "#08519C"
-      col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
-      size.num <- 3
-      size.ann <- 3
-      year.text <- substr(as.character(state$dep_time), nchar(as.character(state$dep_time))-2+1, nchar(as.character(state$dep_time)))
-      #c("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18")
-      
-      state$plot_corr_application <- ggplot(data = data.frame(xx, yy), aes(x = xx, y = yy)) +
-        geom_smooth(method ='lm', se = TRUE, col = col.reg, alpha = 0.25) +
-        geom_text(aes(label = year.text), size = size.num) +
-        labs(x = "IMPIT index", y = "log( SCPUE )") +
-        geom_richtext(data =  res.LR, aes(label = labelR2),
-                      fill = after_scale(alpha(col.box,.2)),
-                      color =  col.box,
-                      text.colour = "black",
-                      size = 3.1, hjust = 1, vjust = 1) +
-        theme_bw(base_size = 11)
-      
-      state$plot_corr_application
-      
-    }, height = 450, width = 450 )
-    
-    # Plot Regression: download .png
-    output$downloadPlot_app <- downloadHandler(
-      filename = function(){
-        paste0("Plot_application",'.png')
-      },
-      content = function(file){
-        ggsave(file, plot = state$plot_corr_application, width = 14, height = 14, units = "cm", dpi = 300)
-      }
-    )
-    
-  })
+  # observeEvent(data_index(),{
+  #   choices <- c("Not selected", names(data_index()))
+  #   updateSelectInput(inputId = "index_time_var", choices = choices)
+  #   updateSelectInput(inputId = "index_var", choices = choices)
+  # })
+  # index_var <- eventReactive(input$run_button_app_index, input$index_var)
+  # index_time_var <- eventReactive(input$run_button_app_index, input$index_time_var)
+  # 
+  # 
+  #   # 
+  #   # # Table Index: print
+  #   # output$contents_app_index <- DT::renderDataTable({ 
+  #   #   DT::datatable(data_index(), rownames=FALSE, options = list(pageLength=5)) %>%
+  #   #     formatRound(c(2), 2)
+  #   # })
+  #   
+  #   # Plot Index: print 
+  #   output$plot_app_index <- renderPlot({
+  #     
+  #     state$ind_time <-  as.numeric(data_index()[ ,input$index_time_var])
+  #     state$ind_var <- as.numeric(data_index()[ ,input$index_var])
+  #     t1 <- head(state$ind_time,1)
+  #     t2 <- tail(state$ind_time,1)
+  # 
+  #     df_index <- data.frame(time = state$ind_time, index = state$ind_var)
+  #     
+  #     state$plot_app_index <- ggplot(df_index, aes(time, index)) +
+  #       geom_line() +
+  #       geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 1), aes(colour="Linear", fill="Linear", lty="Linear")) + 
+  #       geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 2), aes(colour="Cuadratic", fill="Cuadratic", lty="Cuadratic")) + 
+  #       scale_colour_manual(name="Regression", values = c("seagreen","darkorchid")) +
+  #       scale_fill_manual(name="Regression", values = c("seagreen","darkorchid")) +
+  #       scale_linetype_manual(name="Regression", values = c(3,2)) +
+  #       scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1,t2)) +
+  #       labs(x = "Time", 
+  #            y = "IMPIT index") +
+  #       theme_light() +
+  #       theme(panel.grid.major.x = element_blank(),
+  #             panel.border = element_blank(),
+  #             axis.ticks.x = element_blank(),
+  #             axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+  #             axis.text.y = element_text(size = 10))
+  # 
+  #     state$plot_app_index
+  #   })
+  # })
+  # 
+  # 
+  # # load response data
+  # data_resp <- reactive({
+  #   req(input$resp_file)
+  #   inFile <- input$resp_file
+  #   read.csv(inFile$datapath)
+  # })
+  # # choose response variable
+  # observeEvent(data_resp(),{
+  #   choices <- c("Not selected", names(data_resp()))
+  #   updateSelectInput(inputId = "resp_time_var", choices = choices)
+  #   updateSelectInput(inputId = "resp_var", choices = choices)
+  # })
+  # resp_var <- eventReactive(input$run_button_app_resp, input$resp_var)
+  # resp_time_var <- eventReactive(input$run_button_app_resp, input$resp_time_var)
+  # 
+  # observeEvent(input$run_button_application,{
+  #   
+  #   # Table Response: print
+  #   output$contents_app_resp <- DT::renderDataTable({ 
+  #     DT::datatable(data_resp(), rownames=FALSE, options = list(pageLength=5)) %>%
+  #       formatRound(c(2), 2)
+  #   })
+  #   
+  #   # Plot Response: print 
+  #   output$plot_app_resp <- renderPlot({
+  #     
+  #     state$dep_time <-  as.numeric(data_resp()[ ,input$resp_time_var])
+  #     state$dep_var <- as.numeric(data_resp()[ ,input$resp_var])
+  #     t1 <- head(state$dep_time,1)
+  #     t2 <- tail(state$dep_time,1)
+  #     
+  #     df_resp <- data.frame(time = state$dep_time, resp = state$dep_var)
+  #     
+  #     state$plot_app_resp <- ggplot(df_resp, aes(time, resp)) +
+  #       geom_line() +
+  #       scale_x_continuous(breaks=seq(t1, t2, 2), limits=c(t1, t2)) +
+  #       labs(x = "Time", 
+  #            y = "Response variable") +
+  #       theme_light() +
+  #       theme(panel.grid.major.x = element_blank(),
+  #             panel.border = element_blank(),
+  #             axis.ticks.x = element_blank(),
+  #             axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
+  #             axis.text.y = element_text(size = 10))
+  #     
+  #     state$plot_app_resp
+  #   })
+  #   
+  #   # Plot Regression: print 
+  #   output$plot_corr_application <- renderPlot({
+  #     
+  #     # keep vars
+  #     xx <- as.numeric(state$ind_var)
+  #     yy <- log(as.numeric(state$dep_var))
+  #     
+  #     # linear model
+  #     mod <- lm(yy ~ xx)
+  #     CI95 <- confint(mod, "xx", level = 0.95)
+  #     cor.out95 <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")
+  #    
+  #     # data frame with results of LR
+  #     res.LR <-  data.frame(slope = as.numeric(coef(mod)[2]), 
+  #                           lb95 = CI95[ ,1], 
+  #                           ub95 = CI95[ ,2],
+  #                           R2 = as.numeric(summary(mod)$r.squared), 
+  #                           pVal = as.numeric(anova(mod)$'Pr(>F)'[1]), 
+  #                           corr = as.numeric(cor.out95$estimate), 
+  #                           corr.lb95 = as.numeric(cor.out95$conf.int[1]),
+  #                           corr.ub95 = as.numeric(cor.out95$conf.int[2]))
+  #     
+  #     res.LR <- res.LR %>% 
+  #       mutate(
+  #         # location of text label in data coordinates
+  #         xx= max(xx), yy = max(yy),
+  #         # text label containing corr and r^2 value 
+  #         labelR2 =  glue("Corr = {round(corr, 2)}<br>*R*<sup>2</sup> = {round(R2, 2)} ")
+  #       )
+  #     
+  #     
+  #     # extra for plotting
+  #     col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
+  #     col.ann <- "#08519C"
+  #     col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
+  #     size.num <- 3
+  #     size.ann <- 3
+  #     year.text <- substr(as.character(state$dep_time), nchar(as.character(state$dep_time))-2+1, nchar(as.character(state$dep_time)))
+  #     #c("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18")
+  #     
+  #     state$plot_corr_application <- ggplot(data = data.frame(xx, yy), aes(x = xx, y = yy)) +
+  #       geom_smooth(method ='lm', se = TRUE, col = col.reg, alpha = 0.25) +
+  #       geom_text(aes(label = year.text), size = size.num) +
+  #       labs(x = "IMPIT index", y = "log( SCPUE )") +
+  #       geom_richtext(data =  res.LR, aes(label = labelR2),
+  #                     fill = after_scale(alpha(col.box,.2)),
+  #                     color =  col.box,
+  #                     text.colour = "black",
+  #                     size = 3.1, hjust = 1, vjust = 1) +
+  #       theme_bw(base_size = 11)
+  #     
+  #     state$plot_corr_application
+  #     
+  #   }, height = 450, width = 450 )
+  #   
+  #   # Plot Regression: download .png
+  #   output$downloadPlot_app <- downloadHandler(
+  #     filename = function(){
+  #       paste0("Plot_application",'.png')
+  #     },
+  #     content = function(file){
+  #       ggsave(file, plot = state$plot_corr_application, width = 14, height = 14, units = "cm", dpi = 300)
+  #     }
+  #   )
+  #   
+  # })
   
   
   

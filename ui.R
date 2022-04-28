@@ -122,19 +122,21 @@ ui <- dashboardPage(
           box(
             width = 12, 
             height = "30em",
-            title = "Description",
+            title = h4(tags$b("Description")),
             solidHeader = F,
             collapsible = T,
-            h5("An intuitive R-Shiny app that simplifies the construction of IMPIT indices. This app combines the analytic framework developed in (IMPIT paper, 2022) with the visual power offered by R."),
-            h5("IMPIT tool has a friendly workflow for importing raw data, exploring, defining and computing basic episodes reports and constructing IMPIT indices."),
-            h5("The user can choose between a menu of intensity and relative weight functions."),
-            h5("The results are indices and their corresponding visualization with the aim of constituiting a useful data analysis exploratory tool.")
+            tags$ul(
+              tags$li(h4("Provide a friendly interface for constructing IMPIT indices.")),
+              tags$li(h4("Provide a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices.")),
+              tags$li(h4("Allow users to choose between a menu of intensity and relative weight functions.")), 
+              tags$li(h4("Visualize importing data, defined episodes, and constructed IMPIT indices"))
+            )
             #br(), br(), br(), br(), br(), br(),
           ),
           # Roadmap
           box(
             width = 12,
-            title = "Roadmap",
+            title = h4(tags$b("Roadmap")),
             align = "center", 
             solidHeader = F,
             collapsible = T,

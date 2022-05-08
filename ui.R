@@ -26,7 +26,7 @@ source("./source/fun_w2.R")
 source("./source/fun_w3.R")
 
 
-steps <- read_csv("help.csv")
+steps <- read_csv("./helpfiles/help.csv")
 choices_days <- as.character(1:31)
 choices_months <- c("January","February","March","April","May","June","July","August","September","October","November","December") 
 
@@ -129,7 +129,7 @@ ui <- dashboardPage(
               tags$li(h4("Provide a friendly interface for constructing IMPIT indices.")),
               tags$li(h4("Provide a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices.")),
               tags$li(h4("Allow users to choose between a menu of intensity and relative weight functions.")), 
-              tags$li(h4("Visualize importing data, defined episodes, and constructed IMPIT indices"))
+              tags$li(h4("Visualize importing data, defined episodes, and constructed IMPIT indices."))
             )
             #br(), br(), br(), br(), br(), br(),
           ),

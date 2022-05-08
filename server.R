@@ -428,109 +428,31 @@ server <- function(input, output, session) {
              yaxis = list(title="IMPIT index"))
     })
   
-  # IMPIT index + linear trend
-  observeEvent(input$choiceReg, {
+  # IMPIT index + trend
+  output$plot_app_index <- renderPlotly({
     
     xx <- data_index()[ ,1]
     yy <- data_index()[ ,2]
     df_index <- data.frame(xx, yy)
     t1 <- head(xx,1)
     t2 <- tail(xx,1)
+    data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
+    line.fmt = list(dash="solid", width = 1.5, color=NULL)
     
-    if (input$choiceReg == '1'){
-      
-      output$plot_app_index <- renderPlotly({
-        
-        pLin <- ggplot(df_index, aes(xx, yy)) +
-          geom_line() +
-          geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 1), col = "seagreen") +
-          scale_x_continuous(breaks = seq(t1, t2, 2), limits = c(t1,t2)) +
-          labs(x = "Time", y = "IMPIT index") +
-          theme_light() +
-          theme(panel.grid.major.x = element_blank(),
-                panel.border = element_blank(),
-                axis.ticks.x = element_blank(),
-                axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
-                axis.text.y = element_text(size = 10))
-        
-        ggplotly(pLin)
-      })
-  } else {
+    m1 <- lm(yy ~ xx)
+    m2 <- lm(yy ~ xx + I(xx^2))
+    m3 <- lm(log(yy) ~ log(xx))
     
-    if (input$choiceReg == '2'){
-      
-      output$plot_app_index <- renderPlotly({
-        
-        pQuad <- ggplot(df_index, aes(xx, yy)) +
-          geom_line() +
-          geom_smooth( method = "lm", alpha = 0.10, level = 0.95, formula = y ~ poly(x, 2), col = "darkorchid") +
-          scale_x_continuous(breaks = seq(t1, t2, 2), limits = c(t1,t2)) +
-          labs(x = "Time", y = "IMPIT index") +
-          theme_light() +
-          theme(panel.grid.major.x = element_blank(),
-                panel.border = element_blank(),
-                axis.ticks.x = element_blank(),
-                axis.text.x = element_text(size = 10, angle = 45, hjust = 1),
-                axis.text.y = element_text(size = 10))
-      
-        ggplotly(pQuad)
-      })
-    } else{
-      
-      output$plot_app_index <- renderPlotly({
-      
-      #data_index_name <- colnames(data_index())
-      
-      # Set x and y axis and display data in line plot using plotly
-      plot_ly(data = data_index()) %>%
-        add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>%
-        layout(xaxis = list(title="Time"),
-               yaxis = list(title="IMPIT index"))
-      })
-      
-    }
-  }
+    
+    p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=data.fmt, name="Data")
+    p <- add_lines(p, x=xx, y=predict(m1), line=line.fmt, name="Linear")
+    p <- add_lines(p, x=xx, y=predict(m2), line=line.fmt, name="Quadratic")
+    p <- add_lines(p, x=xx, y=exp(coef(m3)[1])*(xx^coef(m3)[2]), line=line.fmt, name="Exponential")
+    p
     
   })
   
-  
-  # # IMPIT index + quadratic trend
-
-  
-  # observeEvent(input$choiceReg,{
-  #   
-  #   xx <- data_index()[ ,1]
-  #   yy <- data_index()[ ,2]
-  #   
-  #   yi = 1:length(xx)
-  #   m1 = lm(xx~yy)
-  #   m2 = lm(xx~yy+I(yy^2))
-  #   m3 = lm(xx~yy+I(yy^2)+I(yy^3))
-  #   
-  #   fig_index <- plot_ly(data = data_index()) %>%
-  #     add_lines(x = ~data_index()[ ,1], y = ~data_index()[ ,2]) %>%
-  #     layout(xaxis = list(title="Time"),
-  #            yaxis = list(title="IMPIT index"))
-  #   
-  #   if (input$choiceReg == "Linear"){
-  #     
-  #     fig_index.Linear <- add_lines(fig_index, x=xx, y=predict(m1), col="orange", name="Linear")
-  #     fig_index.Linear
-  #   }
-  #   
-  #   
-  # })
-  
-  
-  # choose index variable
-  # observeEvent(data_index(),{
-  #   choices <- c("Not selected", names(data_index()))
-  #   updateSelectInput(inputId = "index_time_var", choices = choices)
-  #   updateSelectInput(inputId = "index_var", choices = choices)
-  # })
-  # index_var <- eventReactive(input$run_button_app_index, input$index_var)
-  # index_time_var <- eventReactive(input$run_button_app_index, input$index_time_var)
-  # 
+   
   # 
   #   # 
   #   # # Table Index: print

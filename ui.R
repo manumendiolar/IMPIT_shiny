@@ -140,8 +140,7 @@ ui <- dashboardPage(
             align = "center", 
             solidHeader = F,
             collapsible = T,
-            #img(src = "images/roadmap_3.png", style="width: 80%")
-            img(src = "images/IMPIT_roadmap.svg", style="width: 80%")
+            img(src = "images/IMPIT_roadmap.svg", style="width: 75%")
           )
          )
       ),
@@ -411,14 +410,8 @@ ui <- dashboardPage(
             tabsetPanel(
               tabPanel("Table", div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")),
               tabPanel("Plot",
-                fluidRow(column(2, br(), checkboxGroupInput("choiceReg", label = "Regression", 
-                                                            choices = c("Linear"=1,"Quadratic"=2,"Loess"=3),
-                                                            selected = "Linear")
-                                ),
-                         column(10, plotlyOutput("plot_app_index", width = "100%")),
-                         ),
-                fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;")
-                       )
+                fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
+                fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
                 )
               )
             )

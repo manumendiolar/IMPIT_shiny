@@ -42,7 +42,7 @@ ui <- dashboardPage(
 
   dashboardHeader(
     
-    title = span(img(src = "images/icon_explore_2.svg", height = 30), "IMPITa"),
+    title = span(img(src = "images/icon_explore_2.svg", height = 30), "IMPIT-a"),
     
     dropdownMenu(
       type = "notifications", 

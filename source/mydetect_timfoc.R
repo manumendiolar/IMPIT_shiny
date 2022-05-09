@@ -7,7 +7,7 @@
 #            with a minimum duration "block length".
 #
 # timfoc_dates : character vector of length 2. Corresponding to start and date of 
-#                special season. Format "month_number / "day". 
+#                special season. Format "MM-DD". 
 
 
 # Output
@@ -39,8 +39,7 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
     # extract info dates from episodes
     Edates <- c(episodes$date_start[ii], episodes$date_end[ii])
     
-    # fix format
-    Edates <- gsub("-", "/", Edates)
+    # Note: date format should already be YYYY-MM-DD
     
     # if episode covered more than a year (we analyze overlap in each year)
     dates <- fun_getdates(Edates)
@@ -53,7 +52,7 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
     for (jj in 1:length(dates)){
       
       # add year info to Tdates
-      Tdates <- paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="/") 
+      Tdates <- paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-") 
       
       # get overlap info
       out <- fun_overlap(dates[[jj]], Tdates)

@@ -16,8 +16,8 @@
 #            overlap                 : logical value indicating if there was overlapping (TRUE) or not (FALSE)
 #            overlap_days            : integer value with duration of the overlap in days 
 #            overlap__months         : integer value with duration of the overlap in months
-#            overlap_date_start      : character with format "YYYY/mm/dd" for the date when the overlap starts
-#            overlap_date_end        : character with format "YYYY/mm/dd" for the date when the overlap ends
+#            overlap_date_start      : character with format "YYYY-MM-DD" for the date when the overlap starts
+#            overlap_date_end        : character with format "YYYY-MM-DD" for the date when the overlap ends
 
 
 # Note

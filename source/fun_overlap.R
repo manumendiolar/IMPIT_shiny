@@ -8,8 +8,8 @@
 # Output
 # a list with three elements
 #   overlap            : a logic value TRUE if there is overlap, FALSE otherwise.  
-#   date_start_overlap : date with format " " when the overlap starts
-#   date_end_overlap   : date with format " " when the overlap end
+#   date_start_overlap : date with format "MM-DD" when the overlap starts
+#   date_end_overlap   : date with format "MM-DD" when the overlap end
 
 # Note: both pair of dates should be in the same year (for now)
 

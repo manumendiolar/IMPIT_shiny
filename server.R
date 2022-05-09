@@ -116,7 +116,7 @@ server <- function(input, output, session) {
       data_input_name <- colnames(data_input())
       
       # Set x and y axis and display data in line plot using plotly
-      plot_ly( x = ~as.Date(data_input()[ ,1], format = "%d/%m/%Y"), y = ~data_input()[ ,2]) %>%
+      plot_ly( x = ~as.Date(data_input()[ ,1], format = "%Y-%m-%d"), y = ~data_input()[ ,2]) %>%
         add_lines() %>% 
         layout(xaxis = list(title=data_input_name[1],titlefont=list(size=12)),
                yaxis = list(title=data_input_name[2],titlefont=list(size=12)))
@@ -189,7 +189,7 @@ server <- function(input, output, session) {
       state$end_month <- ifelse(end_timfoc_month %in% seq(1,9,1), paste0("0",end_timfoc_month), paste0(end_timfoc_month))
       
       # gather as a vector
-      state$period_timfoc <- c(paste0(state$start_month,"/",state$start_day), paste0(state$end_month,"/",state$end_day))
+      state$period_timfoc <- c(paste0(state$start_month,"-",state$start_day), paste0(state$end_month,"-",state$end_day))
       
       # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)

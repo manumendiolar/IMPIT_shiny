@@ -129,11 +129,7 @@ ui <- dashboardPage(
               tags$li(h4("Provide a user-friendly interface for constructing IMPIT indices.")),
               tags$li(h4("Provide a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices.")),
               tags$li(h4("Allow users to choose between a menu of intensity and relative weight functions.")), 
-<<<<<<< HEAD
               tags$li(h4("Visualize imported data, defined episodes, and constructed IMPIT indices"))
-=======
-              tags$li(h4("Visualize importing data, defined episodes, and constructed IMPIT indices."))
->>>>>>> e0604884d2a951027df3d6b69b99ce45263b117d
             )
             #br(), br(), br(), br(), br(), br(),
           ),

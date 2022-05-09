@@ -156,7 +156,6 @@ ui <- dashboardPage(
           # Import data
           box(
             title = "Required Data", 
-            #status="purple",
             id = "box_source_data",
             collapsible = T,
             icon = icon("upload"),
@@ -175,7 +174,6 @@ ui <- dashboardPage(
           # Check data 
           box(
             title = "Check data",
-            #status="purple",
             id = "box_table_data",
             collapsible = TRUE,
             icon = icon("file-import"),
@@ -201,7 +199,6 @@ ui <- dashboardPage(
           
           box(
             title = "Set up", 
-            #status = "navy",
             id = "box_list_epi",
             collapsible = TRUE,
             icon = icon("cogs"),
@@ -270,7 +267,6 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Episodes",
-            #status = "navy",
             id = "box_table_epi",
             collapsible = TRUE,
             icon = icon("tasks"),

@@ -170,10 +170,6 @@ ui <- dashboardPage(
                    title = "Data format", 
                    type = "markdown", 
                    content = "source_data_help")#,
-            #h4("Set up"),
-            # selectInput("time_var","Time Variable",choices=c("Not selected")),
-            # selectInput("env_var","Environmental Variable",choices=c("Not selected")),
-            # actionButton("run_button_data", "Submit", icon=icon("play"))
             ),
           
           # Check data 

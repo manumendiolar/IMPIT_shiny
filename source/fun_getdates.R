@@ -11,8 +11,7 @@
 
 fun_getdates <- function(Edates){
   
-  # fix format
-  Edates <- gsub("-", "/", Edates)
+  # Note: format od dates should be YYYY-MM-DD
   
   # vector of years covered by the episode
   years <- seq(lubridate::year(Edates[1]), lubridate::year(Edates[2]), 1)
@@ -25,12 +24,10 @@ fun_getdates <- function(Edates){
     
     for (ii in 1:length(years)){
      
-      begin <- paste0(years[[ii]],"/01/01" )
-      #begin <- as.Date(begin, format = "%Y/%m/%d")
-      
-      end <- paste0(years[ii],"/12/31")
-      #end <- as.Date(end, format = "%Y/%m/%d")
-      
+      begin <- paste0(years[[ii]],"-01-01" )
+     
+      end <- paste0(years[ii],"-12-31")
+     
       dates[[ii]] <- c(begin, end)
     }
     

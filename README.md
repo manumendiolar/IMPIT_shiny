@@ -54,7 +54,7 @@ blah blah
 
 # Authors
 <br>
-![UQ_logo.png](www/images/UQ_logo.png){width=30%}
+<img src="www/images/www/images/UQ_logo.png" width="25" height="25"> 
 <br>
 <br>
 IMPIT-a was created at the School of Mathematics and Physics of the [University of Queensland](https://www.uq.edu.au/) by [Manuela Mendiolar](https://smp.uq.edu.au/profile/8282/manuela-mendiolar), PhD Student.

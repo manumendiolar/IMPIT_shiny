@@ -240,9 +240,9 @@ ui <- dashboardPage(
                 fluidRow(column(4, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
                 fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
                 br(),
-                br(),
-                actionButton("run_button_epi", "Submit", icon=icon("play"))
-                )
+                br()
+                ),
+              actionButton("run_button_epi", "Submit", icon=icon("play"))
               ),
             # Time units
             column(width = 3,

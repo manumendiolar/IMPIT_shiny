@@ -40,7 +40,6 @@ choices_days <- as.character(1:31)
 choices_months <- c("January","February","March","April","May","June","July","August","September","October","November","December") 
 
 
-
 # Define server for app
 server <- function(input, output, session) {
   
@@ -73,25 +72,14 @@ server <- function(input, output, session) {
   # Import environmental data 
   data_input <- eventReactive(input$csv_input,
     {
-      if (is.null(input$csv_input)) retunr(NULL)
+      if (is.null(input$csv_input)) return(NULL)
       
       inFile <- input$csv_input
       read.csv(inFile$datapath)
     }
   )
   
-  # 
-  # # update time and env variables
-  # observeEvent(data_input(),{
-  #   choices <- c("Not selected", names(data_input()))
-  #   updateSelectInput(inputId = "time_var", choices = choices)
-  #   updateSelectInput(inputId = "env_var", choices = choices)
-  #   
-  # })
-  # time_var <- eventReactive(input$run_button_data, input$time_var)
-  # env_var <- eventReactive(input$run_button_data, input$env_var)
-  # 
-  
+
   # Environmental data: table
   output$contents_data <- DT::renderDataTable({ 
     DT::datatable(data_input(),
@@ -134,7 +122,7 @@ server <- function(input, output, session) {
   
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi,{
-    
+  
    if (input$choice_epifile == '1'){
       
       # check for up or dwn episodes
@@ -147,25 +135,32 @@ server <- function(input, output, session) {
       # compute episodes/update if necessary 
       state$episodes <- mydetect_event(data_input(), thres_above, input$thres, input$duration_min)
       
-    } else {
+      state$choices_int <- c("intensity_mean","intensity_median","intensity_min","intensity_max","intensity_log")
+    } 
+    
+    if (input$choice_epifile == "2"){ 
       
       # load episode list if already available
-      epifile_input <- eventreactive(input$epifile_input,
-        {
-          inFile <- input$epifile_input
-          ext <- tools::file_ext(inFile$datapath)
-          validate(need(ext %in% c("csv"), "Please upload a csv file"))
-          
-          if (ext == "csv") {
-            read.csv(inFile$datapath, header=T, stringsAsFactors=T)
-          } else {
-            print("This doesn't work for this file extention...")
-          }
-        }
+      data_epi <- eventReactive(input$epifile_input,
+         {
+           if (is.null(input$epifile_input))  return(NULL)
+           inFile <- input$epifile_input
+           read.csv(inFile$datapath)
+         }
       )
       
-      state$episodes <- epifile_input()
+      state$episodes <- data_epi()
+      
+      # Let's update intensity functions choices
+      state$choices_int <- grep("intensity_", colnames(state$episodes), value = T)
+      new_choices_int <- str_remove(state$choices_int, "intensity_")
+      updateSelectInput(session, "choice_intensity", 
+                        label = "Intensity", 
+                        choices =  new_choices_int,
+                        selected = head(new_choices_int, 1)
+                        )
     }
+    
     
     # check for timing focus
     if (input$choice_timfoc == '1'){
@@ -195,10 +190,7 @@ server <- function(input, output, session) {
       # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
-    } else {
-      # keep the same
-      state$episodes <- state$episodes
-    }
+    } 
   })
   
   
@@ -213,8 +205,7 @@ server <- function(input, output, session) {
                     searching=T,
                     search = list(regex=T, caseInsensitive=T)
                     )
-                  ) %>%
-    formatRound(c(6:10), 2)
+                  ) #%>% formatRound(purrr::map_lgl(.$x$data[ ,5:dim(state$episodes)[2]], is.numeric), digits = 2)#formatRound(c(6:10), 2)
     })
   
   
@@ -233,14 +224,13 @@ server <- function(input, output, session) {
   output$plot_epi <- renderPlotly({
     
     x <- state$episodes$date_start
-    y <- state$episodes$intensity_mean
+    y <- as.numeric(state$episodes[ , as.character(state$choices_int[1])])
     df <- data.frame(x,y)
     df$x <- as.Date(df$x)
     d1 <- as.Date(head(df$x,1))
     d2 <- as.Date(tail(df$x,1))
-      
     
-    if (input$choice_timfoc == '1'){
+    if (input$choice_timfoc == "1"){
       df$z <- state$episodes$overlap
       df$z <- as.factor(df$z)
       
@@ -248,14 +238,15 @@ server <- function(input, output, session) {
       lolliEp <- ggplot(df, aes(x, y, col = z)) +
         geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
         geom_point(size=2) +
-        labs(x="date_start", y="intensity_mean", title="Lollipop chart", col="Overlap") +
+        labs(x="date_start", y=state$choices_int[1], title="Lollipop chart", col="Overlap") +
         scale_color_manual(values = c("orange","blue"), labels=c("no","yes"))
+      
       } else {
         
         lolliEp <- ggplot(df, aes(x, y)) +
           geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
           geom_point(color="orange", size=2) +
-          labs(x="date_start", y="intensity_mean", title="Lollipop chart") 
+          labs(x="date_start", y=state$choices_int[1], title="Lollipop chart") 
       }
     
     state$plot_epi <- lolliEp +
@@ -311,7 +302,7 @@ server <- function(input, output, session) {
       state$choice_timfoc <- TRUE
       state$d <- input$d_w3
       if (state$unit_var == 'days') {
-        state$tau <- as.Date(paste0("2000","/",state$period_timfoc[2])) - as.Date(paste0("2000","/",state$period_timfoc[1]))
+        state$tau <- as.Date(paste0("2000","-",state$period_timfoc[2])) - as.Date(paste0("2000","-",state$period_timfoc[1]))
       } else {
         if (state$unit_var == 'months'){
           state$tau <- as.integer(input$end_timfoc_month) - as.integer(input$start_timfoc_month) + 1

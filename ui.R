@@ -318,8 +318,14 @@ ui <- dashboardPage(
               icon = icon("user-cog"), 
               solidHeader=TRUE,
               collapsible = T,
-              
-              numericInput("m", label = "Memory ", min=1, max=40, value=1),
+              helper(
+                numericInput("m", label = "Memory ", min=1, max=40, value=1),
+                icon = "question",
+                size = "m",
+                title = "Set up for constructing IMPIT index",
+                type = "markdown",
+                content = "set_up_index_help"
+              ),
               selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
               h5(strong("Weights")),
               sliderInput('a_w1', label = 'Persistence (a)', min=1, max=5, value=2),

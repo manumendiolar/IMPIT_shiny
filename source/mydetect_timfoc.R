@@ -31,8 +31,8 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
   episodes$overlap <- FALSE
   episodes$overlap_days <- 0
   episodes$overlap_months <- 0
-  episodes$overlap_date_start <- 0
-  episodes$overlap_date_end <- 0
+  #episodes$overlap_date_start <- 0
+  #episodes$overlap_date_end <- 0
   
   for (ii in 1:dim(episodes)[1]){
     
@@ -84,19 +84,19 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
       episodes$overlap[ii] <- overlap
       episodes$overlap_days[ii] <- overlap_duration_days
       episodes$overlap_months[ii] <- overlap_duration_months
-      episodes$overlap_date_start[ii] <- min(dates_overlap[ ,1])
-      episodes$overlap_date_end[ii] <- max(dates_overlap[ ,2])
+      #episodes$overlap_date_start[ii] <- min(dates_overlap[ ,1])
+      #episodes$overlap_date_end[ii] <- max(dates_overlap[ ,2])
     }
   }
   
   # columns we want
-  col_names <- c("event_no","duration",
-                 "date_start","date_peak","date_end",
-                 "intensity_mean","intensity_median","intensity_max","intensity_min","intensity_log",
-                 "overlap","overlap_days","overlap_months")
+  #col_names <- c("event_no","duration",
+  #               "date_start","date_peak","date_end",
+  #               "intensity_mean","intensity_median","intensity_max","intensity_min","intensity_log",
+  #               "overlap","overlap_days","overlap_months")
   
   # keep only columns we need
-  episodes <- episodes[ ,col_names]
+  #episodes <- episodes[ ,col_names]
   
   return(episodes)
 }

@@ -222,20 +222,27 @@ ui <- dashboardPage(
                   size = "l",
                   title = "Episodes data format", 
                   type = "markdown", 
-                  content = "source_epi_help"
+                  content = "source_epi_upload_help"
                   )
                 ),
               conditionalPanel(
                 condition = "input.choice_epifile == '1'",
-                checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold:", 
-                                   choices=list("up-episodes?"=1, "down-episodes?"=2), 
-                                   selected = NULL),
+                helper(
+                  checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold:", 
+                                     choices=list("up-episodes?"=1, "down-episodes?"=2), 
+                                     selected = NULL),
+                  icon = "exclamation",
+                  size = "l",
+                  title = "Episodes file generated format",
+                  type = "markdown",
+                  content = "source_epi_generate_help"
+                  ),
                 fluidRow(column(4, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
-                fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf)))
-                ),
+                fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
                 br(),
                 br(),
                 actionButton("run_button_epi", "Submit", icon=icon("play"))
+                )
               ),
             # Time units
             column(width = 3,
@@ -491,7 +498,7 @@ ui <- dashboardPage(
         
       )
     )
-  )
-)
+  ) #close dashboardBody
+) #close dashboardPage
 
 

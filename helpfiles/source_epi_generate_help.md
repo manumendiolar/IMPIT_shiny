@@ -1,14 +1,11 @@
-Source data should be stored as a `CSV` format with 10 columns and header.
+To generate episodes you need to take into account the following: 
 
-* The first column is a number for the event indicator (event_no).
-* The second column is for the duration of the event (units according to user's choice).
-* The third column is for the date when the event starts (date_start, format YYYY-MM-DD).
-* The fourth column is for the date when the event peaks its maximum value (date_peak, format YYYY-MM-DD).
-* The fifth column is for the date when the event ends (date_end, format YYYY-MM-DD).
-* The sixth column is for the intensity mean value (intensity_mean, should be a numeric value).
+* First, choose if you want to generate episodes above or below certain threshold. If above then tick up-episode checkbox. If below tick down-episodes checkbox.
+* Second, enter a value for the threshold.
+* Thirdly, enter a value for the minimum duration for each episode. 
+* Finally, check yes or no for Timing to be accounted. If you tick yes you'll have to provide a day and month for both start and end of the special season of Timing.  
 
-
-* Please note that missing values are not allowed and space in header's names is not allowed either (e.g., use 'soi_episodes' instead of 'soi episodes').
+* This app generates a list of episodes with the following format:
 
 ***
 CSV Format:
@@ -24,9 +21,20 @@ $$
 \\end{array}
 $$
 
+If Timing yes is selected, three columns will be added to the table above:   
 
+$$
+\\scriptsize
+\\begin{array}{ccccccccccccc} 
+  \\hline 
+  \\text{event_no} & \\text{duration} & \\text{date_start} & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\text{overlap} & \\text{overlap_days} & \\text{overlap_months}\\\\ 
+  \\hline 
+  \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot & \\cdot \\\\ 
+  \\hline 
+\\end{array}
+$$
 *** 
-An example:
+An example (without Timing):
 
 $$
 \\scriptsize

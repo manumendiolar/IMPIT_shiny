@@ -166,6 +166,7 @@ ui <- dashboardPage(
                              placeholder = "ex: soi_monthly.csv"),
                    icon = "question", 
                    size = "m",
+                   #colour = "black",
                    title = "Data format", 
                    type = "markdown", 
                    content = "source_data_help")#,
@@ -218,7 +219,7 @@ ui <- dashboardPage(
                             placeholder = "ex: soi_episodes.csv"
                             ),
                   icon = "question", 
-                  size = "m",
+                  size = "l",
                   title = "Episodes data format", 
                   type = "markdown", 
                   content = "source_epi_help"

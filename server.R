@@ -50,7 +50,8 @@ server <- function(input, output, session) {
   # uses 'helpfiles' directory by default
   # in this example, we use the withMathJax parameter to render formulae
   observe_helpers(session = getDefaultReactiveDomain(),
-                  help_dir = paste0(IMPIT_base,"helpfiles"), withMathJax = TRUE)
+                  help_dir = paste0(IMPIT_base,"helpfiles"), 
+                  withMathJax = TRUE)
   
   
   

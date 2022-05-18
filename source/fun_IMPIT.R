@@ -66,8 +66,8 @@ fun_IMPIT <- function(episodes, unit, yrs, m, a, b, c, d, intensity, time_focus=
     period <- seq(yrs[tt]-(m-1), yrs[tt], 1) 
     
     # keep start and end date of the period
-    date_start <- as.Date(paste0(head(period,1),"/01/01"))
-    date_end <- as.Date(paste0(tail(period,1),"/12/31"))
+    date_start <- as.Date(paste0(head(period,1),"-01-01"))
+    date_end <- as.Date(paste0(tail(period,1),"-12-31"))
     
     # vector of dates of the period
     dates <- seq(date_start, date_end, by=unit) 

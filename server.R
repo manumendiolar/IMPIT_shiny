@@ -540,14 +540,11 @@ server <- function(input, output, session) {
     mod.df = mod.df[order(mod.df$x),]
 
     pp <- plot_ly(x=xx, y=yy)
-    pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
-    pp <- add_ribbons(pp, x=mod.df$x, ymin=mod.df$lb, ymax=mod.df$ub, name="95% CI", line=list(color="grey", opacity=0.4, width=0))
+    pp <- add_ribbons(pp, x=mod.df$x, ymin=mod.df$lb, ymax=mod.df$ub, name="95% CI", 
+                      line = list(color="grey", opacity=0.4, width=0),
+                      fillcolor = 'rgba(7, 164, 181, 0.2)')
     pp <- add_lines(pp, x=xx, y=mod.pred$fit, name="Linear Regression", line=list(color=col.reg, width=2))
-    pp <- pp %>% 
-      layout(xaxis = list(title=xx_name, titlefont=list(size=12)),
-             yaxis = list(title=paste0("log (",yy_name[2],")"), titlefont=list(size=12)))
-    #pp = layout(pp, title="Outcome")
-    
+    pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
     pp
     
   })

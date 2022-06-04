@@ -52,7 +52,8 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
     for (jj in 1:length(dates)){
       
       # add year info to Tdates
-      Tdates <- paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-") 
+      Tdates <- as.Date(paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-"), format = "%Y-%m-%d") 
+      #Tdates <- paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-")
       
       # get overlap info
       out <- fun_overlap(dates[[jj]], Tdates)

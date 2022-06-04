@@ -22,8 +22,10 @@ fun_overlap <- function(Edates, Tdates){
   
   overlap <- date_start_overlap <= date_end_overlap
   
-  date_start_overlap <- ifelse(overlap, date_start_overlap, NA)
-  date_end_overlap <- ifelse(overlap, date_end_overlap, NA)
+  if (!overlap){
+    date_start_overlap <- NA
+    date_end_overlap <- NA
+  }
   
   out <- list(overlap = overlap, 
               date_start_overlap = date_start_overlap,

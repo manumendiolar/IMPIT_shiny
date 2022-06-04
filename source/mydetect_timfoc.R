@@ -59,7 +59,6 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
       out <- fun_overlap(dates[[jj]], Tdates)
       
       
-      
       if (out$overlap){
         
         # sufficient if entering once
@@ -74,7 +73,7 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
                                                                         1))
         
         # save dates when overlap
-        dates_overlap <- rbind(dates_overlap, c(out$date_start_overlap, out$date_end_overlap) ) 
+        #dates_overlap <- rbind(dates_overlap, c(out$date_start_overlap, out$date_end_overlap) ) 
 
       }
       

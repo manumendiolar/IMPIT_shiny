@@ -22,7 +22,7 @@ fun_overlap <- function(Edates, Tdates){
   
   overlap <- date_start_overlap <= date_end_overlap
   
-  if (!overlap){
+  if (overlap == FALSE ){
     date_start_overlap <- NA
     date_end_overlap <- NA
   }

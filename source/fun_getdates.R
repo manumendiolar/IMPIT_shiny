@@ -24,9 +24,11 @@ fun_getdates <- function(Edates){
     
     for (ii in 1:length(years)){
      
-      begin <- paste0(years[[ii]],"-01-01" )
-     
-      end <- paste0(years[ii],"-12-31")
+      begin <- as.Date(paste0(years[ii],"-01-01"), format = "%Y-%m-%d")  
+      #begin <- paste0(years[ii],"-01-01" )
+      
+      end <- as.Date(paste0(years[ii],"-12-31"), format = "%Y-%m-%d")
+      #end <- paste0(years[ii],"-12-31")
      
       dates[[ii]] <- c(begin, end)
     }

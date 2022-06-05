@@ -26,7 +26,12 @@
 
 
 mydetect_timfoc <- function(episodes, timfoc_dates){
-
+  
+  # arrange format
+  episodes$date_start <- as.Date(episodes$date_start, format = "%Y-%m-%d")
+  episodes$date_peak <- as.Date(episodes$date_peak, format = "%Y-%m-%d")
+  episodes$date_end <- as.Date(episodes$date_end, format = "%Y-%m-%d")
+  
   # pre-allocate
   episodes$overlap <- FALSE
   episodes$overlap_days <- 0

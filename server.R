@@ -86,7 +86,7 @@ server <- function(input, output, session) {
                   options = list(
                     pageLength=10,
                     lengthMenu=c(5,10,30,50), 
-                    autoWidth=T,  
+                    autoWidth=F,  
                     searching=T,
                     search=list(regex=T, caseInsensitive=T)
                     ),

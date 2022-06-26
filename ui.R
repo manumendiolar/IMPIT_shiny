@@ -142,7 +142,7 @@ ui <- dashboardPage(
             collapsible = T,
             img(src = "images/IMPIT_roadmap.svg", style="width: 75%")
           )
-         )
+        )
       ),
       
       
@@ -169,7 +169,10 @@ ui <- dashboardPage(
                    #colour = "black",
                    title = "Data format", 
                    type = "markdown", 
-                   content = "source_data_help")#,
+                   content = "source_data_help"),
+            br(),
+            br(),
+            div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")
             ),
           
           # Check data 
@@ -180,13 +183,10 @@ ui <- dashboardPage(
             icon = icon("file-import"),
             width = 8,
             height = "500px",
-            tabsetPanel(
-              tabPanel("Table", div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")),
-              tabPanel("Plot", plotlyOutput("envPlot", height = 500))
-              )
+            plotlyOutput("envPlot", height = 700)
             )
         )
-        ),
+      ),
         
 
       
@@ -328,12 +328,12 @@ ui <- dashboardPage(
               ),
               selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
               h5(strong("Weights")),
-              sliderInput('a_w1', label = 'Persistence (a)', min=1, max=5, value=2),
-              sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0),
+              sliderInput('a_w1', label = 'Persistence (a)', min=0, max=5, value=2),
+              sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0, step = 0.01),
               sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0),
               conditionalPanel(
                 condition = "input.choice_timfoc == '1'",
-                numericInput("d_w3", label = "Timing (d)", min=0, max=15, value=1)
+                numericInput("d_w3", label = "Timing (d)", min=0.01, max=15, value=1)
               ),
               br(),
               dateRangeInput("daterange_index", "Index period (yyyy-mm-dd):", start="1900-01-01", end="2020-01-01"),

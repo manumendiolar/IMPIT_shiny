@@ -397,7 +397,7 @@ server <- function(input, output, session) {
   output$contents_app_index <- DT::renderDataTable({
     DT::datatable(data_index(),
                   options = list(
-                    pageLength=10,
+                    pageLength=5,
                     autoWidth=T,
                     searching=T,
                     search=list(regex=T, caseInsensitive=T)
@@ -429,7 +429,12 @@ server <- function(input, output, session) {
     # p <- add_lines(p, x=xx, y=predict(m2), line=line.fmt, name="Quadratic")
     # p <- add_lines(p, x=xx, y=exp(coef(m3)[1])*(xx^coef(m3)[2]), line=line.fmt, name="Exponential")
     # p
-    # 
+   
+    
+    # Smoothing splines
+    # Splines consist of a piece-wise polynomial with pieces defined by a sequence of knots where the pieces join smoothly. 
+    # A smoothing splines is estimated by minimizing a criterion containing a penalty for both goodness of fit, and smoothness.
+    # The trade-off between the two is controlled by the smoothing parameter lambda, which is typically chosen by cross-validation.
     sp.base = smooth.spline(xx, yy)
     sp.cr = gam(yy ~ s(xx, bs="cr"))
     sp.gam = gam(yy ~ s(xx))
@@ -440,13 +445,33 @@ server <- function(input, output, session) {
     sp.df = sp.df[order(sp.df$x),]
     
     pp = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
-    pp = add_lines(pp, x=xx, y=sp.pred$fit, name="GAM", line=list(color="black", width=1.5))
+    pp = add_lines(pp, x=xx, y=sp.pred$fit, name="GAM", line=list(color="black", width=1))
     pp = add_ribbons(pp, x=sp.df$x, ymin=sp.df$lb, ymax=sp.df$ub, name="GAM 95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
-    #pp = add_lines(pp, x=xx, y=predict(sp.base)$y, name="smooth.spline", line=list(color="orange", width=2))
-    #pp = layout(pp, title="Smoothing splines")
-    pp
-    # 
+    #pp
+     
     
+    # LOESS
+    # LOESS (Locally Estimated Scatterplot Smoother) combines local regression 
+    # with kernels by using locally weighted polynomial regression (by default, 
+    # quadratic regression with tri-cubic weights). It also allows estimation of
+    # approximate confidence intervals. However, it is important to note that 
+    # unlike supsmu, smooth.spline or gam, loess does not use cross-validation. 
+    # By default, the span is set to 0.75; that is, the estimated smooth at each
+    # target value consists of a local regression constructed using 75% of the 
+    # data points closest to the target value. This span is fairly large and 
+    # results in estimated values that are smoother than those from other methods.
+    ll.smooth = loess(yy ~ xx, span=0.75)
+    ll.pred = predict(ll.smooth, se = TRUE)
+    ll.df = data.frame(x=ll.smooth$x, fit=ll.pred$fit,
+                       lb = ll.pred$fit - (1.96 * ll.pred$se),
+                       ub = ll.pred$fit + (1.96 * ll.pred$se))
+    ll.df = ll.df[order(ll.df$xx),]
+    
+    p.llci = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
+    p.llci = add_lines(p.llci, x=xx, y=ll.pred$fit, name="Mean", line=list(color="black", width=1))
+    p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
+    p.llci = layout(p.llci, title = "LOESS with confidence intervals")
+    p.llci
     
   })
   
@@ -467,7 +492,7 @@ server <- function(input, output, session) {
   output$contents_app_resp <- DT::renderDataTable({
     DT::datatable(data_resp(),
                   options = list(
-                    pageLength=10,
+                    pageLength=5,
                     autoWidth=T,
                     searching=T,
                     search=list(regex=T, caseInsensitive=T)
@@ -563,6 +588,7 @@ server <- function(input, output, session) {
                       fillcolor = 'rgba(7, 164, 181, 0.2)')
     pp <- add_lines(pp, x=xx, y=mod.pred$fit, name="Linear Regression", line=list(color=col.reg, width=2))
     pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
+    pp <- layout(pp, xaxis = list(title = xx_name), yaxis = list(title = yy_name))
     pp
     
   })
@@ -577,6 +603,22 @@ server <- function(input, output, session) {
       ggsave(file, plot = state$plot_corr_application, width = 14, height = 14, units = "cm", dpi = 300)
     }
   )
+  
+  # Summary of regression analysis
+  output$summary <- renderPrint({
+    
+    xx <- data_index()[ ,2]
+    yy <- data_resp()[ ,2]
+    yy <- log(yy)
+    
+    xx_name <- colnames(data_index())[2]
+    yy_name <- colnames(data_resp())[2]
+    
+    # linear model
+    mod <- lm(yy ~ xx)
+    summary(mod)
+    
+  })
 
   
   

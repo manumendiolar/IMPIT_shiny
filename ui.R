@@ -398,7 +398,10 @@ ui <- dashboardPage(
                    size = "m",
                    title = "Data format",
                    type = "markdown",
-                   content = "source_data_impit_help")
+                   content = "source_data_impit_help"),
+            br(),
+            br(),
+            div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
             #dateRangeInput("daterange_app_index", "Date range (yyyy-mm-dd):", start="1950-01-01", end="2022-01-01"),
             #actionButton("run_button_app_index", "Submit", icon=icon("play"))
           ),
@@ -413,12 +416,11 @@ ui <- dashboardPage(
             width = 8,
             height = "500px",
             tabsetPanel(
-              tabPanel("Table", div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")),
-              tabPanel("Plot",
-                fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
-                fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
-                )
-              )
+             tabPanel("Plot",
+               fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
+               fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
+               )
+             )
             )
           ),
         
@@ -442,7 +444,8 @@ ui <- dashboardPage(
                    size = "m",
                    title = "Data format",
                    type = "markdown",
-                   content = "source_data_resp_help")#,
+                   content = "source_data_resp_help"),
+            div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")
             #dateRangeInput("daterange_app_resp", "Choose date range to explore association:", start="1950-01-01", end="2022-01-01"),
             #actionButton("run_button_app_resp", "Submit", icon=icon("play"))
             ),
@@ -456,7 +459,7 @@ ui <- dashboardPage(
             width = 8,
             height = "500px",
             tabsetPanel(
-              tabPanel("Table", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
+              #tabPanel("Table", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
               tabPanel("Plot",
                        fluidRow(column(10, plotlyOutput("plot_app_resp", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
@@ -464,7 +467,9 @@ ui <- dashboardPage(
               tabPanel("Correlation analysis",
                        fluidRow(column(10, plotlyOutput("plot_corr_application", width="100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
-              )
+              ),
+              tabPanel("Summary",
+                       verbatimTextOutput("summary"))
             )
           )
         )

@@ -191,7 +191,18 @@ server <- function(input, output, session) {
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
     } 
-  })
+    
+    
+    # update index range dates (index period)
+    aux <- as.Date(state$episodes$date_start[1])
+    state$yr_first_epi <- lubridate::year(aux)
+    state$yr_first_epi <- as.numeric(state$yr_first_epi)
+    observe({
+      updateDateRangeInput(session, "daterange_index", start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), end = "2020-01-01")
+    })
+
+    })
+  
   
   
   # Episodes: table print
@@ -266,7 +277,7 @@ server <- function(input, output, session) {
     })
   
   
-  # Episdes: plot download .png
+  # Episodes: plot download .png
   output$downloadPlot_epi <- downloadHandler(
     filename = function(){
       paste0("Episodes_LolliChart",'.png')
@@ -276,22 +287,28 @@ server <- function(input, output, session) {
     }
   )
   
-  
-  
-  
+
+
   # INDEX TAB ---------------------------------------------------------------
-  
+
   observeEvent(input$run_button_index,{
+    
+    # observe({
+    #   updateDateRangeInput(session, "daterange_index", 
+    #                        start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), 
+    #                        end = "2020-01-01")
+    # })
     
     # keep unit choice
     state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
+    
     # keep intensity choice
     state$intensity <- input$choice_intensity
+    
     # build vector of dates (index period)
     yr_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
     yr_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
     state$yrs_index <- seq(yr_index_start, yr_index_end, 1)
-    
     
     # compute d and tau (total units of special timing)
     state$d <- NULL
@@ -571,24 +588,34 @@ server <- function(input, output, session) {
     # state$plot_corr_application
     
     
+    # save corr and p-value info
+    COR = c(res.LR$corr, res.LR$pVal)
     
-    data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
-    line.fmt = list(dash="solid", width = 1.5, color=NULL)
     
+    # build plot
     mod.pred = predict(mod, type="response", se.fit=TRUE)
     mod.df = data.frame(x=xx, 
                         y=mod.pred$fit,
                         lb=as.numeric(mod.pred$fit - (1.96 * mod.pred$se.fit)),
                         ub=as.numeric(mod.pred$fit + (1.96 * mod.pred$se.fit)))
     mod.df = mod.df[order(mod.df$x),]
-
+    
     pp <- plot_ly(x=xx, y=yy)
     pp <- add_ribbons(pp, x=mod.df$x, ymin=mod.df$lb, ymax=mod.df$ub, name="95% CI", 
-                      line = list(color="grey", opacity=0.4, width=0),
-                      fillcolor = 'rgba(7, 164, 181, 0.2)')
+                      fillcolor = list(color="rgb(195, 195, 195)", opacity=0.4), 
+                      line = list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
     pp <- add_lines(pp, x=xx, y=mod.pred$fit, name="Linear Regression", line=list(color=col.reg, width=2))
     pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
-    pp <- layout(pp, xaxis = list(title = xx_name), yaxis = list(title = yy_name))
+    pp <- layout(pp, 
+                 xaxis = list(title = xx_name), 
+                 yaxis = list(title = yy_name),
+                 title = list(
+                   text = paste(c("R=","p="), signif(as.numeric(COR,3),3), collapse=" "),
+                   font = list(color="blue", size=11),
+                   y=0.75, x=0.90, 
+                   xanchor='center', yanchor='top'
+                   )
+                 )
     pp
     
   })

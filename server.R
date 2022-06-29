@@ -16,7 +16,7 @@ library(glue)
 library(ggtext)
 library(shinyjs)
 library(plotly)
-
+library(mgcv)
 
 # source
 source("./source/mydetect_event.R")
@@ -424,11 +424,29 @@ server <- function(input, output, session) {
     m3 <- lm(log(yy) ~ log(xx))
     
     
-    p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=data.fmt, name="Data")
-    p <- add_lines(p, x=xx, y=predict(m1), line=line.fmt, name="Linear")
-    p <- add_lines(p, x=xx, y=predict(m2), line=line.fmt, name="Quadratic")
-    p <- add_lines(p, x=xx, y=exp(coef(m3)[1])*(xx^coef(m3)[2]), line=line.fmt, name="Exponential")
-    p
+    # p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=data.fmt, name="Data")
+    # p <- add_lines(p, x=xx, y=predict(m1), line=line.fmt, name="Linear")
+    # p <- add_lines(p, x=xx, y=predict(m2), line=line.fmt, name="Quadratic")
+    # p <- add_lines(p, x=xx, y=exp(coef(m3)[1])*(xx^coef(m3)[2]), line=line.fmt, name="Exponential")
+    # p
+    # 
+    sp.base = smooth.spline(xx, yy)
+    sp.cr = gam(yy ~ s(xx, bs="cr"))
+    sp.gam = gam(yy ~ s(xx))
+    sp.pred = predict(sp.gam, type="response", se.fit=TRUE)
+    sp.df = data.frame(x=sp.gam$model[,2], y=sp.pred$fit,
+                       lb=as.numeric(sp.pred$fit - (1.96 * sp.pred$se.fit)),
+                       ub=as.numeric(sp.pred$fit + (1.96 * sp.pred$se.fit)))
+    sp.df = sp.df[order(sp.df$x),]
+    
+    pp = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
+    pp = add_lines(pp, x=xx, y=sp.pred$fit, name="GAM", line=list(color="black", width=1.5))
+    pp = add_ribbons(pp, x=sp.df$x, ymin=sp.df$lb, ymax=sp.df$ub, name="GAM 95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
+    #pp = add_lines(pp, x=xx, y=predict(sp.base)$y, name="smooth.spline", line=list(color="orange", width=2))
+    #pp = layout(pp, title="Smoothing splines")
+    pp
+    # 
+    
     
   })
   

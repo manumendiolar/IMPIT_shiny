@@ -354,18 +354,23 @@ ui <- dashboardPage(
               icon = icon("tasks"),
               height = "500px",
               solidHeader=T,
-              tabsetPanel(
-                tabPanel("Table",
-                   fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
-                            column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
-                            )
-                   ),
-                tabPanel("Plot", 
-                   fluidRow(column(12, plotlyOutput("plot_index", width = "100%")),
-                            column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
-                            )
-                   )
-                )
+              plotlyOutput("plot_index", width = "100%"),
+              br(),
+              fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+                       column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+                       )
+              # tabsetPanel(
+              #   tabPanel("Table",
+              #      fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+              #               column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+              #               )
+              #      ),
+              #   tabPanel("Plot", 
+              #      fluidRow(column(12, plotlyOutput("plot_index", width = "100%")),
+              #               column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
+              #               )
+              #      )
+              #   )
               )
             )
           )

@@ -140,7 +140,7 @@ ui <- dashboardPage(
             align = "center", 
             solidHeader = F,
             collapsible = T,
-            img(src = "images/IMPIT_roadmap.svg", style="width: 75%")
+            img(src = "images/IMPIT_roadmap.svg", style="width: 65%")
           )
         )
       ),

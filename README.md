@@ -1,5 +1,5 @@
 # `IMPIT-a` <img src="www/images/icon_explore_2.svg" width="25" height="25">
-IMPIT-a is an application that provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. It allows the user to choose between a menu of intensity and relative weights functions. It also offers the possibility to visualize imported data, defined episodes and construced IMPIT indices. 
+Provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. Offers, as well, a suite of tools for index exploration before exporting it for posterior use.  
 <br>
 <br>
 

@@ -1,7 +1,7 @@
-Source data should be stored as a `CSV` format with two columns and header.
+Source data should be stored as a `CSV` format with four columns and header.
 
-* The first column is for the time variable (could be year, month, day, etc.). The format should be YYYY-MM-DD.
-* The second column for the environmental signal.
+* The first three columns are for the year, month and day of the time variable, respectively. 
+* The last column is for the environmental signal.
 * Please note that missing values are not allowed and space in header's names is not allowed either (e.g., use 'soi_monthly' instead of 'soi monthly').
 
 ***
@@ -11,9 +11,9 @@ $$
 \\scriptsize
 \\begin{array}{cc} 
   \\hline 
-  \\text{Time} & \\text{Value} \\\\
+  \\text{Year} & \\text{Month} & \\text{Day} & \\text{Value} \\\\
   \\hline       
-  \\cdot &        \\cdot \\\\ 
+  \\cdot & \\cdot & \\cdot &        \\cdot \\\\ 
   \\hline 
 \\end{array}
 $$
@@ -24,15 +24,15 @@ An example:
 $$
 \\begin{array}{rr}
   \\hline 
-  \\text{Date} & \\text{SOI} \\\\
+  \\text{year} & \\text{month} & \\text{day} & \\text{SOI} \\\\
   \\hline 
-  \\text{01/01/1950} & 5.1 \\\\
+  \\text{1950} & \\text{01} & \\text{01} & 5.1 \\\\
   \\hline 
-  \\text{01/01/1950} & 17.6 \\\\
+  \\text{1950} & \\text{02} & \\text{01} & 17.6 \\\\
   \\hline 
-  \\vdots & \\vdots \\\\
+  \\vdots & \\vdots & \\vdots & \\vdots \\\\
   \\hline 
-  \\text{01/02/2022} & 8.2 \\\\
+  \\text{2022} & \\text{02} &  \\text{01} & 8.2 \\\\
   \\hline 
 \\end{array}
 $$

@@ -91,8 +91,8 @@ server <- function(input, output, session) {
                     search=list(regex=T, caseInsensitive=T)
                     ),
                   rownames = F) %>%
-      formatRound(c(2), 2) %>%
-      formatStyle(columns=c(1:2), 'text-align'='centre')
+      formatRound(c(4), 2) %>%
+      formatStyle(columns=c(1:4), 'text-align'='centre')
   })
   
   
@@ -100,15 +100,19 @@ server <- function(input, output, session) {
   output$envPlot <- renderPlotly({
     
     withProgress(message = 'Creating plot', style = 'notification', value = 0.1, {
-      Sys.sleep(0.5)
+      Sys.sleep(0.25)
       
       data_input_name <- colnames(data_input())
       
       # Set x and y axis and display data in line plot using plotly
-      plot_ly( x = ~as.Date(data_input()[ ,1], format = "%Y-%m-%d"), y = ~data_input()[ ,2]) %>%
+      xx <- as.Date(paste0(data_input()[ ,1],"-",data_input()[ ,2],"-",data_input()[ ,3]), format = "%Y-%m-%d")
+      yy <- data_input()[ ,4]
+      xx_name <- "Date"
+      yy_name <- data_input_name[4]
+      plot_ly( x = ~xx, y = ~yy) %>%
         add_lines() %>% 
-        layout(xaxis = list(title=data_input_name[1],titlefont=list(size=12)),
-               yaxis = list(title=data_input_name[2],titlefont=list(size=12)))
+        layout(xaxis = list(title=xx_name, titlefont=list(size=12)),
+               yaxis = list(title=yy_name, titlefont=list(size=12)))
     }
     )
   }) 

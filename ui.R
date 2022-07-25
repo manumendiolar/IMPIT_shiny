@@ -171,7 +171,6 @@ ui <- dashboardPage(
                    type = "markdown", 
                    content = "source_data_help"),
             br(),
-            br(),
             div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")
             ),
           

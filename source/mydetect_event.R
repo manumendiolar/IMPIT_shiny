@@ -33,8 +33,11 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
 
   
   # prepare data
-  names(dat) <- c("date","EnvSignal")
-  dat <- dat %>%  mutate(date = as.Date(date,"%Y-%m-%d")) # this should be already the format.
+  #names(dat) <- c("date","EnvSignal")
+  #dat <- dat %>%  mutate(date = as.Date(date,"%Y-%m-%d")) # this should be already the format.
+  names(dat) <- c("year","month","day","EnvSignal")
+  dat <- dat %>%  mutate(date = paste0(year,"-",month,"-",day))
+  dat <- dat %>%  mutate(date = as.Date(date,"%Y-%m-%d")) 
   dat <- dat[order(dat$date), ] # order rows according to date
   
   # identify episodes (detect "blocks" of values exceeding thresh)

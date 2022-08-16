@@ -16,8 +16,9 @@ A live version of the app should be running at
 
 The Shiny app can be run locally from within R or R Studio. *The [shiny](https://shiny.rstudio.com/) library must be installed.*
 
+Run the following from an R console:
 ``` r
-# install.packages("shiny")
+if(!require("devtools"))  install.packages("devtools")
 shiny::runGitHub("manumendiolar/IMPIT_shiny")
 ```
 

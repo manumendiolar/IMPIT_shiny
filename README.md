@@ -1,9 +1,11 @@
 # `IMPIT-a` <img src="www/images/icon_explore_2.svg" width="25" height="25">
-Provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. Offers, as well, a suite of tools for index exploration before exporting it for posterior use. IMPIT-a was built in [R](https://www.r-project.org), an open source programming language using the [Shiny package](https://shiny.rstudio.com), a web application framework for R. Users will need to download [R](https://cran.uni-muenster.de/) in order to use IMPIT-a and we suggest the use of [RStudio](https://www.rstudio.com). R is completely free to use. All required code can be found in this github repository.
+Provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. Offers, as well, a suite of tools for index exploration before exporting it for posterior use. 
 
 -----
 
 ## Shiny App
+
+IMPIT-a was built in [R](https://www.r-project.org), an open source programming language using the [Shiny package](https://shiny.rstudio.com), a web application framework for R. Users will need to download [R](https://cran.uni-muenster.de/) in order to use IMPIT-a and we suggest the use of [RStudio](https://www.rstudio.com). R is completely free to use. 
 
 The code located is located in [ShinyApp](/https://github.com/manumendiolar/IMPIT_shiny).
 

@@ -5,7 +5,7 @@ This provides a definition of episodes based on the threshold-crossing indices. 
 * Thirdly, enter a value for the minimum duration of episodes (by default it is 1)for each episode. Minimum duration means, minimum consecutive values above or below the threshold.
 * Finally, check yes or no for Timing to be accounted. If you tick yes you'll have to provide a day and month for both start and end of the special season of Timing.  
 
-* This app generates a list of episodes with the following format:
+This app generates a list of episodes with the following format:
 
 ***
 CSV Format:

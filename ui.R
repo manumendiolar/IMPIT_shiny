@@ -208,7 +208,7 @@ ui <- dashboardPage(
             # Generate / Upload episodes 
             column(width = 4,
               checkboxGroupInput("choice_epifile", "You can generate or upload the list of episodes:", 
-                                 choices=list("generate?"=1, "upload?"=2), 
+                                 choices=list("generate? "=1, "upload? "=2), 
                                  selected=NULL),
               conditionalPanel(
                 condition = "input.choice_epifile == '2'",
@@ -227,7 +227,7 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "input.choice_epifile == '1'",
                 helper(
-                  checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold:", 
+                  checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold: ", 
                                      choices=list("up-episodes?"=1, "down-episodes?"=2), 
                                      selected = NULL),
                   icon = "question",

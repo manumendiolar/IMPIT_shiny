@@ -27,11 +27,8 @@ $$
   \\text{year} & \\text{month} & \\text{day} & \\text{SOI} \\\\
   \\hline 
   \\text{1950} & \\text{01} & \\text{01} & 5.1 \\\\
-  \\hline 
   \\text{1950} & \\text{02} & \\text{01} & 17.6 \\\\
-  \\hline 
   \\vdots & \\vdots & \\vdots & \\vdots \\\\
-  \\hline 
   \\text{2022} & \\text{02} &  \\text{01} & 8.2 \\\\
   \\hline 
 \\end{array}

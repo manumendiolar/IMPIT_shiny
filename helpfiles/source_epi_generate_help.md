@@ -1,8 +1,8 @@
-To generate episodes you need to take into account the following: 
+This provides a definition of episodes based on the threshold-crossing indices. To start generating episodes you need to:
 
-* First, choose if you want to generate episodes above or below certain threshold. If above then tick up-episode checkbox. If below tick down-episodes checkbox.
+* First, choose if you want to generate episodes above or below certain threshold. If above, tick up-episode checkbox. If below, tick down-episodes checkbox.
 * Second, enter a value for the threshold.
-* Thirdly, enter a value for the minimum duration for each episode. 
+* Thirdly, enter a value for the minimum duration of episodes (by default it is 1)for each episode. Minimum duration means, minimum consecutive values above or below the threshold.
 * Finally, check yes or no for Timing to be accounted. If you tick yes you'll have to provide a day and month for both start and end of the special season of Timing.  
 
 * This app generates a list of episodes with the following format:

@@ -230,9 +230,9 @@ ui <- dashboardPage(
                   checkboxGroupInput("choice_thres", "Observations which exceed, or fall below specified threshold:", 
                                      choices=list("up-episodes?"=1, "down-episodes?"=2), 
                                      selected = NULL),
-                  icon = "exclamation",
+                  icon = "question",
                   size = "l",
-                  title = "Episodes file generated format",
+                  title = "Format of generated episodes file",
                   type = "markdown",
                   content = "source_epi_generate_help"
                   ),

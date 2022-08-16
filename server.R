@@ -220,7 +220,9 @@ server <- function(input, output, session) {
                     searching=T,
                     search = list(regex=T, caseInsensitive=T)
                     )
-                  ) #%>% formatRound(purrr::map_lgl(.$x$data[ ,5:dim(state$episodes)[2]], is.numeric), digits = 2)#formatRound(c(6:10), 2)
+                  ) %>% 
+      formatRound(c(6,7,8,9,10), 2) %>% 
+      formatStyle(columns=c(1:4), 'text-align'='centre') #%>% formatRound(purrr::map_lgl(.$x$data[ ,5:dim(state$episodes)[2]], is.numeric), digits = 2)#formatRound(c(6:10), 2)
     })
   
   

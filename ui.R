@@ -327,9 +327,9 @@ ui <- dashboardPage(
               ),
               selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
               h5(strong("Weights")),
-              sliderInput('a_w1', label = 'Persistence (a)', min=0, max=5, value=2),
+              sliderInput('a_w1', label = 'Persistence (a)', min=0, max=5, value=0, step = 0.01),
               sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0, step = 0.01),
-              sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0),
+              sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0, step = 0.01),
               conditionalPanel(
                 condition = "input.choice_timfoc == '1'",
                 numericInput("d_w3", label = "Timing (d)", min=0.01, max=15, value=1)

@@ -1,13 +1,13 @@
 # `IMPIT-a` <img src="www/images/icon_explore_2.svg" width="25" height="25">
-Provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. Offers, as well, a suite of tools for index exploration before exporting it for posterior use.  
+Provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. Offers, as well, a suite of tools for index exploration before exporting it for posterior use. IMPIT-a was built in [R](https://www.r-project.org), an open source programming language using the [Shiny package](https://shiny.rstudio.com), a web application framework for R. Users will need to download [R](https://cran.uni-muenster.de/) in order to use IMPIT-a and we suggest the use of [RStudio](https://www.rstudio.com). R is completely free to use. All required code can be found in this github repository.
 
+-----
 
-# Prerequisites for using IMPIT-a
-IMPIT-a was built in [R](https://www.r-project.org), an open source programming language using the [Shiny package](https://shiny.rstudio.com), a web application framework for R. Users will need to download [R](https://cran.uni-muenster.de/) in order to use IMPIT-a and we suggest the use of [RStudio](https://www.rstudio.com). R is completely free to use. All required code can be found in this github repository.
+## Shiny App
 
-# Shiny App
+The code located is located in [ShinyApp](/https://github.com/manumendiolar/IMPIT_shiny).
 
-The code located is located in [ShinyApp](/https://github.com/manumendiolar/IMPIT_shiny). A live version of the app should be running at
+A live version of the app should be running at
 <https://manumendiolar.shinyapps.io/impit_shiny/?_ga=2.87453400.1164059912.1657767117-1978399315.1647491284>
 
 ### Run Locally
@@ -23,31 +23,37 @@ shiny::runGitHub("manumendiolar/IMPIT_shiny")
 
 The app also relies on the following packages,
 [`shinydashboard`](https://dplyr.tidyverse.org/),
+[`shinydashboardPlus`](https://cran.r-project.org/web/packages/XML/index.html),
+[`shinyFiles`](https://cran.r-project.org/web/packages/rvest/),
+[`shinyhelper`](https://cran.r-project.org/web/packages/rvest/),
 [`dashboardthemes`](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html),
-[`shinydashboardPlus`](https://cran.r-project.org/web/packages/XML/index.html), and
-[`shinyFiles`](https://cran.r-project.org/web/packages/rvest/).
-[`shinyhelper`](https://cran.r-project.org/web/packages/rvest/).
-[`tidyverse`](https://cran.r-project.org/web/packages/rvest/).
-[`DT`](https://cran.r-project.org/web/packages/rvest/).
+[`tidyverse`](https://cran.r-project.org/web/packages/rvest/),
+[`DT`](https://cran.r-project.org/web/packages/rvest/) and
 [`plotly`](https://cran.r-project.org/web/packages/rvest/).
 
-library(shinydashboard) # which version of this 
-library(dashboardthemes)
-library(shinydashboardPlus)
-library(shinyFiles)
-library(shinyhelper)
-library(tidyverse)
-library(DT)
-library(plotly)
 
 To install these packages:
 ``` r
-# install.packages("shiny")
-shiny::runGitHub("manumendiolar/IMPIT_shiny")
+# Run it in R
+get.packages <- function (){
+
+  pkglist = c("shinydashboard", "shinydashboardPlus", "shinyFiles", "DT",
+              "shinyhelper", "dashboardthemes", "tidyverse", "plotly")
+
+  inst.pkgs = rownames(installed.packages())
+
+  newpkgs <- pkglist[!pkglist %in% inst.pkgs]
+
+  if (length(newpkgs) > 0) {
+    do.call("install.packages", list(pkglist))
+  }
+}
+
+get.packages()
 ```
 -----
 
-## R Package
+<!--## R Package
 
 The code located in [Rlib](/Rlib) contains an R package named
 `dublinRTPI`. This can be installed using the `devtools` package.
@@ -58,7 +64,7 @@ package.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("aboland/DublinRTPI", subdir = "Rlib")
+devtools::install_github("manumendiolar/IMPIT_shiny", subdir = "Rlib")
 
  # Get info about bus stop number 334
 dublinRTPI::db_info(334)

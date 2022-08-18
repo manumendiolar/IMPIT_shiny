@@ -10,7 +10,7 @@ IMPIT-a was built in [R](https://www.r-project.org), an open source programming 
 The code located is located in [ShinyApp](/https://github.com/manumendiolar/IMPIT_shiny).
 
 A live version of the app should be running at
-<https://manumendiolar.shinyapps.io/impit_shiny/?_ga=2.87453400.1164059912.1657767117-1978399315.1647491284>
+<https://manumendiolar.shinyapps.io/impit_shiny/>
 
 ### Run Locally
 

@@ -518,8 +518,13 @@ ui <- dashboardPage(
             width = 12,
             title = "Rsession",
             collapsible = T,
+<<<<<<< HEAD
             solidHeader = F
             
+=======
+            solidHeader = F,
+            verbatimTextOutput("Rsession")
+>>>>>>> 211b3892173983bda208a4e6e030b75de3675af7
             )
         )
         

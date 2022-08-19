@@ -654,9 +654,11 @@ server <- function(input, output, session) {
   })
 
   
+  # APPLICATION TAB ---------------------------------------------------------
   
-  
-  
+  output$Rsession <- renderPrint(
+    print(sessionInfo())
+  )
 }
 
 #shinyApp(ui, server)

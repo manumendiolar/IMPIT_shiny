@@ -486,13 +486,24 @@ ui <- dashboardPage(
         tabName = "about",
         h4("Created with R Shiny"),
         br(),
-        "2022 March",
-        
+        "2022 August",
+        br(),
+        br(),
         fluidRow(
           box(
             width = 12,
             title = "About us",
-            solidHeader = F
+            collapsible = T,
+            solidHeader = F,
+            h5(strong("Contact")),
+            h5("IMPIT-a is created and mantained by Manuela Mendiolar. Bugs reports and features requests can be communicated in several ways:"),
+            h5("* Github: https://github.com/manumendiolar/IMPIT_shiny/issues"),
+            h5("* Email: m.mendiolar@uq.edu.au"),
+            br(),
+            h5(strong("Source")),
+            h5("Source code is available at https://github.com/manumendiolar/IMPIT_shiny/")
+            # ,a("github/manumendiolar", href = "https://github.com/manumendiolar/IMPIT_shiny/")
+           
             # userDescription(
             #   title = "Manuela Mendiolar",
             #   subtitle = "lead Developer",
@@ -506,6 +517,7 @@ ui <- dashboardPage(
           box(
             width = 12,
             title = "Rsession",
+            collapsible = T,
             solidHeader = F
             
             )

@@ -659,6 +659,24 @@ server <- function(input, output, session) {
   output$Rsession <- renderPrint(
     print(sessionInfo())
   )
+  
+  # ABOUT TAB ---------------------------------------------------------------
+  url <- a("github/manumendiolar", href="https://github.com/manumendiolar/IMPIT_shiny/")
+  output$githublink <- renderUI({
+    tagList("Source code is available at:", url)
+  })
+  
+  url_gitissues <- a("https://github.com/manumendiolar/IMPIT_shiny/issues", href="https://github.com/manumendiolar/IMPIT_shiny/issues")
+  output$githubissues <- renderUI({
+    tagList("* Github:", url_gitissues)
+  })
+  
+  url_mm_email <- a("m.mendiolar@uq.edu.au",href="m.mendiolar@uq.edu.au")
+  output$mm_email <- renderUI({
+    tagList("* Email:", url_mm_email)
+  })
+  
+  
 }
 
 #shinyApp(ui, server)

@@ -496,14 +496,13 @@ ui <- dashboardPage(
             collapsible = T,
             solidHeader = F,
             h5(strong("Contact")),
-            h5("IMPIT-a is created and mantained by Manuela Mendiolar. Bugs reports and features requests can be communicated in several ways:"),
-            h5("* Github: https://github.com/manumendiolar/IMPIT_shiny/issues"),
-            h5("* Email: m.mendiolar@uq.edu.au"),
+            h5("IMPIT-a is created and mantained by Manuela Mendiolar. Bugs reports and features requests can be communicated in two ways:"),
+            uiOutput("githubissues"),
+            uiOutput("mm_email"),
             br(),
             h5(strong("Source")),
-            h5("Source code is available at https://github.com/manumendiolar/IMPIT_shiny/")
-            # ,a("github/manumendiolar", href = "https://github.com/manumendiolar/IMPIT_shiny/")
-           
+            uiOutput("githublink")
+
             # userDescription(
             #   title = "Manuela Mendiolar",
             #   subtitle = "lead Developer",

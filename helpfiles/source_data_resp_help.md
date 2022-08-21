@@ -1,18 +1,19 @@
-Source data should be stored as a `CSV` format with two columns and header.
+Source data for the response variable should be stored as a `CSV` format with two columns and header.
 
-* The first column is for the time variable (could be year, month, day, etc.). It should be in the format YYYY-MM-DD.
-* The second column is for the response variable value. 
-* Please note that missing values are not allowed and space in header's names is not allowed either (e.g., use 'resp_variable' instead of 'response variable').
+* The first column is for the time variable in years (numeric value). 
+* The second column is for the response value (numeric value). 
+* Please note that missing values are not allowed and space in header's names is not allowed either (e.g., use 'resp_variable' instead of 'resp variable').
 
 ***
 CSV Format:
 
 $$
-\\scriptsize
-\\begin{array}{cc} 
+\\begin{array}{rr} 
   \\hline 
-  \\text{Time} & \\text{Value} \\\\
+  \\text{Time} & \\text{Value} \\\\ 
   \\hline 
+  \\cdot & \\cdot \\\\ 
+  \\cdot & \\cdot \\\\ 
   \\cdot & \\cdot \\\\ 
   \\hline 
 \\end{array}
@@ -27,15 +28,11 @@ $$
   \\hline 
   \\text{Year} & \\text{catch_rate} \\\\ 
   \\hline 
-  \\text{1988-01-01} & 52.85 \\\\ 
-  \\hline 
-  \\text{1989-01-01} & 61.20 \\\\
-  \\hline 
-  \\text{1990-01-01} & 49.42 \\\\
-  \\hline 
+  \\text{1988} & 52.85 \\\\ 
+  \\text{1989} & 61.20 \\\\
+  \\text{1990} & 49.42 \\\\
   \\vdots & \\vdots \\\\ 
-  \\hline 
-  \\text{2019-01-01} & 15.94 \\\\ 
+  \\text{2019} & 15.94 \\\\ 
   \\hline 
 \\end{array}
 $$

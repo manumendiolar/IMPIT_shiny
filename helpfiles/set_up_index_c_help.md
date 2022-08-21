@@ -1,0 +1,2 @@
+Associated with the *recency* of the episode. Parameter $c$ characterizes the skewness of the recency weight and its peak. A value close to zero indicates that recent episodes have higher weight than those starting late in the memory. The functional form for the recency weight is:
+    $$ w_2(s_k,m) = exp\\left[ -b \\left( 1- \\lambda \\right(\\frac{s_k}{m} \\left)^c \\right(1-\\frac{s_k}{m} \\left)^{1-c} \\right) \\right]$$

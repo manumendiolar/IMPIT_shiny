@@ -1,0 +1,1 @@
+Enter a value for the *memory* ($m$) in years. A period of fixed and uninterrupted duration in the past with respect to the current observation in time. Note that according to $m$ the app automatically sets the first year of resulting IMPIT index. 

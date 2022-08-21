@@ -1,0 +1,1 @@
+Choose an intensity function. If you generate the episode list you can choose between: mean, median, max (maximum), min (minimum) or log (natural logarithm). But if you uploaded the episode list this menu will depend entirely on the intensity columns provided in that dataset. 

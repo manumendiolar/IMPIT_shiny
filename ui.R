@@ -318,27 +318,70 @@ ui <- dashboardPage(
               solidHeader=TRUE,
               collapsible = T,
               helper(
-                numericInput("m", label = "Memory ", min=1, max=40, value=1),
+                numericInput("m", label = "Memory (m)", min=1, max=40, value=1),
                 icon = "question",
                 size = "m",
                 title = "Set up for constructing IMPIT index",
                 type = "markdown",
-                content = "set_up_index_help"
+                content = "set_up_index_m_help"
               ),
+              helper(
               selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
+              icon = "question",
+              size = "m",
+              title = "Set up for constructing IMPIT index",
+              type = "markdown",
+              content = "set_up_index_intensity_help"
+              ),
               h5(strong("Weights")),
+              helper(
               sliderInput('a_w1', label = 'Persistence (a)', min=0, max=5, value=0, step = 0.01),
+              icon = "question",
+              size = "m",
+              title = "Set up for constructing IMPIT index",
+              type = "markdown",
+              content = "set_up_index_a_help"
+              ),
+              helper(
               sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0, step = 0.01),
+              icon = "question",
+              size = "m",
+              title = "Set up for constructing IMPIT index",
+              type = "markdown",
+              content = "set_up_index_b_help"
+              ),
+              helper(
               sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0, step = 0.01),
+              icon = "question",
+              size = "m",
+              title = "Set up for constructing IMPIT index",
+              type = "markdown",
+              content = "set_up_index_c_help"
+              ),
               conditionalPanel(
                 condition = "input.choice_timfoc == '1'",
-                numericInput("d_w3", label = "Timing (d)", min=0.01, max=15, value=1)
+                helper(
+                numericInput("d_w3", label = "Timing (d)", min=0.01, max=15, value=1),
+                icon = "question",
+                size = "m",
+                title = "Set up for constructing IMPIT index",
+                type = "markdown",
+                content = "set_up_index_d_help"
+                )
               ),
               br(),
-              dateRangeInput("daterange_index", "Index period (yyyy-mm-dd):", start="1900-01-01", end="2020-01-01"),
+              #helper(
+              dateRangeInput("daterange_index", "Index period (yyyy-mm-dd):", start="1900-01-01", end="2020-01-01")#,
+              #icon = "question",
+              #size = "m",
+              #title = "Set up for constructing IMPIT index",
+              #type = "markdown",
+              #content = "set_up_index_intensity_help"
+              #)
+            ),
               br(),
-              actionButton("run_button_index", "Compute", icon=icon("play"))
-              )
+              actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
+              #)
             ),
           
           # IMPIT index: exploratory

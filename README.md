@@ -53,7 +53,7 @@ Alternatively, you can also access the app via <https://manumendiolar.shinyapps.
 
 ### Demo data 
 
-A list of example .csv files have been provided. Please use this [link to download](https://github.com/manumendiolar/IMPIT_shiny/tree/main/example-data) the demo data.
+A list of example .csv files have been provided. Please use this [link to download](https://github.com/manumendiolar/IMPIT_shiny/tree/main/example-data) the files. 
 
 -----
 

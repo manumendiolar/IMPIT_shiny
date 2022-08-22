@@ -153,7 +153,11 @@ server <- function(input, output, session) {
          }
       )
       
-      state$episodes <- data_epi()
+      #state$episodes <- data_epi()
+      state$episodes <- as.data.frame(data_epi())
+      state$episodes$date_start <- as.Date(state$episodes$date_start)
+      state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+      state$episodes$date_end <- as.Date(state$episodes$date_end)
       
       # Let's update intensity functions choices
       state$choices_int <- grep("intensity_", colnames(state$episodes), value = T)

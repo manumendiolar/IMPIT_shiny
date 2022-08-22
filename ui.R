@@ -213,7 +213,7 @@ ui <- dashboardPage(
               conditionalPanel(
                 condition = "input.choice_epifile == '2'",
                 helper(
-                  fileInput("epifile_input","Select CSV or RData File to Import",
+                  fileInput("epifile_input","Select CSV to Import",
                             accept = ".csv", 
                             placeholder = "ex: soi_episodes.csv"
                             ),

@@ -122,7 +122,7 @@ dublinRTPI::runShiny()
 
 ## Authors
 
-<img src="www/images/UQ_logo.png" width="250"/> 
+<img src="www/images/UQ_logo.png" width="150"/> 
 
 IMPIT-a was created at the School of Mathematics and Physics of the [University of Queensland](https://www.uq.edu.au/) by [Manuela Mendiolar](https://smp.uq.edu.au/profile/8282/manuela-mendiolar), PhD Student.
 

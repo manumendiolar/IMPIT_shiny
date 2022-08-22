@@ -1,25 +1,17 @@
-# Function to compute IMPIT index for episodes associated with SOI
-# when empirical data for "response" variable is available
+# Function to compute episodes from time series of an environmental signal 
 
-# Input
-# m        : integer value to denote the memory, in years
+# INUPUT
+# dat         : data frame of environmental signal. This has 4 columns: 
+#               year (integer), month (integer), day (integer) and value (numeric) of the signal. 
 #
-# yrs      : integer vector of years where we want to compute IMPIT index
+# thres_above : to indicate if episodes should be constructed for values above or below certain threshold. thres_abov should be a logical value (TRUE/FALSE).
 #
-# episodes : output of mydetect_event(). A data frame of episodes 
-#            corresponding to SOI values above/below threshold and
-#            with a minimum duration "block length".
-#
-# d        : numeric value for the dampening parameter used to compute 
-#            nu ratio and relative importance weights w later
-#
-# dat_resp : data frame of  proportions for each age group and year of the
-#            response variable. It should have the following format: first column
-#            for the year named 'Year', second column for the age group named 'AgeGroup'
-#            and third column for the proportion called 'prop' 
+# thres       : value of threshold (numeric) 
+# 
+# duration_min: minimum duration of consecutive values above/below threshold. 
 
-# Output
-# Isoi : numeric vector of indices for each year of the period given by yrs 
+# OUTPUT
+# data frame of epsiodes  
 
 # Note
 # Depends on user defined functions fun_nu() and fun_w()
@@ -28,9 +20,10 @@
 
 mydetect_event <- function(dat, thres_above, thres, duration_min){
   
+  # dat: data frame
   # thres_above: logical
   # thres: choose threshold
-
+  # duration_min: integer
   
   # prepare data
   #names(dat) <- c("date","EnvSignal")
@@ -98,11 +91,11 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
     date_end <- dat[index_end, ]$date
     
     # a couple of intensities (we could also put a function here) 
-    intensity_mean   <- mean(t(dat[ind[[ii]],2]))
-    intensity_median <- median(t(dat[ind[[ii]],2]))
-    intensity_max    <- max(t(dat[ind[[ii]],2]))
-    intensity_min    <- min(t(dat[ind[[ii]],2]))
-    intensity_log    <- ifelse(thres_above, log(sum(dat[ind[[ii]],2])), -log(abs(sum(dat[ind[[ii]],2]))))
+    intensity_mean   <- mean(t(dat[ind[[ii]],"EnvSignal"]))
+    intensity_median <- median(t(dat[ind[[ii]],"EnvSignal"]))
+    intensity_max    <- max(t(dat[ind[[ii]],"EnvSignal"]))
+    intensity_min    <- min(t(dat[ind[[ii]],"EnvSignal"]))
+    intensity_log    <- ifelse(thres_above, log(sum(dat[ind[[ii]],"EnvSignal"])), -log(abs(sum(dat[ind[[ii]],"EnvSignal"]))))
     
     # save info
     episodes$event_no[ii] <- ii

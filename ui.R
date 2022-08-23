@@ -132,9 +132,8 @@ ui <- dashboardPage(
               tags$li(h4("Provide a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices.")),
               tags$li(h4("Allow users to choose between a menu of intensity and relative weight functions.")), 
               tags$li(h4("Visualize imported data, defined episodes, and constructed IMPIT indices"))
-            )
-            #br(), br(), br(), br(), br(), br(),
-          ),
+              )
+            ),
           # Roadmap
           box(
             width = 12,
@@ -145,9 +144,9 @@ ui <- dashboardPage(
             collapsed = FALSE,
             status = "info",
             img(src = "images/IMPIT_roadmap.svg", style="width: 65%")
+            )
           )
-        )
-      ),
+        ),
       
       
       
@@ -156,15 +155,13 @@ ui <- dashboardPage(
       tabItem(
         tabName = "data",
         fluidRow(
-          
           # Import data
           box(
-            title = "Required Data", 
+            title = div(icon("upload"), strong("Required Data")), 
             id = "box_source_data",
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("upload"),
             width = 3,
             height = "500px",
             helper(
@@ -181,12 +178,11 @@ ui <- dashboardPage(
           
           # Check data 
           box(
-            title = "Check data",
+            title = div(icon("file-import"), strong("Check data")),
             id = "box_table_data",
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("file-import"),
             width = 8,
             height = "500px",
             plotlyOutput("envPlot", height = 700)
@@ -205,12 +201,11 @@ ui <- dashboardPage(
         fluidRow(
           
           box(
-            title = "Set up", 
+            title = div(icon("cogs"), strong("Set up")), 
             id = "box_list_epi",
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("cogs"),
             width = 11,
             height = "500px",
             
@@ -276,12 +271,11 @@ ui <- dashboardPage(
         # Explore episodes
         fluidRow(
           box(
-            title = "Episodes",
+            title = div(icon("list-check"), strong("Episodes")),
             id = "box_table_epi",
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("tasks"),
             width = 11,
             height = "500px",
             tabsetPanel(
@@ -322,9 +316,8 @@ ui <- dashboardPage(
           column(
             width = 3,
             box(
-              title = "Set up", 
+              title = div(icon("user-cog"), strong("Set up")), 
               width = NULL, 
-              icon = icon("user-cog"), 
               solidHeader = FALSE,
               collapsible = TRUE,
               collapsed = FALSE,
@@ -418,14 +411,13 @@ ui <- dashboardPage(
           column(
             width = 8,
             box(
-              title = "IMPIT index",
+              title = div(icon("chart-line"), strong("IMPIT index")),
               width = NULL,
               id = "box_table_epi",
               solidHeader = FALSE,
                collapsible = TRUE,
               collapsed = FALSE,
               status = "info",
-              icon = icon("tasks"),
               height = "500px",
               plotlyOutput("plot_index", width = "100%"),
               br(),
@@ -450,13 +442,12 @@ ui <- dashboardPage(
           
           # Import IMPIT index values
           box(
-            title = "Source IMPIT index",
+            title = div(icon("upload"), strong("Source IMPIT index")),
             id = "box_app_data_index",
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("upload"),
             width = 3,
             height = "500px",
             helper(
@@ -467,19 +458,16 @@ ui <- dashboardPage(
               type = "markdown",
               content = "source_data_impit_help"
               ),
-            br(),
-            br(),
             div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
             ),
           
           # IMPIT index plot 
           box(
-            title = "Explore trend in IMPIT index",
+            title = div(icon("magnifying-glass"), strong("Explore trend in IMPIT index")),
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("chart"),
             width = 8,
             height = "500px",
             tabsetPanel(
@@ -496,13 +484,12 @@ ui <- dashboardPage(
            
           # upload other variable
           box(
-            title = "Source response",
+            title = div(icon("upload"), strong("Source response")),
             id = "box_app_data_resp",
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("upload"),
             width = 3,
             height = "500px",
             helper(
@@ -518,12 +505,11 @@ ui <- dashboardPage(
           
           # table and plot of other variable (to check) and correlation analysis with IMPIT index
           box(
-            title = "Explore association between IMPIT index and response variable",
+            title = div(icon("chart-scatter"), strong("Explore association between IMPIT index and response variable")),
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            icon = icon("chart"),
             width = 8,
             height = "500px",
             tabsetPanel(

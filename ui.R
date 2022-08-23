@@ -47,27 +47,27 @@ ui <- dashboardPage(
     dropdownMenu(
       type = "notifications", 
       headerText = strong("HELP"), 
-      icon = icon("question", verify_fa = FALSE), 
+      icon = icon("question"), 
       badgeStatus = NULL,
       notificationItem(
         text = steps$text[1],
-        icon = icon("database", verify_fa = FALSE)
+        icon = icon("database")
       ),
       notificationItem(
         text = steps$text[2],
-        icon = icon("crosshairs", verify_fa = FALSE)
+        icon = icon("crosshairs")
       ),
       notificationItem(
         text = steps$text[3],
-        icon = icon("chart-line", verify_fa = FALSE)
+        icon = icon("chart-line")
       ),
       notificationItem(
         text = steps$text[4],
-        icon = icon("brain", verify_fa = FALSE)
+        icon = icon("brain")
       ),
       notificationItem(
         text = strong("Important info"),
-        icon = icon("exclamation", verify_fa = FALSE)
+        icon = icon("exclamation")
       )
     )
   ),
@@ -78,12 +78,12 @@ ui <- dashboardPage(
   
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Home", tabName = "home", icon = icon("home", verify_fa = FALSE)),
-      menuItem("Data", tabName = "data", icon = icon("database", verify_fa = FALSE)),
-      menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs", verify_fa = FALSE)),
-      menuItem("Index", tabName = "index", icon = icon("chart-line", verify_fa = FALSE)),
-      menuItem("Application", tabName = "application", icon = icon("brain", verify_fa = FALSE)),
-      menuItem("About", tabName = "about", icon = icon("info-circle", verify_fa = FALSE))
+      menuItem("Home", tabName = "home", icon = icon("home")),
+      menuItem("Data", tabName = "data", icon = icon("database")),
+      menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs")),
+      menuItem("Index", tabName = "index", icon = icon("chart-line")),
+      menuItem("Application", tabName = "application", icon = icon("brain")),
+      menuItem("About", tabName = "about", icon = icon("info-circle"))
     )
   ),
   
@@ -115,17 +115,18 @@ ui <- dashboardPage(
       
       tabItem(
         tabName = "home",
-        h2("IMPIT app"),
+        h4(em("Web Application for IMPIT index construction"), style = "font-family: monospace;"),
         br(),
         fluidRow(
           # Description
           box(
             width = 12, 
             height = "30em",
-            title = h4(tags$b("Description")),
+            title = div(icon("home"), strong("Description")),
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
+            status = "info",
             tags$ul(
               tags$li(h4("Provide a user-friendly interface for constructing IMPIT indices.")),
               tags$li(h4("Provide a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices.")),
@@ -137,11 +138,12 @@ ui <- dashboardPage(
           # Roadmap
           box(
             width = 12,
-            title = h4(tags$b("Roadmap")),
+            title = div(icon("map-location-dot"), strong("Roadmap")),
             align = "center", 
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
+            status = "info",
             img(src = "images/IMPIT_roadmap.svg", style="width: 65%")
           )
         )
@@ -161,18 +163,18 @@ ui <- dashboardPage(
             id = "box_source_data",
             collapsible = TRUE,
             collapsed = FALSE,
+            status = "info",
             icon = icon("upload"),
             width = 3,
             height = "500px",
-            helper(fileInput("csv_input","Select CSV File to Import",
-                             accept=".csv", 
-                             placeholder = "ex: soi_monthly.csv"),
-                   icon = icon("question", verify_fa = FALSE), 
-                   size = "m",
-                   #colour = "black",
-                   title = "Data format", 
-                   type = "markdown", 
-                   content = "source_data_help"),
+            helper(
+              fileInput("csv_input","Select CSV File to Import", accept = ".csv", placeholder = "ex: soi_monthly.csv"),
+              icon = "question", 
+              size = "m",
+              title = "Data format", 
+              type = "markdown", 
+              content = "source_data_help"
+              ),
             br(),
             div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")
             ),
@@ -183,15 +185,16 @@ ui <- dashboardPage(
             id = "box_table_data",
             collapsible = TRUE,
             collapsed = FALSE,
-            icon = icon("file-import", verify_fa = FALSE),
+            status = "info",
+            icon = icon("file-import"),
             width = 8,
             height = "500px",
             plotlyOutput("envPlot", height = 700)
             )
-        )
-      ),
-        
-
+          )
+        ),
+      
+      
       
       # EPISODES TAB ------------------------------------------------------------
       
@@ -206,7 +209,8 @@ ui <- dashboardPage(
             id = "box_list_epi",
             collapsible = TRUE,
             collapsed = FALSE,
-            icon = shiny::icon("cogs", verify_fa = FALSE),
+            status = "info",
+            icon = icon("cogs"),
             width = 11,
             height = "500px",
             
@@ -218,7 +222,7 @@ ui <- dashboardPage(
                      condition = "input.choice_epifile == '2'",
                      helper(
                        fileInput("epifile_input","Select CSV to Import", accept=".csv", placeholder="ex: soi_episodes.csv"),
-                       icon = icon("question", verify_fa = FALSE), 
+                       icon = "question", 
                        size = "l",
                        title = "Episodes data format",
                        type = "markdown",
@@ -231,7 +235,7 @@ ui <- dashboardPage(
                        radioButtons("choice_thres", "Observations which exceed, or fall below specified threshold:",
                                     choices = list("up-episodes?" = 1, "down-episodes?" = 2),
                                     selected = NULL),
-                       icon = icon("question", verify_fa = FALSE),
+                       icon = "question",
                        size = "l",
                        title = "Format of generated episodes file",
                        type = "markdown",
@@ -240,7 +244,7 @@ ui <- dashboardPage(
                      fluidRow(column(4, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
                      fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
                      ),
-                   actionButton("run_button_epi", "Compute", icon=icon("play", verify_fa = FALSE))
+                   actionButton("run_button_epi", "Compute", icon=icon("play"))
                    ),
             # Time units
             column(width = 3,
@@ -276,35 +280,37 @@ ui <- dashboardPage(
             id = "box_table_epi",
             collapsible = TRUE,
             collapsed = FALSE,
-            icon = icon("tasks", verify_fa = FALSE),
+            status = "info",
+            icon = icon("tasks"),
             width = 11,
             height = "500px",
             tabsetPanel(
               # Episodes: table
               tabPanel("Table",
-                 fluidRow(
-                   column(11, div(DT::dataTableOutput("contents_epi"), style="font-size: 100%; width: 100%")),
-                   column( 3, downloadButton("downloadTable_epi", "Download Table"), style="margin-top: 25px;")
-                   )
-                 ),
+                       fluidRow(
+                         column(11, div(DT::dataTableOutput("contents_epi"), style="font-size: 100%; width: 100%")),
+                         column( 3, downloadButton("downloadTable_epi", "Download Table"), style="margin-top: 25px;")
+                         )
+                       ),
               # Episodes: plot
-              tabPanel("Plot: Intensity", 
-                 fluidRow(
-                   column(11, plotlyOutput("plot_epi_intensity", height=500)),
-                   column( 3, downloadButton("downloadPlot_epi_intensity", "Download Plot"), style="margin-top: 25px;")
-                   )
-              ),
+              tabPanel("Plot: Intensity",
+                       fluidRow(
+                         column(11, plotlyOutput("plot_epi_intensity", height=500)),
+                         column( 3, downloadButton("downloadPlot_epi_intensity", "Download Plot"), style="margin-top: 25px;")
+                         )
+                       ),
               # Episodes: plot
-              tabPanel("Plot: Duration", 
+              tabPanel("Plot: Duration",
                        fluidRow(
                          column(11, plotlyOutput("plot_epi_duration", height=500)),
                          column( 3, downloadButton("downloadPlot_epi_duration", "Download Plot"), style="margin-top: 25px;")
+                         )
                        )
               )
-            ) 
+            )
           )
-        )
-      ),
+        ),
+      
       
       
       # INDEX TAB ---------------------------------------------------------------
@@ -318,28 +324,31 @@ ui <- dashboardPage(
             box(
               title = "Set up", 
               width = NULL, 
-              #status="primary", 
-              icon = icon("user-cog", verify_fa = FALSE), 
-              solidHeader = TRUE,
+              icon = icon("user-cog"), 
+              solidHeader = FALSE,
               collapsible = TRUE,
               collapsed = FALSE,
+              status = "info",
+              # Memory
               helper(
                 numericInput("m", label = "Memory", min=1, max=Inf, value=1),
-                icon = icon("question", verify_fa = FALSE),
+                icon = "question",
                 size = "m",
                 title = "Memory",
                 type = "markdown",
                 content = "set_up_index_m_help"
                 ),
+              # Intensity
               helper(
                 selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
-                icon = icon("question", verify_fa = FALSE),
+                icon = "question",
                 size = "m",
                 title = "Intensity",
                 type = "markdown",
                 content = "set_up_index_intensity_help"
                 ),
               p(h5(strong("Weights")), style = "margin-top: 20px;"),
+              # Weight: Persistence
               h5(em(strong("Persitence"))),
               helper(
                 fluidRow(
@@ -349,12 +358,13 @@ ui <- dashboardPage(
                 ),
                 tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=0, step = 0.01)))
                 ),
-                icon = icon("question", verify_fa = FALSE),
+                icon = "question",
                 size = "m",
                 title = "Persistence",
                 type = "markdown",
                 content = "set_up_index_a_help"
                 ),
+              # Weight: Recency
               h5(em(strong("Recency"))),
               helper(
                 fluidRow(
@@ -365,21 +375,13 @@ ui <- dashboardPage(
                   tags$div(id = "inline", column(5, numericInput("b_w2", label = 'b:', min=0, max=Inf, value=0, step = 0.01))),
                   tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0, step = 0.01)))
                   ),
-                # sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0, step = 0.01),
-                icon = icon("question", verify_fa = FALSE),
+                icon = "question",
                 size = "m",
-                title = "Recency: b",
+                title = "Recency: b and c",
                 type = "markdown",
                 content = "set_up_index_b_help"
                 ),
-              # helper(
-              #   sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0, step = 0.01),
-              #   icon = "question",
-              #   size = "m",
-              #   title = "Recency: c",
-              #   type = "markdown",
-              #   content = "set_up_index_c_help"
-              #   ),
+              # Weight: Timing
               conditionalPanel(
                 condition = "input.choice_timfoc == '1'",
                 h5(em(strong("Timing"))),
@@ -391,28 +393,26 @@ ui <- dashboardPage(
                     ),
                     tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=0, step = 0.01)))
                   ),
-                  #numericInput("d_w3", label = "Timing (d)", min=0.01, max=Inf, value=1),
-                  icon = icon("question", verify_fa = FALSE),
+                  icon = "question",
                   size = "m",
                   title = "Timing",
                   type = "markdown",
                   content = "set_up_index_d_help"
                   )
                 ),
-              
-              #helper(
-              
-              dateRangeInput("daterange_index", p(h5(strong("Index period (YYYY-MM-DD)")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
-              #icon = "question",
-              #size = "m",
-              #title = "Set up for constructing IMPIT index",
-              #type = "markdown",
-              #content = "set_up_index_intensity_help"
-              #)
-              actionButton("run_button_index", "Compute", icon=icon("paper-plane", verify_fa = FALSE))),
-             
-              #)
+              # Period time Index
+              helper(
+                dateRangeInput("daterange_index", p(h5(strong("Index period (YYYY-MM-DD)")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
+                icon = "question",
+                size = "m",
+                title = "Set up for constructing IMPIT index",
+                type = "markdown",
+                content = "set_up_index_intensity_help"
+                ),
+              actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
+              ),
             ),
+          
           
           # IMPIT index: exploratory
           column(
@@ -420,34 +420,23 @@ ui <- dashboardPage(
             box(
               title = "IMPIT index",
               width = NULL,
-              #status="primary",
               id = "box_table_epi",
-              collapsible = TRUE,
+              solidHeader = FALSE,
+               collapsible = TRUE,
               collapsed = FALSE,
-              icon = icon("tasks", verify_fa = FALSE),
+              status = "info",
+              icon = icon("tasks"),
               height = "500px",
-              solidHeader = TRUE,
               plotlyOutput("plot_index", width = "100%"),
               br(),
-              fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
-                       column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
-                       )
-              # tabsetPanel(
-              #   tabPanel("Table",
-              #      fluidRow(column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
-              #               column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
-              #               )
-              #      ),
-              #   tabPanel("Plot", 
-              #      fluidRow(column(12, plotlyOutput("plot_index", width = "100%")),
-              #               column( 3,  downloadButton("downloadPlot_index", "Download Plot"), style = "margin-top: 25px;")
-              #               )
-              #      )
-              #   )
+              fluidRow(
+                column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+                column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+                )
               )
             )
           )
-      ),
+        ),
       
       
       
@@ -462,45 +451,43 @@ ui <- dashboardPage(
           # Import IMPIT index values
           box(
             title = "Source IMPIT index",
-            #status="success",
-            solidHeader = TRUE,
             id = "box_app_data_index",
+            solidHeader = FALSE,
             collapsible = TRUE,
-            collapsed = TRUE,
-            icon = icon("upload", verify_fa = FALSE),
+            collapsed = FALSE,
+            status = "info",
+            icon = icon("upload"),
             width = 3,
             height = "500px",
-            helper(fileInput("index_file","Select CSV File to Import",
-                             accept=".csv",
-                             placeholder = "ex: impit_index.csv"),
-                   icon = icon("question", verify_fa = FALSE),
-                   size = "m",
-                   title = "Data format",
-                   type = "markdown",
-                   content = "source_data_impit_help"),
+            helper(
+              fileInput("index_file","Select CSV File to Import", accept = ".csv", placeholder = "ex: impit_index.csv"),
+              icon = "question",
+              size = "m",
+              title = "Data format",
+              type = "markdown",
+              content = "source_data_impit_help"
+              ),
             br(),
             br(),
             div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
-            #dateRangeInput("daterange_app_index", "Date range (yyyy-mm-dd):", start="1950-01-01", end="2022-01-01"),
-            #actionButton("run_button_app_index", "Submit", icon=icon("play"))
-          ),
+            ),
           
-          # IMPIT index table and plot 
+          # IMPIT index plot 
           box(
             title = "Explore trend in IMPIT index",
-            #status="success",
-            #id = "box_app_data_index_exp",
+            solidHeader = FALSE,
             collapsible = TRUE,
-            collapsed = TRUE,
-            icon = icon("chart", verify_fa = FALSE),
+            collapsed = FALSE,
+            status = "info",
+            icon = icon("chart"),
             width = 8,
             height = "500px",
             tabsetPanel(
-             tabPanel("Plot",
-               fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
-               fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
-               )
-             )
+              tabPanel("Plot",
+                       fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
+                       fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
+                       )
+              )
             )
           ),
         
@@ -510,52 +497,51 @@ ui <- dashboardPage(
           # upload other variable
           box(
             title = "Source response",
-            #status="success",
-            solidHeader = TRUE,
             id = "box_app_data_resp",
+            solidHeader = FALSE,
             collapsible = TRUE,
-            collapsed = TRUE,
-            icon = icon("upload", verify_fa = FALSE),
+            collapsed = FALSE,
+            status = "info",
+            icon = icon("upload"),
             width = 3,
             height = "500px",
-            helper(fileInput("resp_file","Select CSV File to Import",
-                             accept=".csv",
-                             placeholder = "ex: resp_variable.csv"),
-                   icon = icon("question", verify_fa = FALSE),
-                   size = "m",
-                   title = "Data format",
-                   type = "markdown",
-                   content = "source_data_resp_help"),
+            helper(
+              fileInput("resp_file","Select CSV File to Import", accept = ".csv", placeholder = "ex: resp_variable.csv"),
+              icon = "question",
+              size = "m",
+              title = "Data format",
+              type = "markdown",
+              content = "source_data_resp_help"
+              ),
             div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")
-            #dateRangeInput("daterange_app_resp", "Choose date range to explore association:", start="1950-01-01", end="2022-01-01"),
-            #actionButton("run_button_app_resp", "Submit", icon=icon("play"))
             ),
-
+          
           # table and plot of other variable (to check) and correlation analysis with IMPIT index
           box(
             title = "Explore association between IMPIT index and response variable",
-            #status="success",
+            solidHeader = FALSE,
             collapsible = TRUE,
-            collapsed = TRUE,
-            icon = icon("chart", verify_fa = FALSE),
+            collapsed = FALSE,
+            status = "info",
+            icon = icon("chart"),
             width = 8,
             height = "500px",
             tabsetPanel(
-              #tabPanel("Table", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
               tabPanel("Plot",
                        fluidRow(column(10, plotlyOutput("plot_app_resp", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
-              ),
+                       ),
               tabPanel("Correlation analysis",
                        fluidRow(column(10, plotlyOutput("plot_corr_application", width="100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
-              ),
-              tabPanel("Summary",
+                       ),
+              tabPanel("Summary", 
                        verbatimTextOutput("summary"))
+              )
             )
           )
-        )
-      ),
+        ),
+      
       
       
       # ABOUT US TAB ------------------------------------------------------------
@@ -570,10 +556,11 @@ ui <- dashboardPage(
         fluidRow(
           box(
             width = 12,
-            title = "About us",
+            title = strong("About us"),
             collapsible = TRUE,
             collapsed = FALSE,
             solidHeader = FALSE,
+            status = "info",
             h5(strong("Contact")),
             h5("IMPIT-a is created and mantained by Manuela Mendiolar. Bugs reports and features requests can be communicated in two ways:"),
             uiOutput("githubissues"),
@@ -581,30 +568,23 @@ ui <- dashboardPage(
             br(),
             h5(strong("Source")),
             uiOutput("githublink")
-
-            # userDescription(
-            #   title = "Manuela Mendiolar",
-            #   subtitle = "lead Developer",
-            #   type = 2,
-            #   image = "images/UQ_Manuela_.jpg",
-            # )
-            
-          )
-        ),
+            )
+          ),
         fluidRow(
           box(
             width = 12,
-            title = "Rsession",
+            title = div(icon("jsfiddle"), strong("Rsession")),
             collapsible = TRUE,
-            collapsed = TRUE,
+            collapsed = FALSE,
             solidHeader = FALSE,
+            status = "info",
             verbatimTextOutput("Rsession")
-            )
+          )
+          )
         )
-        
       )
-    )
-  ) #close dashboardBody
-) #close dashboardPage
+    ) #close dashboardBody
+  ) #close dashboardPage
+
 
 

@@ -84,13 +84,13 @@ server <- function(input, output, session) {
   output$contents_data <- DT::renderDataTable({ 
     DT::datatable(data_input(),
                   options = list(
-                    pageLength=10,
-                    lengthMenu=c(5,10,30,50), 
-                    autoWidth=F,  
-                    searching=T,
-                    search=list(regex=T, caseInsensitive=T)
+                    pageLength = 10,
+                    lengthMenu = c(5,10,30,50), 
+                    autoWidth = FALSE,  
+                    searching = T,
+                    search = list(regex=TRUE, caseInsensitive=TRUE)
                     ),
-                  rownames = F) %>%
+                  rownames = FALSE) %>%
       formatRound(c(4), 2) %>%
       formatStyle(columns=c(1:4), 'text-align'='centre')
   })
@@ -216,13 +216,13 @@ server <- function(input, output, session) {
   # Episodes: table print
   output$contents_epi <- DT::renderDataTable({ 
     DT::datatable(state$episodes, 
-                  rownames=F, 
+                  rownames = FALSE, 
                   options = list(
-                    pageLength=10,
-                    autoWidth=F,
-                    scrollX = T,
-                    searching=T,
-                    search = list(regex=T, caseInsensitive=T)
+                    pageLength = 10,
+                    autoWidth = FALSE,
+                    scrollX = TRUE,
+                    searching = TRUE,
+                    search = list(regex=TRUE, caseInsensitive=TRUE)
                     )
                   ) %>% 
       formatRound(c(6,7,8,9,10), 2) %>% 
@@ -236,13 +236,13 @@ server <- function(input, output, session) {
       paste0("Episodes_table.csv")
     },
     content = function(file) {
-      write.csv(state$episodes, file)
+      write.csv(state$episodes, file, row.names = FALSE, col.names = TRUE)
     }
   )
   
   
   # Episodes: plot print
-  output$plot_epi <- renderPlotly({
+  output$plot_epi_intensity <- renderPlotly({
     
     x <- state$episodes$date_start
     y <- as.numeric(state$episodes[ , as.character(state$choices_int[1])])
@@ -254,49 +254,88 @@ server <- function(input, output, session) {
     if (input$choice_timfoc == "1"){
       df$z <- state$episodes$overlap
       df$z <- as.factor(df$z)
-      
-      # if there is timing we add colour  
-      lolliEp <- ggplot(df, aes(x, y, col = z)) +
-        geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
+      levels(df$z) <- c("No","Yes")
+
+      lolliEp1 <- ggplot(df, aes(x, y, col = z)) +
+        geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
         geom_point(size=2) +
-        labs(x="date_start", y=state$choices_int[1], title="Lollipop chart", col="Overlap") +
-        scale_color_manual(values = c("orange","blue"), labels=c("no","yes"))
+        labs(x=" ", y=" ", title=state$choices_int[1], col="Overlap") +
+        scale_color_manual(values = c("black","orange"))
       
       } else {
         
-        lolliEp <- ggplot(df, aes(x, y)) +
-          geom_segment( aes(x=x, xend=x, y=0, yend=y), color="grey") +
-          geom_point(color="orange", size=2) +
-          labs(x="date_start", y=state$choices_int[1], title="Lollipop chart") 
+        lolliEp1 <- ggplot(df, aes(x, y)) +
+          geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+          geom_point(color="black", size=2) +
+          labs(x=" ", y=" ", title = state$choices_int[1]) 
       }
     
-    state$plot_epi <- lolliEp +
+    state$plot_epi_intensity <- lolliEp1 +
       scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
       theme_light() +
       theme(
         panel.grid.major.x = element_blank(),
         panel.border = element_blank(),
+        title = element_text(size=10),
         axis.ticks.x = element_blank(),
         axis.text.x = element_text(size= 9, angle=45, hjust=1),
         axis.text.y = element_text(size=9), 
         legend.position="right"
         )
       
-    ggplotly(state$plot_epi)
+    ggplotly(state$plot_epi_intensity)
       
     })
   
+  output$plot_epi_duration <- renderPlotly({
+    
+    x <- state$episodes$date_start
+    y <- as.numeric(state$episodes[ , "duration"])
+    state$unit_var <- ifelse(input$unit_var=="1","days", ifelse(input$unit_var=="2", "months", "years"))
+    df <- data.frame(x,y)
+    df$x <- as.Date(df$x)
+    d1 <- as.Date(head(df$x,1))
+    d2 <- as.Date(tail(df$x,1))
+    
+    state$plot_epi_duration <- ggplot(df, aes(x, y)) +
+      geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+      geom_point(color="black", size=2) +
+      labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration") +
+      scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
+      theme_light() +
+      theme(
+        panel.grid.major.x = element_blank(),
+        panel.border = element_blank(),
+        title = element_text(size=10),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_text(size= 9, angle=45, hjust=1),
+        axis.text.y = element_text(size=9), 
+        legend.position="right"
+      )
+    
+    ggplotly(state$plot_epi_duration)
+    
+  })
   
-  # Episodes: plot download .png
-  output$downloadPlot_epi <- downloadHandler(
+  # Episodes: plot intensity download .png
+  output$downloadPlot_epi_intensity<- downloadHandler(
     filename = function(){
-      paste0("Episodes_LolliChart",'.png')
+      paste0("Episodes_LolliChart_intensity",'.png')
     },
     content = function(file){
-      ggsave(file, plot = state$plot_epi, width = 26, height = 12, units = "cm", dpi = 300)
+      ggsave(file, plot = state$plot_epi_intensity, width = 26, height = 12, units = "cm", dpi = 300)
     }
   )
   
+  # Episodes: plot intensity download .png
+  output$downloadPlot_epi_duration <- downloadHandler(
+    filename = function(){
+      paste0("Episodes_LolliChart_duration",'.png')
+    },
+    content = function(file){
+      ggsave(file, plot = state$plot_epi_duration, width = 26, height = 12, units = "cm", dpi = 300)
+    }
+  )
 
 
   # INDEX TAB ---------------------------------------------------------------
@@ -338,6 +377,14 @@ server <- function(input, output, session) {
         }
       }
     }
+    
+    print(head(state$episodes))
+    print(state$unit_var)
+    print(input$m)
+    print(input$a_w1)
+    print(input$b_w2)
+    print(input$c_w2)
+    print(input$d_w3)
     
     # compute IMPIT index
     state$index <- fun_IMPIT(episodes = state$episodes,

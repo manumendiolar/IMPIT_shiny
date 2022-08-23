@@ -47,27 +47,27 @@ ui <- dashboardPage(
     dropdownMenu(
       type = "notifications", 
       headerText = strong("HELP"), 
-      icon = icon("question"), 
+      icon = icon("question", verify_fa = FALSE), 
       badgeStatus = NULL,
       notificationItem(
         text = steps$text[1],
-        icon = icon("database")
+        icon = icon("database", verify_fa = FALSE)
       ),
       notificationItem(
         text = steps$text[2],
-        icon = icon("crosshairs")
+        icon = icon("crosshairs", verify_fa = FALSE)
       ),
       notificationItem(
         text = steps$text[3],
-        icon = icon("chart-line")
+        icon = icon("chart-line", verify_fa = FALSE)
       ),
       notificationItem(
         text = steps$text[4],
-        icon = icon("brain")
+        icon = icon("brain", verify_fa = FALSE)
       ),
       notificationItem(
         text = strong("Important info"),
-        icon = icon("exclamation")
+        icon = icon("exclamation", verify_fa = FALSE)
       )
     )
   ),
@@ -78,12 +78,12 @@ ui <- dashboardPage(
   
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Home", tabName = "home", icon = icon("home")),
-      menuItem("Data", tabName = "data", icon = icon("database")),
-      menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs")),
-      menuItem("Index", tabName = "index", icon = icon("chart-line")),
-      menuItem("Application", tabName = "application", icon = icon("brain")),
-      menuItem("About", tabName = "about", icon = icon("info-circle"))
+      menuItem("Home", tabName = "home", icon = icon("home", verify_fa = FALSE)),
+      menuItem("Data", tabName = "data", icon = icon("database", verify_fa = FALSE)),
+      menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs", verify_fa = FALSE)),
+      menuItem("Index", tabName = "index", icon = icon("chart-line", verify_fa = FALSE)),
+      menuItem("Application", tabName = "application", icon = icon("brain", verify_fa = FALSE)),
+      menuItem("About", tabName = "about", icon = icon("info-circle", verify_fa = FALSE))
     )
   ),
   
@@ -167,7 +167,7 @@ ui <- dashboardPage(
             helper(fileInput("csv_input","Select CSV File to Import",
                              accept=".csv", 
                              placeholder = "ex: soi_monthly.csv"),
-                   icon = "question", 
+                   icon = icon("question", verify_fa = FALSE), 
                    size = "m",
                    #colour = "black",
                    title = "Data format", 
@@ -183,7 +183,7 @@ ui <- dashboardPage(
             id = "box_table_data",
             collapsible = TRUE,
             collapsed = FALSE,
-            icon = icon("file-import"),
+            icon = icon("file-import", verify_fa = FALSE),
             width = 8,
             height = "500px",
             plotlyOutput("envPlot", height = 700)
@@ -206,7 +206,7 @@ ui <- dashboardPage(
             id = "box_list_epi",
             collapsible = TRUE,
             collapsed = FALSE,
-            icon = icon("cogs"),
+            icon = shiny::icon("cogs", verify_fa = FALSE),
             width = 11,
             height = "500px",
             
@@ -218,7 +218,7 @@ ui <- dashboardPage(
                      condition = "input.choice_epifile == '2'",
                      helper(
                        fileInput("epifile_input","Select CSV to Import", accept=".csv", placeholder="ex: soi_episodes.csv"),
-                       icon = "question", 
+                       icon = icon("question", verify_fa = FALSE), 
                        size = "l",
                        title = "Episodes data format",
                        type = "markdown",
@@ -231,7 +231,7 @@ ui <- dashboardPage(
                        radioButtons("choice_thres", "Observations which exceed, or fall below specified threshold:",
                                     choices = list("up-episodes?" = 1, "down-episodes?" = 2),
                                     selected = NULL),
-                       icon = "question",
+                       icon = icon("question", verify_fa = FALSE),
                        size = "l",
                        title = "Format of generated episodes file",
                        type = "markdown",
@@ -240,7 +240,7 @@ ui <- dashboardPage(
                      fluidRow(column(4, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
                      fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
                      ),
-                   actionButton("run_button_epi", "Compute", icon=icon("play"))
+                   actionButton("run_button_epi", "Compute", icon=icon("play", verify_fa = FALSE))
                    ),
             # Time units
             column(width = 3,
@@ -276,7 +276,7 @@ ui <- dashboardPage(
             id = "box_table_epi",
             collapsible = TRUE,
             collapsed = FALSE,
-            icon = icon("tasks"),
+            icon = icon("tasks", verify_fa = FALSE),
             width = 11,
             height = "500px",
             tabsetPanel(
@@ -319,13 +319,13 @@ ui <- dashboardPage(
               title = "Set up", 
               width = NULL, 
               #status="primary", 
-              icon = icon("user-cog"), 
+              icon = icon("user-cog", verify_fa = FALSE), 
               solidHeader = TRUE,
               collapsible = TRUE,
               collapsed = FALSE,
               helper(
                 numericInput("m", label = "Memory", min=1, max=Inf, value=1),
-                icon = "question",
+                icon = icon("question", verify_fa = FALSE),
                 size = "m",
                 title = "Memory",
                 type = "markdown",
@@ -333,7 +333,7 @@ ui <- dashboardPage(
                 ),
               helper(
                 selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
-                icon = "question",
+                icon = icon("question", verify_fa = FALSE),
                 size = "m",
                 title = "Intensity",
                 type = "markdown",
@@ -349,7 +349,7 @@ ui <- dashboardPage(
                 ),
                 tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=0, step = 0.01)))
                 ),
-                icon = "question",
+                icon = icon("question", verify_fa = FALSE),
                 size = "m",
                 title = "Persistence",
                 type = "markdown",
@@ -364,13 +364,13 @@ ui <- dashboardPage(
                     ),
                   tags$div(id = "inline", column(5, numericInput("b_w2", label = 'b:', min=0, max=Inf, value=0, step = 0.01))),
                   tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0, step = 0.01)))
-                  )#,
+                  ),
                 # sliderInput("b_w2", label = "Recency (b)", min=0, max=5, value=0, step = 0.01),
-                # icon = "question",
-                # size = "m",
-                # title = "Recency: b",
-                # type = "markdown",
-                # content = "set_up_index_b_help"
+                icon = icon("question", verify_fa = FALSE),
+                size = "m",
+                title = "Recency: b",
+                type = "markdown",
+                content = "set_up_index_b_help"
                 ),
               # helper(
               #   sliderInput("c_w2", label = "Recency (c)", min=0, max=1, value=0, step = 0.01),
@@ -392,7 +392,7 @@ ui <- dashboardPage(
                     tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=0, step = 0.01)))
                   ),
                   #numericInput("d_w3", label = "Timing (d)", min=0.01, max=Inf, value=1),
-                  icon = "question",
+                  icon = icon("question", verify_fa = FALSE),
                   size = "m",
                   title = "Timing",
                   type = "markdown",
@@ -409,7 +409,7 @@ ui <- dashboardPage(
               #type = "markdown",
               #content = "set_up_index_intensity_help"
               #)
-              actionButton("run_button_index", "Compute", icon=icon("paper-plane"))),
+              actionButton("run_button_index", "Compute", icon=icon("paper-plane", verify_fa = FALSE))),
              
               #)
             ),
@@ -424,7 +424,7 @@ ui <- dashboardPage(
               id = "box_table_epi",
               collapsible = TRUE,
               collapsed = FALSE,
-              icon = icon("tasks"),
+              icon = icon("tasks", verify_fa = FALSE),
               height = "500px",
               solidHeader = TRUE,
               plotlyOutput("plot_index", width = "100%"),
@@ -467,13 +467,13 @@ ui <- dashboardPage(
             id = "box_app_data_index",
             collapsible = TRUE,
             collapsed = TRUE,
-            icon = icon("upload"),
+            icon = icon("upload", verify_fa = FALSE),
             width = 3,
             height = "500px",
             helper(fileInput("index_file","Select CSV File to Import",
                              accept=".csv",
                              placeholder = "ex: impit_index.csv"),
-                   icon = "question",
+                   icon = icon("question", verify_fa = FALSE),
                    size = "m",
                    title = "Data format",
                    type = "markdown",
@@ -492,7 +492,7 @@ ui <- dashboardPage(
             #id = "box_app_data_index_exp",
             collapsible = TRUE,
             collapsed = TRUE,
-            icon = icon("chart"),
+            icon = icon("chart", verify_fa = FALSE),
             width = 8,
             height = "500px",
             tabsetPanel(
@@ -515,13 +515,13 @@ ui <- dashboardPage(
             id = "box_app_data_resp",
             collapsible = TRUE,
             collapsed = TRUE,
-            icon = icon("upload"),
+            icon = icon("upload", verify_fa = FALSE),
             width = 3,
             height = "500px",
             helper(fileInput("resp_file","Select CSV File to Import",
                              accept=".csv",
                              placeholder = "ex: resp_variable.csv"),
-                   icon = "question",
+                   icon = icon("question", verify_fa = FALSE),
                    size = "m",
                    title = "Data format",
                    type = "markdown",
@@ -537,7 +537,7 @@ ui <- dashboardPage(
             #status="success",
             collapsible = TRUE,
             collapsed = TRUE,
-            icon = icon("chart"),
+            icon = icon("chart", verify_fa = FALSE),
             width = 8,
             height = "500px",
             tabsetPanel(

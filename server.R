@@ -443,15 +443,22 @@ server <- function(input, output, session) {
                                time_focus = state$choice_timfoc,
                                tau = state$tau)
     
-    state$contents_index <- data.frame(time = state$index_range, index = state$index)
+    # Arrange data frame index
+    state$contents_index <- data.frame(
+      Year = lubridate::year(state$index_range),
+      Month = lubridate::month(state$index_range),
+      Day = lubridate::day(state$index_range),
+      time = state$index_range,
+      index = state$index)
+    
   })
   
   observeEvent(input$run_button_index,{
     
     # Table index: print
     output$contents_index <- DT::renderDataTable({ 
-      DT::datatable(state$contents_index, 
-                    rownames=FALSE, 
+      DT::datatable(state$contents_index[, c("Year","Month","Day","index")], 
+                    rownames = FALSE, 
                     options = list(
                       pageLength=10,
                       autoWidth = TRUE,
@@ -459,7 +466,7 @@ server <- function(input, output, session) {
                       search = list(regex=TRUE, caseInsensitive=TRUE)
                       )
                     ) %>%
-        formatRound(c(2), 2)
+        formatRound(c(4), 2)
     }) 
     
     # Table index: download .csv
@@ -468,7 +475,7 @@ server <- function(input, output, session) {
         paste0("IMPIT_index_table.csv")
       },
       content = function(file) {
-        write.csv(state$contents_index, file, row.names = FALSE)
+        write.csv(state$contents_index[, c("Year","Month","Day","index")], file, row.names = FALSE)
       }
     )
     
@@ -520,7 +527,7 @@ server <- function(input, output, session) {
                     search=list(regex=TRUE, caseInsensitive=TRUE)
                   ),
                   rownames = FALSE) %>%
-      formatRound(c(2), 2) %>%
+      formatRound(c(4), 2) %>%
       formatStyle(columns=c(1:2), 'text-align'='centre')
   })
     
@@ -528,28 +535,21 @@ server <- function(input, output, session) {
   # IMPIT index + trend
   output$plot_app_index <- renderPlotly({
     
-    xx <- as.Date(data_index()[ ,1])
-    yy <- data_index()[ ,2]
-    df_index <- data.frame(xx, yy)
-   
-     t1 <- head(xx,1)
-    t2 <- tail(xx,1)
-    data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
-    line.fmt = list(dash="solid", width = 1.5, color=NULL)
-    
-    
     # LOESS
     # LOESS (Locally Estimated Scatterplot Smoother) combines local regression 
     # with kernels by using locally weighted polynomial regression (by default, 
     # quadratic regression with tri-cubic weights). It also allows estimation of
     # approximate confidence intervals. However, it is important to note that 
-    # unlike supsmu, smooth.spline or gam, loess does not use cross-validation. 
+    # unlike smooth.spline or gam, loess does not use cross-validation. 
     # By default, the span is set to 0.75; that is, the estimated smooth at each
     # target value consists of a local regression constructed using 75% of the 
     # data points closest to the target value. This span is fairly large and 
     # results in estimated values that are smoother than those from other methods.
     
+    xx <- as.Date(paste0(data_index()[ ,1],"-",data_index()[ ,2],"-",data_index()[ ,3]))
+    yy <- data_index()[ ,4]
     xx <- as.integer(lubridate::year(xx))
+
     ll.smooth = loess(yy ~ xx, span=0.75)
     ll.pred = predict(ll.smooth, se = TRUE)
     ll.df = data.frame(x=ll.smooth$x, fit=ll.pred$fit,
@@ -562,14 +562,10 @@ server <- function(input, output, session) {
     p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
     p.llci = layout(p.llci, title = "LOESS with confidence intervals")
     p.llci
-    
-    #p.llci <- ggplot(df_index)+geom_smooth(aes(x=xx,y=yy),method='loess')
-    #ggplotly(p.llci)
+
   })
   
-  
-  
-  
+ 
   # Import Response variable 
   data_resp <- eventReactive(input$resp_file, {
     
@@ -590,21 +586,27 @@ server <- function(input, output, session) {
                     search=list(regex=TRUE, caseInsensitive=TRUE)
                   ),
                   rownames = FALSE) %>%
-      formatRound(c(2), 2) %>%
-      formatStyle(columns=c(1:2), 'text-align'='centre')
+      formatRound(c(4), 2) %>%
+      formatStyle(columns=c(1:4), 'text-align'='centre')
   }) 
   
 
   # Response variable: plot
   output$plot_app_resp <- renderPlotly({
     
-    xx <- data_resp()[ ,1]
-    yy <- data_resp()[ ,2]
+    xx <-  as.Date(paste0(data_resp()[ ,1],"-",data_resp()[ ,2],"-",data_resp()[ ,3])) #data_resp()[ ,1]
+    yy <- data_resp()[ ,4]
     df_resp <- data.frame(xx, yy)
     t1 <- head(xx,1)
     t2 <- tail(xx,1)
+    data_resp_name <- colnames(data_resp())
     
-    p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines")
+    
+    #p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", col="purple")
+    p <- plot_ly(df_resp, x = ~xx, y = ~yy, type = 'scatter', mode = 'lines', line = list(color = 'rgb(205, 12, 24)', width = 2)) 
+    p <- p %>% layout(
+      xaxis = list(title = "Time", titlefont = list(size=12)),
+      yaxis = list(title = data_resp_name[4], titlefont=list(size=12)))
     p
     
   })
@@ -613,12 +615,12 @@ server <- function(input, output, session) {
   # Correlation analysis (Response vs IMPIT index): plot
   output$plot_corr_application <- renderPlotly({
     
-    xx <- data_index()[ ,2]
-    yy <- data_resp()[ ,2]
+    xx <- data_index()[ ,"index"]
+    yy <- data_resp()[ ,4]
     yy <- log(yy)
     
-    xx_name <- colnames(data_index())[2]
-    yy_name <- colnames(data_resp())[2]
+    xx_name <- "IMPIT index"#colnames(data_index())[5]
+    yy_name <- colnames(data_resp())[4]
     
     # linear model
     mod <- lm(yy ~ xx)
@@ -642,7 +644,8 @@ server <- function(input, output, session) {
       )
     
     # extra for plotting
-    col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
+    #col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
+    col.reg <- ifelse(res.LR$pVal <= 0.05, "blue", "grey40")
     col.ann <- "#08519C"
     col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
     size.num <- 3
@@ -709,12 +712,9 @@ server <- function(input, output, session) {
   # Summary of regression analysis
   output$summary <- renderPrint({
     
-    xx <- data_index()[ ,2]
-    yy <- data_resp()[ ,2]
+    xx <- data_index()[ ,4]
+    yy <- data_resp()[ ,4]
     yy <- log(yy)
-    
-    xx_name <- colnames(data_index())[2]
-    yy_name <- colnames(data_resp())[2]
     
     # linear model
     mod <- lm(yy ~ xx)

@@ -530,7 +530,7 @@ ui <- dashboardPage(
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
                        ),
               tabPanel("Correlation analysis",
-                       fluidRow(column(10, plotlyOutput("plot_corr_application", width="100%"))),
+                       fluidRow(column(10, plotlyOutput("plot_corr_application", width="90%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
                        ),
               tabPanel("Summary", 

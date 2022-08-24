@@ -17,6 +17,8 @@ library(ggtext)
 library(shinyjs)
 library(plotly)
 library(mgcv)
+library(lubridate)
+
 
 # source
 source("./source/mydetect_event.R")
@@ -29,6 +31,8 @@ source("./source/fun_nu3.R")
 source("./source/fun_w1.R")
 source("./source/fun_w2.R")
 source("./source/fun_w3.R")
+source("./source/subtract_mem.R")
+source("./source/fun_IMPITv2.R")
 
 setBackgroundImage(src = NULL, shinydashboard = TRUE)
 
@@ -202,12 +206,13 @@ server <- function(input, output, session) {
     
     
     # update index range dates (index period)
-    aux <- as.Date(state$episodes$date_start[1])
-    state$yr_first_epi <- lubridate::year(aux)
-    state$yr_first_epi <- as.numeric(state$yr_first_epi)
-    observe({
-      updateDateRangeInput(session, "daterange_index", start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), end = "2020-01-01")
-    })
+    # aux <- as.Date(state$episodes$date_start[1])
+    # state$yr_first_epi <- lubridate::year(aux)
+    # state$yr_first_epi <- as.numeric(state$yr_first_epi)
+    # aux_m <- ifelse(state$unit_var == "days", input$m)
+    # observe({
+    #   updateDateRangeInput(session, "daterange_index", start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), end = "2020-01-01")
+    # })
 
     })
   
@@ -376,31 +381,71 @@ server <- function(input, output, session) {
           state$tau <- as.integer(input$end_timfoc_year) - as.integer(input$start_timfoc_year) + 1
         }
       }
+      
+      # # alternative to compute tau
+      # # compute tau
+      # if (state$unit_var == "months") {
+      #   aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
+      #   aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
+      #   state$tau <- interval(aux_d1, aux_d2) %/% months(1)
+      # } else {
+      #   if (state$unit_var == "days"){
+      #     aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
+      #     aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
+      #     state$tau <- interval(aux_d1, aux_d2) %/% days(1)
+      #   } else {
+      #     state$tau <- NULL
+      #   }
+      # }
+      
+    }
+
+    # compute IMPIT index
+    # state$index <- fun_IMPIT(episodes = state$episodes,
+    #                          unit = state$unit_var,
+    #                          yrs = state$yrs_index,
+    #                          m = input$m,
+    #                          a = input$a_w1,
+    #                          b = input$b_w2,
+    #                          c = input$c_w2,
+    #                          d = state$d,
+    #                          intensity = state$intensity,
+    #                          time_focus = state$choice_timfoc,
+    #                          tau = state$tau)
+    # 
+    # state$contents_index <- data.frame(time = state$yrs_index, index = state$index)
+    
+    # compute with new function
+    if (input$choice_index_unit == '1') {
+      state$index_unit <- "years"
+    } else {
+      if (input$choice_index_unit == '2'){
+        state$index_unit <- "months"
+      } else{
+        state$index_unit <- "days"
+      }
     }
     
-    print(head(state$episodes))
-    print(state$unit_var)
-    print(input$m)
-    print(input$a_w1)
-    print(input$b_w2)
-    print(input$c_w2)
-    print(input$d_w3)
+    # period to compute index (YYYY-MM-DD)
+    index_d1 <- as.Date(input$daterange_index[1])
+    index_d2 <- as.Date(input$daterange_index[2])
+    state$index_range <- seq(index_d1, index_d2, by = state$index_unit)
     
-    # compute IMPIT index
-    state$index <- fun_IMPIT(episodes = state$episodes,
-                             unit = state$unit_var,
-                             yrs = state$yrs_index,
-                             m = input$m,
-                             a = input$a_w1,
-                             b = input$b_w2,
-                             c = input$c_w2,
-                             d = state$d,
-                             intensity = state$intensity,
-                             time_focus = state$choice_timfoc,
-                             tau = state$tau)
+    state$index <- fun_IMPITv2(episodes = state$episodes,
+                               unit = state$unit_var,
+                               index_range = state$index_range,
+                               m = input$m,
+                               a = input$a_w1,
+                               b = input$b_w2,
+                               c = input$c_w2,
+                               d = state$d,
+                               intensity = state$intensity,
+                               time_focus = state$choice_timfoc,
+                               tau = state$tau)
     
-    state$contents_index <- data.frame(time = state$yrs_index, index = state$index)
-    
+    state$contents_index <- data.frame(time = state$index_range, index = state$index)
+    print(head(state$index))
+    print(head(state$contents_index))
   })
   
   observeEvent(input$run_button_index,{
@@ -434,7 +479,7 @@ server <- function(input, output, session) {
       
       state$plot_index <- plot_ly(data = state$contents_index) %>%
         add_lines(x = ~time, y = ~index) %>% 
-        layout(xaxis = list(title="Year"),
+        layout(xaxis = list(title="Time"),
                yaxis = list(title="IMPIT index"))
       
       state$plot_index

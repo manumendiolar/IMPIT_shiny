@@ -402,6 +402,9 @@ ui <- dashboardPage(
                 type = "markdown",
                 content = "set_up_index_intensity_help"
                 ),
+              radioButtons("choice_index_unit", h5(strong("Display:")),
+                           choices = list("annually?" = 1, "monthly?" = 2, "daily?" = 3),
+                           selected = 1),
               actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
               ),
             ),
@@ -505,7 +508,7 @@ ui <- dashboardPage(
           
           # table and plot of other variable (to check) and correlation analysis with IMPIT index
           box(
-            title = div(icon("chart-scatter"), strong("Explore association between IMPIT index and response variable")),
+            title = div(icon("magnifying-glass", lib = "font-awesome"), strong("Explore association between IMPIT index and response variable")),
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
@@ -542,7 +545,7 @@ ui <- dashboardPage(
         fluidRow(
           box(
             width = 12,
-            title = strong("About us"),
+            title = strong("About us"),#div(icon("user"), strong("About us")),
             collapsible = TRUE,
             collapsed = FALSE,
             solidHeader = FALSE,

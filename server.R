@@ -91,7 +91,7 @@ server <- function(input, output, session) {
                     pageLength = 10,
                     lengthMenu = c(5,10,30,50), 
                     autoWidth = FALSE,  
-                    searching = T,
+                    searching = TRUE,
                     search = list(regex=TRUE, caseInsensitive=TRUE)
                     ),
                   rownames = FALSE) %>%
@@ -444,8 +444,6 @@ server <- function(input, output, session) {
                                tau = state$tau)
     
     state$contents_index <- data.frame(time = state$index_range, index = state$index)
-    print(head(state$index))
-    print(head(state$contents_index))
   })
   
   observeEvent(input$run_button_index,{
@@ -453,12 +451,12 @@ server <- function(input, output, session) {
     # Table index: print
     output$contents_index <- DT::renderDataTable({ 
       DT::datatable(state$contents_index, 
-                    rownames=F, 
+                    rownames=FALSE, 
                     options = list(
                       pageLength=10,
-                      autoWidth = T,
-                      searching = T,
-                      search = list(regex=T, caseInsensitive=T)
+                      autoWidth = TRUE,
+                      searching = TRUE,
+                      search = list(regex=TRUE, caseInsensitive=TRUE)
                       )
                     ) %>%
         formatRound(c(2), 2)
@@ -470,7 +468,7 @@ server <- function(input, output, session) {
         paste0("IMPIT_index_table.csv")
       },
       content = function(file) {
-        write.csv(state$contents_index, file)
+        write.csv(state$contents_index, file, row.names = FALSE)
       }
     )
     
@@ -517,11 +515,11 @@ server <- function(input, output, session) {
     DT::datatable(data_index(),
                   options = list(
                     pageLength=5,
-                    autoWidth=T,
-                    searching=T,
-                    search=list(regex=T, caseInsensitive=T)
+                    autoWidth=TRUE,
+                    searching=TRUE,
+                    search=list(regex=TRUE, caseInsensitive=TRUE)
                   ),
-                  rownames = F) %>%
+                  rownames = FALSE) %>%
       formatRound(c(2), 2) %>%
       formatStyle(columns=c(1:2), 'text-align'='centre')
   })
@@ -530,44 +528,15 @@ server <- function(input, output, session) {
   # IMPIT index + trend
   output$plot_app_index <- renderPlotly({
     
-    xx <- data_index()[ ,1]
+    xx <- as.Date(data_index()[ ,1])
     yy <- data_index()[ ,2]
     df_index <- data.frame(xx, yy)
-    t1 <- head(xx,1)
+   
+     t1 <- head(xx,1)
     t2 <- tail(xx,1)
     data.fmt = list(color=rgb(0.8,0.8,0.8,0.8), width=4)
     line.fmt = list(dash="solid", width = 1.5, color=NULL)
     
-    m1 <- lm(yy ~ xx)
-    m2 <- lm(yy ~ xx + I(xx^2))
-    m3 <- lm(log(yy) ~ log(xx))
-    
-    
-    # p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=data.fmt, name="Data")
-    # p <- add_lines(p, x=xx, y=predict(m1), line=line.fmt, name="Linear")
-    # p <- add_lines(p, x=xx, y=predict(m2), line=line.fmt, name="Quadratic")
-    # p <- add_lines(p, x=xx, y=exp(coef(m3)[1])*(xx^coef(m3)[2]), line=line.fmt, name="Exponential")
-    # p
-   
-    
-    # Smoothing splines
-    # Splines consist of a piece-wise polynomial with pieces defined by a sequence of knots where the pieces join smoothly. 
-    # A smoothing splines is estimated by minimizing a criterion containing a penalty for both goodness of fit, and smoothness.
-    # The trade-off between the two is controlled by the smoothing parameter lambda, which is typically chosen by cross-validation.
-    sp.base = smooth.spline(xx, yy)
-    sp.cr = gam(yy ~ s(xx, bs="cr"))
-    sp.gam = gam(yy ~ s(xx))
-    sp.pred = predict(sp.gam, type="response", se.fit=TRUE)
-    sp.df = data.frame(x=sp.gam$model[,2], y=sp.pred$fit,
-                       lb=as.numeric(sp.pred$fit - (1.96 * sp.pred$se.fit)),
-                       ub=as.numeric(sp.pred$fit + (1.96 * sp.pred$se.fit)))
-    sp.df = sp.df[order(sp.df$x),]
-    
-    pp = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
-    pp = add_lines(pp, x=xx, y=sp.pred$fit, name="GAM", line=list(color="black", width=1))
-    pp = add_ribbons(pp, x=sp.df$x, ymin=sp.df$lb, ymax=sp.df$ub, name="GAM 95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
-    #pp
-     
     
     # LOESS
     # LOESS (Locally Estimated Scatterplot Smoother) combines local regression 
@@ -579,19 +548,23 @@ server <- function(input, output, session) {
     # target value consists of a local regression constructed using 75% of the 
     # data points closest to the target value. This span is fairly large and 
     # results in estimated values that are smoother than those from other methods.
+    
+    xx <- as.integer(lubridate::year(xx))
     ll.smooth = loess(yy ~ xx, span=0.75)
     ll.pred = predict(ll.smooth, se = TRUE)
     ll.df = data.frame(x=ll.smooth$x, fit=ll.pred$fit,
-                       lb = ll.pred$fit - (1.96 * ll.pred$se),
-                       ub = ll.pred$fit + (1.96 * ll.pred$se))
+                      lb = ll.pred$fit - (1.96 * ll.pred$se),
+                      ub = ll.pred$fit + (1.96 * ll.pred$se))
     ll.df = ll.df[order(ll.df$xx),]
-    
+     
     p.llci = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
     p.llci = add_lines(p.llci, x=xx, y=ll.pred$fit, name="Mean", line=list(color="black", width=1))
     p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
     p.llci = layout(p.llci, title = "LOESS with confidence intervals")
     p.llci
     
+    #p.llci <- ggplot(df_index)+geom_smooth(aes(x=xx,y=yy),method='loess')
+    #ggplotly(p.llci)
   })
   
   
@@ -603,8 +576,8 @@ server <- function(input, output, session) {
     if (is.null(input$resp_file)) return(NULL)
     
     read.csv(file=input$resp_file$datapath,
-             header=T, 
-             stringsAsFactors=F)
+             header=TRUE, 
+             stringsAsFactors=FALSE)
   })
   
   # Response variable: table
@@ -612,11 +585,11 @@ server <- function(input, output, session) {
     DT::datatable(data_resp(),
                   options = list(
                     pageLength=5,
-                    autoWidth=T,
-                    searching=T,
-                    search=list(regex=T, caseInsensitive=T)
+                    autoWidth=TRUE,
+                    searching=TRUE,
+                    search=list(regex=TRUE, caseInsensitive=TRUE)
                   ),
-                  rownames = F) %>%
+                  rownames = FALSE) %>%
       formatRound(c(2), 2) %>%
       formatStyle(columns=c(1:2), 'text-align'='centre')
   }) 

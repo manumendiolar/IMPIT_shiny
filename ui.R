@@ -64,11 +64,11 @@ ui <- dashboardPage(
       notificationItem(
         text = steps$text[4],
         icon = icon("brain")
-      ),
-      notificationItem(
-        text = strong("Important info"),
-        icon = icon("exclamation")
-      )
+      )#,
+      # notificationItem(
+      #   text = strong("Important info"),
+      #   icon = icon("exclamation")
+      # )
     )
   ),
   

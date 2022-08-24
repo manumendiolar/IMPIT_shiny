@@ -1,20 +1,19 @@
-Source data for the response variable should be stored as a `CSV` format with two columns and header.
+Source data for the response variable should be stored as a `CSV` format with four columns and header.
 
-* The first column is for the time variable in years (numeric value). 
-* The second column is for the response value (numeric value). 
-* Please note that missing values are not allowed and space in header's names is not allowed either (e.g., use 'resp_variable' instead of 'resp variable').
+* The first three columns are for the year, month and day of the time variable, respectively. 
+* The last column is for the response value (numeric value).
+* Please note that missing values are not allowed, space in header's names is not allowed either (e.g., use 'resp_variable' instead of 'resp variable') and time range between IMPIT index and response variable should match.
 
 ***
 CSV Format:
 
 $$
-\\begin{array}{rr} 
+\\scriptsize
+\\begin{array}{cc} 
   \\hline 
-  \\text{Time} & \\text{Value} \\\\ 
-  \\hline 
-  \\cdot & \\cdot \\\\ 
-  \\cdot & \\cdot \\\\ 
-  \\cdot & \\cdot \\\\ 
+  \\text{Year} & \\text{Month} & \\text{Day} & \\text{Value} \\\\
+  \\hline       
+  \\cdot & \\cdot & \\cdot &        \\cdot \\\\ 
   \\hline 
 \\end{array}
 $$
@@ -24,15 +23,15 @@ $$
 An example:
 
 $$
-\\begin{array}{rr} 
+\\begin{array}{rr}
   \\hline 
-  \\text{Year} & \\text{catch_rate} \\\\ 
+  \\text{Year} & \\text{Month} & \\text{Day} & \\text{catch_rate} \\\\
   \\hline 
-  \\text{1988} & 52.85 \\\\ 
-  \\text{1989} & 61.20 \\\\
-  \\text{1990} & 49.42 \\\\
-  \\vdots & \\vdots \\\\ 
-  \\text{2019} & 15.94 \\\\ 
+  \\text{1988} & \\text{01} & \\text{01} & 52.85 \\\\
+  \\text{1989} & \\text{02} & \\text{01} & 61.20 \\\\
+  \\text{1990} & \\text{02} & \\text{01} & 49.42 \\\\
+  \\vdots & \\vdots & \\vdots & \\vdots \\\\
+  \\text{2019} & \\text{02} &  \\text{01} & 15.94 \\\\
   \\hline 
 \\end{array}
 $$

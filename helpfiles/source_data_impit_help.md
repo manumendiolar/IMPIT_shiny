@@ -1,37 +1,37 @@
-Source IMPIT data should be stored as a `CSV` format with two columns and header.
+Source IMPIT data should be stored as a `CSV` format with four columns and header.
 
-* The first column is for the time variable in years (numeric value). 
-* The second column is for the IMPIT index value (numeric value). 
+* The first three columns are for the year, month and day of the time variable, respectively. 
+* The last column is for the IMPIT index value (numeric value).
 * Please note that missing values are not allowed and space in header's names is not allowed either (e.g., use 'impit_index' instead of 'impit index').
 
 ***
 CSV Format:
 
 $$
-\\begin{array}{rr} 
+\\scriptsize
+\\begin{array}{cc} 
   \\hline 
-  \\text{Time} & \\text{Index} \\\\ 
-  \\hline 
-  \\cdot & \\cdot \\\\ 
-  \\cdot & \\cdot \\\\ 
-  \\cdot & \\cdot \\\\ 
+  \\text{Year} & \\text{Month} & \\text{Day} & \\text{Value} \\\\
+  \\hline       
+  \\cdot & \\cdot & \\cdot &        \\cdot \\\\ 
   \\hline 
 \\end{array}
 $$
+
 
 *** 
 An example:
 
 $$
-\\begin{array}{rr} 
+\\begin{array}{rr}
   \\hline 
-  \\text{Time} & \\text{Index} \\\\ 
+  \\text{Year} & \\text{Month} & \\text{Day} & \\text{Index} \\\\
   \\hline 
-  \\text{1988} & 1.49 \\\\ 
-  \\text{1989} & 1.51 \\\\
-  \\text{1990} & 1.50 \\\\
-  \\vdots & \\vdots \\\\ 
-  \\text{2019} & 0.91 \\\\ 
+  \\text{1988} & \\text{01} & \\text{01} & 1.49 \\\\
+  \\text{1989} & \\text{02} & \\text{01} & 1.51 \\\\
+  \\vdots & \\vdots & \\vdots & \\vdots \\\\
+  \\text{2019} & \\text{02} &  \\text{01} & 0.91 \\\\
   \\hline 
 \\end{array}
 $$
+

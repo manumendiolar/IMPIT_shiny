@@ -183,7 +183,7 @@ ui <- dashboardPage(
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            width = 8,
+            width = 9,
             height = "500px",
             plotlyOutput("envPlot", height = 700)
             )
@@ -206,7 +206,7 @@ ui <- dashboardPage(
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            width = 11,
+            width = 12,
             height = "500px",
             
             # Generate / Upload episodes 
@@ -236,8 +236,8 @@ ui <- dashboardPage(
                        type = "markdown",
                        content = "source_epi_generate_help"
                        ),
-                     fluidRow(column(4, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
-                     fluidRow(column(4, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
+                     fluidRow(column(5, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
+                     fluidRow(column(5, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
                      ),
                    actionButton("run_button_epi", "Compute", icon=icon("play"))
                    ),
@@ -276,7 +276,7 @@ ui <- dashboardPage(
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            width = 11,
+            width = 12,
             height = "500px",
             tabsetPanel(
               # Episodes: table
@@ -421,7 +421,7 @@ ui <- dashboardPage(
           
           # IMPIT index: exploratory
           column(
-            width = 8,
+            width = 9,
             box(
               title = div(icon("chart-line"), strong("IMPIT index")),
               width = NULL,
@@ -480,7 +480,7 @@ ui <- dashboardPage(
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            width = 8,
+            width = 9,
             height = "500px",
             tabsetPanel(
               tabPanel("Plot",
@@ -522,7 +522,7 @@ ui <- dashboardPage(
             collapsible = TRUE,
             collapsed = FALSE,
             status = "info",
-            width = 8,
+            width = 9,
             height = "500px",
             tabsetPanel(
               tabPanel("Plot",

@@ -416,10 +416,10 @@ server <- function(input, output, session) {
     # state$contents_index <- data.frame(time = state$yrs_index, index = state$index)
     
     # compute with new function
-    if (input$choice_index_unit == '1') {
+    if (input$choice_index_unit == 'years') {
       state$index_unit <- "years"
     } else {
-      if (input$choice_index_unit == '2'){
+      if (input$choice_index_unit == 'months'){
         state$index_unit <- "months"
       } else{
         state$index_unit <- "days"
@@ -559,7 +559,9 @@ server <- function(input, output, session) {
      
     p.llci = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
     p.llci = add_lines(p.llci, x=xx, y=ll.pred$fit, name="Mean", line=list(color="black", width=1))
-    p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
+    p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", 
+                         fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), 
+                         line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
     p.llci = layout(p.llci, title = "LOESS with confidence intervals")
     p.llci
 
@@ -603,7 +605,8 @@ server <- function(input, output, session) {
     
     
     #p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", col="purple")
-    p <- plot_ly(df_resp, x = ~xx, y = ~yy, type = 'scatter', mode = 'lines', line = list(color = 'rgb(205, 12, 24)', width = 2)) 
+    p <- plot_ly(df_resp, x = ~xx, y = ~yy, type = 'scatter', mode = 'lines', 
+                 line = list(color = 'rgb(205, 12, 24)', width = 2)) 
     p <- p %>% layout(
       xaxis = list(title = "Time", titlefont = list(size=12)),
       yaxis = list(title = data_resp_name[4], titlefont=list(size=12)))

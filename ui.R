@@ -282,7 +282,7 @@ ui <- dashboardPage(
               # Episodes: table
               tabPanel("Table",
                        fluidRow(
-                         column(11, div(DT::dataTableOutput("contents_epi"), style="font-size: 100%; width: 100%")),
+                         column(12, div(DT::dataTableOutput("contents_epi"), style="font-size: 100%; width: 100%")),
                          column( 3, downloadButton("downloadTable_epi", "Download Table"), style="margin-top: 25px;")
                          )
                        ),

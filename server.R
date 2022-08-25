@@ -257,16 +257,28 @@ server <- function(input, output, session) {
     d2 <- as.Date(tail(df$x,1))
     
     if (input$choice_timfoc == "1"){
+      
       df$z <- state$episodes$overlap
       df$z <- as.factor(df$z)
-      levels(df$z) <- c("No","Yes")
-
       lolliEp1 <- ggplot(df, aes(x, y, col = z)) +
         geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
         geom_point(size=2) +
-        labs(x=" ", y=" ", title=state$choices_int[1], col="Overlap") +
-        scale_color_manual(values = c("black","orange"))
+        labs(x=" ", y=" ", title=state$choices_int[1], col="Overlap")
       
+      if (length(levels(df$z)) > 1) {
+        levels(df$z) <- c("No","Yes")
+        lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
+      } else {
+        if (levels(df$z)[1] == "TRUE"){
+          levels(df$z)[1] <- "Yes"
+          levels(df$z)[2] <- "No"
+          lolliEp1 <- lolliEp1 + scale_color_manual(values = c("orange","black"))
+        } else {
+          levels(df$z)[1] <- "No"
+          levels(df$z)[2] <- "Yes"
+          lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
+        }
+      }
       } else {
         
         lolliEp1 <- ggplot(df, aes(x, y)) +
@@ -302,10 +314,39 @@ server <- function(input, output, session) {
     d1 <- as.Date(head(df$x,1))
     d2 <- as.Date(tail(df$x,1))
     
-    state$plot_epi_duration <- ggplot(df, aes(x, y)) +
-      geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
-      geom_point(color="black", size=2) +
-      labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration") +
+    if (input$choice_timfoc == "1"){
+      
+      df$z <- state$episodes$overlap
+      df$z <- as.factor(df$z)
+      lolliEp2 <- ggplot(df, aes(x, y, col = z)) +
+        geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+        geom_point(size=2) +
+        labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration", col="Overlap")
+      
+      if (length(levels(df$z)) > 1) {
+        levels(df$z) <- c("No","Yes")
+        lolliEp2 <- lolliEp2 + scale_color_manual(values = c("black","orange"))
+      } else {
+        if (levels(df$z)[1] == "TRUE"){
+          levels(df$z)[1] <- "Yes"
+          levels(df$z)[2] <- "No"
+          lolliEp2 <- lolliEp2 + scale_color_manual(values = c("orange","black"))
+        } else {
+          levels(df$z)[1] <- "No"
+          levels(df$z)[2] <- "Yes"
+          lolliEp2 <- lolliEp2 + scale_color_manual(values = c("black","orange"))
+        }
+      }
+    } else {
+      
+      lolliEp2 <- ggplot(df, aes(x, y)) +
+        geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+        geom_point(color="black", size=2) +
+        labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration")
+    }
+    
+    
+    state$plot_epi_duration <- lolliEp2 +
       scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
       theme_light() +
       theme(
@@ -317,6 +358,7 @@ server <- function(input, output, session) {
         axis.text.y = element_text(size=9), 
         legend.position="right"
       )
+    
     
     ggplotly(state$plot_epi_duration)
     
@@ -372,33 +414,33 @@ server <- function(input, output, session) {
     if (input$choice_timfoc == '1'){
       state$choice_timfoc <- TRUE
       state$d <- input$d_w3
-      if (state$unit_var == 'days') {
-        state$tau <- as.Date(paste0("2000","-",state$period_timfoc[2])) - as.Date(paste0("2000","-",state$period_timfoc[1]))
-      } else {
-        if (state$unit_var == 'months'){
-          state$tau <- as.integer(input$end_timfoc_month) - as.integer(input$start_timfoc_month) + 1
-        } else {
-          state$tau <- as.integer(input$end_timfoc_year) - as.integer(input$start_timfoc_year) + 1
-        }
-      }
-      
+      # if (state$unit_var == 'days') {
+      #   state$tau <- as.Date(paste0("2000","-",state$period_timfoc[2])) - as.Date(paste0("2000","-",state$period_timfoc[1]))
+      # } else {
+      #   if (state$unit_var == 'months'){
+      #     state$tau <- as.integer(input$end_timfoc_month) - as.integer(input$start_timfoc_month) + 1
+      #   } else {
+      #     state$tau <- as.integer(input$end_timfoc_year) - as.integer(input$start_timfoc_year) + 1
+      #   }
       # # alternative to compute tau
       # # compute tau
-      # if (state$unit_var == "months") {
-      #   aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
-      #   aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
-      #   state$tau <- interval(aux_d1, aux_d2) %/% months(1)
-      # } else {
-      #   if (state$unit_var == "days"){
-      #     aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
-      #     aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
-      #     state$tau <- interval(aux_d1, aux_d2) %/% days(1)
-      #   } else {
-      #     state$tau <- NULL
-      #   }
-      # }
-      
+      if (state$unit_var == "months") {
+        aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
+        aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
+        state$tau <- interval(aux_d1, aux_d2) %/% months(1)
+      } else {
+        if (state$unit_var == "days"){
+          aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
+          aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
+          state$tau <- interval(aux_d1, aux_d2) %/% days(1)
+        } else {
+          state$tau <- NULL
+        }
+      }
     }
+      
+  
+  
 
     # compute IMPIT index
     # state$index <- fun_IMPIT(episodes = state$episodes,
@@ -442,6 +484,17 @@ server <- function(input, output, session) {
                                intensity = state$intensity,
                                time_focus = state$choice_timfoc,
                                tau = state$tau)
+    print(head(state$episodes))
+    print(state$unit_var)
+    print(state$index_range)
+    print(input$m)
+    print(input$a_w1)
+    print(input$b_w2)
+    print(input$c_w2)
+    print(state$d)
+    print(state$intensity)
+    print(state$choice_timfoc)
+    print(state$tau)
     
     # Arrange data frame index
     state$contents_index <- data.frame(

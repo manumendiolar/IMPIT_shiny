@@ -390,6 +390,10 @@ server <- function(input, output, session) {
 
   observeEvent(input$run_button_index,{
     
+    state$episodes$date_start <- as.Date(state$episodes$date_start)
+    state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+    state$episodes$date_end <- as.Date(state$episodes$date_end)
+    
     # observe({
     #   updateDateRangeInput(session, "daterange_index", 
     #                        start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), 
@@ -398,6 +402,26 @@ server <- function(input, output, session) {
     
     # keep unit choice
     state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
+    
+    # # # Let's update index display unit choices
+    # new_choices_index_unit2 <- list("annually?"=1, "monthly?"=2)
+    # new_choices_index_unit1 <- list("annually?"=1)
+    # 
+    # if(input$unit_var == '2'){
+    #   updateRadioButtons(
+    #     session, "choice_index_unit",
+    #     label = h5(strong("Display:")),
+    #     choices =  new_choices_int2,
+    #     selected = 1)
+    # } else {
+    #   if(input$unit_var == '3'){
+    #     updateRadioButtons(
+    #       session, "choice_index_unit",
+    #       label = h5(strong("Display:")),
+    #       choices =  new_choices_int1,
+    #       selected = 1)
+    #   }}
+ 
     
     # keep intensity choice
     state$intensity <- input$choice_intensity
@@ -445,21 +469,24 @@ server <- function(input, output, session) {
     # state$contents_index <- data.frame(time = state$yrs_index, index = state$index)
     
     # compute with new function
-    if (input$choice_index_unit == 'years') {
-      state$index_unit <- "years"
-    } else {
-      if (input$choice_index_unit == 'months'){
-        state$index_unit <- "months"
-      } else{
-        state$index_unit <- "days"
-      }
-    }
+    state$index_unit <- ifelse(input$choice_index_unit == '1','years', ifelse(input$choice_index_unit == '2', 'months', 'days'))
+    # if (input$unit_var == '1') {
+    #   state$index_unit <- ifelse(input$choice_index_unit == '1','years', ifelse(input$choice_index_unit == '2', 'months', 'days'))
+    # } else {
+    #   if (input$unit_var == '2'){
+    #     state$index_unit <- ifelse(input$choice_index_unit == '1','years', 'months')
+    #   } else{
+    #     state$index_unit <-  'years'
+    #   }
+    # }
+    print(input$choice_index_unit)
+    print(state$index_unit)
     
     # period to compute index (YYYY-MM-DD)
     index_d1 <- as.Date(input$daterange_index[1])
     index_d2 <- as.Date(input$daterange_index[2])
     state$index_range <- seq(index_d1, index_d2, by = state$index_unit)
-    
+
     # compute IMPIT index
     state$index <- fun_IMPITv2(episodes = state$episodes,
                                unit = state$unit_var,
@@ -472,10 +499,7 @@ server <- function(input, output, session) {
                                intensity = state$intensity,
                                time_focus = state$choice_timfoc,
                                tau = state$tau)
-    print(state$choice_timfoc)
-    print(state$index_range)
-    print(state$index)
-    
+
     # Arrange data frame index
     state$contents_index <- data.frame(
       Year = lubridate::year(state$index_range),

@@ -402,18 +402,7 @@ ui <- dashboardPage(
                 type = "markdown",
                 content = "set_up_index_range_help"
                 ),
-              conditionalPanel(
-                condition = "input.unit_var == '1'",
-                radioButtons("choice_index_unit", h5(strong("Display:")), choices = list("annually?"="years", "monthly?"="months", "daily?"="days"))
-                ),
-              conditionalPanel(
-                condition = "input.unit_var == '2'",
-                radioButtons("choice_index_unit", h5(strong("Display:")), choices = list("annually?"="years", "monthly?"="months"))
-              ),
-              conditionalPanel(
-                condition = "input.unit_var == '3'",
-                radioButtons("choice_index_unit", h5(strong("Display:")), choices = list("annually?"="years"))
-              ),
+              radioButtons("choice_index_unit", h5(strong("Display:")), choices = list("annually?"=1, "monthly?"=2, "daily?"=3)),
               actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
               ),
             ),

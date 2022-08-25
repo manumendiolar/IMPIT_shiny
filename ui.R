@@ -98,12 +98,12 @@ ui <- dashboardPage(
       theme = "blue_gradient"
     ),
     
-    tags$head(
-      tags$link(
-        rel = "stylesheet",
-        type = "text/css",
-        href = "IMPITa_style.css")
-    ),
+    # tags$head(
+    #   tags$link(
+    #     rel = "stylesheet",
+    #     type = "text/css",
+    #     href = "IMPITa_style.css")
+    # ),
 
     
     # MAIN BODY ---------------------------------------------------------------
@@ -211,8 +211,10 @@ ui <- dashboardPage(
             
             # Generate / Upload episodes 
             column(width = 4,
-                   radioButtons("choice_epifile", "You can generate or upload the list of episodes:",
-                                choices = list("generate? " = 1, "upload? " = 2), selected = NULL),
+                   radioButtons("choice_epifile",
+                                "You can generate or upload the list of episodes:", 
+                                choices = list("generate"=1,"upload"=2)
+                                ),
                    conditionalPanel(
                      condition = "input.choice_epifile == '2'",
                      helper(
@@ -227,41 +229,70 @@ ui <- dashboardPage(
                    conditionalPanel(
                      condition = "input.choice_epifile == '1'",
                      helper(
-                       radioButtons("choice_thres", "Observations which exceed, or fall below specified threshold:",
-                                    choices = list("up-episodes?" = 1, "down-episodes?" = 2),
-                                    selected = NULL),
+                       radioButtons("choice_thres",
+                                    "Observations which exceed, or fall below a threshold:",
+                                    choices = list("up-episodes" = 1, "down-episodes" = 2)
+                                    ),
                        icon = "question",
                        size = "l",
                        title = "Format of generated episodes file",
                        type = "markdown",
                        content = "source_epi_generate_help"
                        ),
-                     fluidRow(column(5, numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf))),
-                     fluidRow(column(5, numericInput('duration_min', 'Minimum duration:', 1, min = 1, max = Inf))),
+                     fluidRow(column(5, 
+                                     helper(
+                                       numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf),
+                                       icon = "question",
+                                       size = "m",
+                                       title = "Threshold",
+                                       type = "markdown",
+                                       content = "help_threshold"
+                                     ))),
+                     fluidRow(column(5, 
+                                     helper(
+                                       numericInput('duration_min','Minimum duration:', 1, min = 1, max = Inf),
+                                       verbatimTextOutput("value_duration_min"),
+                                       icon = "question",
+                                       size = "m",
+                                       title = "Minimum duration",
+                                       type = "markdown",
+                                       content = "help_min_duration"
+                                     )))
                      ),
                    actionButton("run_button_epi", "Compute", icon=icon("play"))
                    ),
             # Time units
             column(width = 3,
-                   radioButtons("unit_var", "Time units", choices=list("days"=1,"months"=2,"years"=3), selected=NULL)
+                   helper(
+                     radioButtons("unit_var", "Episodes time units", choices=list("days"=1,"months"=2,"years"=3)),
+                     icon = "question",
+                     size = "m",
+                     title = "Episodes time units",
+                     type = "markdown",
+                     content = "help_epi_units"
+                     )
                    ),
             # Timing
             column(width = 4,
-                   radioButtons("choice_timfoc", "Timing", choices=list("yes"=1,"no"=2), selected=NULL),
+                   helper(
+                     radioButtons("choice_timfoc", "Episodes overlapping special season", choices=list("yes"=1,"no"=2), selected=NULL),
+                     icon = "question",
+                     size = "m",
+                     title = "Episodes time units",
+                     type = "markdown",
+                     content = "help_epi_units"
+                   ),
                    conditionalPanel(
                      condition = "input.choice_timfoc == '1'",
-                     strong("When does the special season start?"),
-                     br(),
+                     strong("Special season start"),
                      fluidRow(
-                       column(4, selectInput("start_timfoc_day", "", choices=choices_days, selected=choices_days[1])),
-                       column(4, selectInput("start_timfoc_month", "", choices=choices_months, selected=choices_months[1]))
+                       column(5, selectInput("start_timfoc_month", "", choices=choices_months, selected=choices_months[1])),
+                       column(3, selectInput("start_timfoc_day", "", choices=choices_days, selected=choices_days[1]))
                        ),
-                     br(),
-                     strong("When does the special season end?"),
-                     br(),
+                     strong("Special season end"),
                      fluidRow(
-                       column(4, selectInput("end_timfoc_day", "", choices=choices_days, selected=choices_days[1])),
-                       column(4, selectInput("end_timfoc_month", "", choices=choices_months, selected=choices_months[1]))
+                       column(5, selectInput("end_timfoc_month", "", choices=choices_months, selected=choices_months[2])),
+                       column(3, selectInput("end_timfoc_day", "", choices=choices_days, selected=choices_days[1])),
                        )
                      )
                    )

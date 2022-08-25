@@ -128,6 +128,33 @@ server <- function(input, output, session) {
   
   state <- reactiveValues()
   
+  months1 <- c("January","March","May","July","August","October","December") 
+  months2 <- c("April","June","September","November") 
+  months3 <- c("February") 
+  
+  
+  # Let's update days options according to month
+  observeEvent(input$start_timfoc_month,{
+    if (input$start_timfoc_month %in% months1) updateSelectInput(session, "start_timfoc_day", choices = 1:31, selected = 1)
+    if (input$start_timfoc_month %in% months2) updateSelectInput(session, "start_timfoc_day", choices = 1:30, selected = 1)
+    if (input$start_timfoc_month %in% months3) updateSelectInput(session, "start_timfoc_day", choices = 1:28, selected = 1)
+  })
+  
+  observeEvent(input$end_timfoc_month,{
+    if (input$end_timfoc_month %in% months1) updateSelectInput(session, "end_timfoc_day", choices = 1:31, selected = 1)
+    if (input$end_timfoc_month %in% months2) updateSelectInput(session, "end_timfoc_day", choices = 1:30, selected = 1)
+    if (input$end_timfoc_month %in% months3) updateSelectInput(session, "end_timfoc_day", choices = 1:28, selected = 1)
+  })
+  
+  
+  numbers <- reactive({
+    validate(
+      need(is.integer(input$duration_min), "Please input an integer")
+    )
+  })
+  output$value_duration_min <- renderPrint({ numbers() })
+  
+  
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi,{
   
@@ -413,7 +440,7 @@ server <- function(input, output, session) {
     #       selected = 1)
     #   }}
     
-  })
+  #})
   
   
   # INDEX TAB ---------------------------------------------------------------

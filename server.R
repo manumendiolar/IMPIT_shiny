@@ -383,15 +383,15 @@ server <- function(input, output, session) {
     }
   )
 
-  observeEvent(input$unit_var, {
-    if (input$unit_var == '2'){
-      updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1, "monthly?"=2))
-    } else {
-      if (input$unit_var == '3'){
-        updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1))
-       }
-    }
-  })
+  # observeEvent(input$unit_var, {
+  #   if (input$unit_var == '2'){
+  #     updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1, "monthly?"=2))
+  #   } else {
+  #     if (input$unit_var == '3'){
+  #       updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1))
+  #      }
+  #   }
+  # })
     
     
     # # # Let's update index display unit choices

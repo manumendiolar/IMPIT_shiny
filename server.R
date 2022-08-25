@@ -383,25 +383,16 @@ server <- function(input, output, session) {
     }
   )
 
-
-  
-  
-  # INDEX TAB ---------------------------------------------------------------
-
-  observeEvent(input$run_button_index,{
+  observeEvent(input$unit_var, {
+    if (input$unit_var == '2'){
+      updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1, "monthly?"=2))
+    } else {
+      if (input$unit_var == '3'){
+        updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1))
+       }
+    }
+  })
     
-    state$episodes$date_start <- as.Date(state$episodes$date_start)
-    state$episodes$date_peak <- as.Date(state$episodes$date_peak)
-    state$episodes$date_end <- as.Date(state$episodes$date_end)
-    
-    # observe({
-    #   updateDateRangeInput(session, "daterange_index", 
-    #                        start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), 
-    #                        end = "2020-01-01")
-    # })
-    
-    # keep unit choice
-    state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
     
     # # # Let's update index display unit choices
     # new_choices_index_unit2 <- list("annually?"=1, "monthly?"=2)
@@ -421,8 +412,29 @@ server <- function(input, output, session) {
     #       choices =  new_choices_int1,
     #       selected = 1)
     #   }}
- 
     
+  })
+  
+  
+  # INDEX TAB ---------------------------------------------------------------
+
+  
+  observeEvent(input$run_button_index,{
+    
+    state$episodes$date_start <- as.Date(state$episodes$date_start)
+    state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+    state$episodes$date_end <- as.Date(state$episodes$date_end)
+    
+    # observe({
+    #   updateDateRangeInput(session, "daterange_index", 
+    #                        start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), 
+    #                        end = "2020-01-01")
+    # })
+    
+    # keep unit choice
+    state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
+    
+
     # keep intensity choice
     state$intensity <- input$choice_intensity
     

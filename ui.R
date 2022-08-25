@@ -98,12 +98,12 @@ ui <- dashboardPage(
       theme = "blue_gradient"
     ),
     
-    # tags$head(
-    #   tags$link(
-    #     rel = "stylesheet",
-    #     type = "text/css",
-    #     href = "IMPITa_style.css")
-    # ),
+    tags$head(
+      tags$link(
+        rel = "stylesheet",
+        type = "text/css",
+        href = "IMPITa_style.css")
+    ),
 
     
     # MAIN BODY ---------------------------------------------------------------
@@ -251,7 +251,7 @@ ui <- dashboardPage(
                      fluidRow(column(5, 
                                      helper(
                                        numericInput('duration_min','Minimum duration:', 1, min = 1, max = Inf),
-                                       verbatimTextOutput("value_duration_min"),
+                                       #verbatimTextOutput("value_duration_min"),
                                        icon = "question",
                                        size = "m",
                                        title = "Minimum duration",

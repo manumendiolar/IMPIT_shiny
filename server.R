@@ -147,13 +147,32 @@ server <- function(input, output, session) {
   })
   
   
-  numbers <- reactive({
-    validate(
-      need(is.integer(input$duration_min), "Please input an integer")
-    )
-  })
-  output$value_duration_min <- renderPrint({ numbers() })
+  # numbers <- reactive({
+  #   validate(
+  #     need(is.integer(input$duration_min), "Please input an integer")
+  #   )
+  # })
+  # output$value_duration_min <- renderPrint({ numbers() })
+  # 
   
+  # A notification ID
+  id <- NULL
+  
+  # A notification if minimum duration is not an integer
+  observe({
+    if (!is.integer(input$duration_min) | (input$duration_min < 0)) {
+      #updateNumericInput(session, "duration_min", 'Minimum duration:', 1)
+      # If there's currently a notification, don't add another
+      if (!is.null(id))
+        return()
+      # Save the ID for removal later
+      id <<- showNotification(paste("Enter a positive and integer value for minimum duration"), type = "warning", duration = NULL)
+    } else {
+      if (!is.null(id))
+        removeNotification(id)
+      id <<- NULL
+    }
+  })
   
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi,{

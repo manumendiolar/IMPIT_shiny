@@ -146,7 +146,7 @@ server <- function(input, output, session) {
       state$choices_int <- c("intensity_mean","intensity_median","intensity_min","intensity_max","intensity_log")
     } 
     
-    if (input$choice_epifile == "2"){ 
+    if (input$choice_epifile == '2'){ 
       
       # load episode list if already available
       data_epi <- eventReactive(input$epifile_input,
@@ -164,7 +164,7 @@ server <- function(input, output, session) {
       state$episodes$date_end <- as.Date(state$episodes$date_end)
       
       # Let's update intensity functions choices
-      state$choices_int <- grep("intensity_", colnames(state$episodes), value = T)
+      state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
       new_choices_int <- str_remove(state$choices_int, "intensity_")
       updateSelectInput(session, "choice_intensity", 
                         label = "Intensity", 
@@ -187,7 +187,6 @@ server <- function(input, output, session) {
       end_timfoc_month <- factor(input$end_timfoc_month, levels = choices_months)
       end_timfoc_month <- as.integer(end_timfoc_month)
       
-      
       # update format of start date
       state$start_day <- ifelse(start_timfoc_day %in% seq(1,9,1), paste0("0",start_timfoc_day), paste0(start_timfoc_day))
       state$start_month <- ifelse(start_timfoc_month %in% seq(1,9,1), paste0("0",start_timfoc_month), paste0(start_timfoc_month))
@@ -203,7 +202,6 @@ server <- function(input, output, session) {
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
     } 
-    
     
     # update index range dates (index period)
     # aux <- as.Date(state$episodes$date_start[1])
@@ -231,7 +229,7 @@ server <- function(input, output, session) {
                     )
                   ) %>% 
       formatRound(c(6,7,8,9,10), 2) %>% 
-      formatStyle(columns=c(1:4), 'text-align'='centre') #%>% formatRound(purrr::map_lgl(.$x$data[ ,5:dim(state$episodes)[2]], is.numeric), digits = 2)#formatRound(c(6:10), 2)
+      formatStyle(columns=c(1:4), 'text-align'='centre') 
     })
   
   
@@ -256,7 +254,7 @@ server <- function(input, output, session) {
     d1 <- as.Date(head(df$x,1))
     d2 <- as.Date(tail(df$x,1))
     
-    if (input$choice_timfoc == "1"){
+    if (input$choice_timfoc == '1'){
       
       df$z <- state$episodes$overlap
       df$z <- as.factor(df$z)
@@ -314,7 +312,7 @@ server <- function(input, output, session) {
     d1 <- as.Date(head(df$x,1))
     d2 <- as.Date(tail(df$x,1))
     
-    if (input$choice_timfoc == "1"){
+    if (input$choice_timfoc == '1'){
       
       df$z <- state$episodes$overlap
       df$z <- as.factor(df$z)
@@ -363,7 +361,8 @@ server <- function(input, output, session) {
     ggplotly(state$plot_epi_duration)
     
   })
-  
+
+    
   # Episodes: plot intensity download .png
   output$downloadPlot_epi_intensity<- downloadHandler(
     filename = function(){
@@ -385,6 +384,8 @@ server <- function(input, output, session) {
   )
 
 
+  
+  
   # INDEX TAB ---------------------------------------------------------------
 
   observeEvent(input$run_button_index,{
@@ -402,9 +403,9 @@ server <- function(input, output, session) {
     state$intensity <- input$choice_intensity
     
     # build vector of dates (index period)
-    yr_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
-    yr_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
-    state$yrs_index <- seq(yr_index_start, yr_index_end, 1)
+    # yr_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
+    # yr_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
+    # state$yrs_index <- seq(yr_index_start, yr_index_end, 1)
     
     # compute d and tau (total units of special timing)
     state$d <- NULL
@@ -414,34 +415,20 @@ server <- function(input, output, session) {
     if (input$choice_timfoc == '1'){
       state$choice_timfoc <- TRUE
       state$d <- input$d_w3
-      # if (state$unit_var == 'days') {
-      #   state$tau <- as.Date(paste0("2000","-",state$period_timfoc[2])) - as.Date(paste0("2000","-",state$period_timfoc[1]))
-      # } else {
-      #   if (state$unit_var == 'months'){
-      #     state$tau <- as.integer(input$end_timfoc_month) - as.integer(input$start_timfoc_month) + 1
-      #   } else {
-      #     state$tau <- as.integer(input$end_timfoc_year) - as.integer(input$start_timfoc_year) + 1
-      #   }
-      # # alternative to compute tau
-      # # compute tau
-      if (state$unit_var == "months") {
+      # alternative to compute tau
+      if (state$unit_var == 'months') {
         aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
         aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
         state$tau <- interval(aux_d1, aux_d2) %/% months(1)
       } else {
-        if (state$unit_var == "days"){
+        if (state$unit_var == 'days'){
           aux_d1 <- as.Date(paste0("2000-",state$period_timfoc[1]))
           aux_d2 <- as.Date(paste0("2000-",state$period_timfoc[2]))
           state$tau <- interval(aux_d1, aux_d2) %/% days(1)
-        } else {
-          state$tau <- NULL
-        }
+        } 
       }
     }
-      
-  
-  
-
+    
     # compute IMPIT index
     # state$index <- fun_IMPIT(episodes = state$episodes,
     #                          unit = state$unit_var,
@@ -473,6 +460,7 @@ server <- function(input, output, session) {
     index_d2 <- as.Date(input$daterange_index[2])
     state$index_range <- seq(index_d1, index_d2, by = state$index_unit)
     
+    # compute IMPIT index
     state$index <- fun_IMPITv2(episodes = state$episodes,
                                unit = state$unit_var,
                                index_range = state$index_range,
@@ -484,17 +472,9 @@ server <- function(input, output, session) {
                                intensity = state$intensity,
                                time_focus = state$choice_timfoc,
                                tau = state$tau)
-    print(head(state$episodes))
-    print(state$unit_var)
-    print(state$index_range)
-    print(input$m)
-    print(input$a_w1)
-    print(input$b_w2)
-    print(input$c_w2)
-    print(state$d)
-    print(state$intensity)
     print(state$choice_timfoc)
-    print(state$tau)
+    print(state$index_range)
+    print(state$index)
     
     # Arrange data frame index
     state$contents_index <- data.frame(
@@ -503,7 +483,6 @@ server <- function(input, output, session) {
       Day = lubridate::day(state$index_range),
       time = state$index_range,
       index = state$index)
-    
   })
   
   observeEvent(input$run_button_index,{

@@ -349,7 +349,7 @@ ui <- dashboardPage(
                   tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
                               #inline .form-group { display: table-row;}")
                 ),
-                tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=0, step = 0.01)))
+                tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=2, step = 0.01)))
                 ),
                 icon = "question",
                 size = "m",
@@ -365,8 +365,8 @@ ui <- dashboardPage(
                     tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle}
                               #inline .form-group { display: table-row;}")
                     ),
-                  tags$div(id = "inline", column(5, numericInput("b_w2", label = 'b:', min=0, max=Inf, value=0, step = 0.01))),
-                  tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0, step = 0.01)))
+                  tags$div(id = "inline", column(5, numericInput("b_w2", label = 'b:', min=0, max=Inf, value=1.75, step = 0.01))),
+                  tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0.25, step = 0.01)))
                   ),
                 icon = "question",
                 size = "m",
@@ -384,7 +384,7 @@ ui <- dashboardPage(
                       tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
                               #inline .form-group { display: table-row;}")
                     ),
-                    tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=0, step = 0.01)))
+                    tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=1, step = 0.01)))
                   ),
                   icon = "question",
                   size = "m",

@@ -47,7 +47,7 @@
 
 
 
-fun_IMPITv2 <- function(episodes, unit, index_range, m, a, b, c, d, intensity, time_focus=FALSE, tau=NULL){
+fun_IMPITv2 <- function(episodes, unit, index_range, m, a, b, c, d=NULL, intensity, time_focus=FALSE, tau=NULL){
 
   # Pre-allocate IMPIT index vector
   Index <- numeric(length(index_range))

@@ -184,39 +184,45 @@ server <- function(input, output, session) {
     }
   })
   
+  observeEvent(input$choice_epifile, {
+    if (input$choice_epifile == '2'){
+      
+    showNotification("This is a notification.")
+    }
+  })
   
   # depending on generate / upload episode file
-  observeEvent(input$run_button_epi,{
-  
-   if (input$choice_epifile == '1'){
+  observeEvent(input$run_button_epi, {
+    
+    if (input$choice_epifile == '1'){
       
       # check for up or dwn episodes
-      if (input$choice_thres == '1'){
-        thres_above <- TRUE
-      } else{
-        thres_above <- FALSE
-      }
-      # compute episodes/update if necessary 
+      if (input$choice_thres == '1') thres_above <- TRUE
+      if (input$choice_thres == '2') thres_above <- FALSE
+      
+      # compute episodes 
       state$episodes <- mydetect_event(data_input(), thres_above, input$thres, input$duration_min)
+      
+      # intensity choices
       state$choices_int <- c("intensity_mean","intensity_median","intensity_min","intensity_max","intensity_log")
-   }
+    }
     
-   if (input$choice_epifile == '2'){
-     
-     # load episode list if already available
-     data_epi <- eventReactive(input$epifile_input,
-         {
-           # if (is.null(input$epifile_input))  return(NULL)
-           # inFile <- input$epifile_input
-           # read.csv(inFile$datapath)
-           #check extension file
-               if (tools::file_ext(input$epifile_input$datapath) != "csv") {
-                 shinyalert("Invalid extension file", type = "error")
-               } else {
-                 # read file
-                 aux <- read.csv(input$epifile_input$datapath)
-                 # check format file
-                 conditions <- (dim(aux)[2] < 6) #|
+    if (input$choice_epifile == '2'){
+      
+      # load episode list 
+      data_epi <- eventReactive(input$epifile_input,
+        {
+          # if (is.null(input$epifile_input))  return(NULL)
+          # inFile <- input$epifile_input
+          # read.csv(inFile$datapath)
+          # check extension file
+          if (tools::file_ext(input$epifile_input$datapath) != "csv") {
+            shinyalert("Invalid extension file", type = "error")
+          } else {
+            # read file
+            aux <- read.csv(input$epifile_input$datapath)
+            # check format file
+            conditions <- (dim(aux)[2] < 6) #|
                    # !all(colnames(aux)[1:5] != c("event_no","duration","date_start","date_peak","date_end")) |
                    # (length(grep("intensity_", colnames(aux))) < 1) |
                    # (aux[ ,1:2]-floor(aux[ ,aux[ ,1:2]]) != 0) |
@@ -225,51 +231,45 @@ server <- function(input, output, session) {
                    # !is.Date(as.Date(aux[,4])) |
                    # !is.Date(as.Date(aux[,5])) |
                    # !is.numeric(aux[ ,6:dim(aux)[2]])
-                 if (conditions) {
-                   shinyalert("Invalid format file", type = "error")
-                  } else {
-                    aux
-                  }
-               }
-         })
-
-    #state$episodes <- data_epi()
-    state$episodes <- as.data.frame(data_epi())
-    state$episodes$date_start <- as.Date(state$episodes$date_start)
-    state$episodes$date_peak <- as.Date(state$episodes$date_peak)
-    state$episodes$date_end <- as.Date(state$episodes$date_end)
-
-    # Let's update intensity functions choices
-    state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
-    new_choices_int <- str_remove(state$choices_int, "intensity_")
-    updateSelectInput(session, "choice_intensity",
-                      label = "Intensity",
-                      choices =  new_choices_int,
-                      selected = head(new_choices_int, 1)
-                      )
+            if (conditions) {
+              shinyalert("Invalid format file", type = "error")
+            } else {
+              aux
+            }
+          }
+        })
+      
+      state$episodes <- as.data.frame(data_epi())
+      state$episodes$date_start <- as.Date(state$episodes$date_start)
+      state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+      state$episodes$date_end <- as.Date(state$episodes$date_end)
+      
+      # update intensity choices
+      state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
+      new_choices_int <- str_remove(state$choices_int, "intensity_")
+      updateSelectInput(session, "choice_intensity",
+                        label = "Intensity",
+                        choices =  new_choices_int,
+                        selected = head(new_choices_int, 1)
+                        )
     }
     
-    
-    # check for timing focus
+    # special season
     if (input$choice_timfoc == '1'){
 
-      # check format timing start date
-      start_timfoc_day <- as.character(input$start_timfoc_day)
-      start_timfoc_month <- factor(input$start_timfoc_month, levels = choices_months)
-      start_timfoc_month <- as.integer(start_timfoc_month)
+      # start date format
+      ss_start_dd <- as.character(input$start_timfoc_day)
+      ss_start_mm <- factor(input$start_timfoc_month, levels = choices_months)
+      ss_start_mm <- as.integer(ss_start_mm)
+      state$start_day <- ifelse(ss_start_dd %in% seq(1,9,1), paste0("0",ss_start_dd), paste0(ss_start_dd))
+      state$start_month <- ifelse(ss_start_mm %in% seq(1,9,1), paste0("0",ss_start_mm), paste0(ss_start_mm))
       
-      # check format timing end date
-      end_timfoc_day <- as.character(input$end_timfoc_day)
-      end_timfoc_month <- factor(input$end_timfoc_month, levels = choices_months)
-      end_timfoc_month <- as.integer(end_timfoc_month)
-      
-      # update format of start date
-      state$start_day <- ifelse(start_timfoc_day %in% seq(1,9,1), paste0("0",start_timfoc_day), paste0(start_timfoc_day))
-      state$start_month <- ifelse(start_timfoc_month %in% seq(1,9,1), paste0("0",start_timfoc_month), paste0(start_timfoc_month))
-      
-      # update format of end date
-      state$end_day <- ifelse(end_timfoc_day %in% seq(1,9,1), paste0("0",end_timfoc_day), paste0(end_timfoc_day))
-      state$end_month <- ifelse(end_timfoc_month %in% seq(1,9,1), paste0("0",end_timfoc_month), paste0(end_timfoc_month))
+      # end date format
+      ss_end_dd <- as.character(input$end_timfoc_day)
+      ss_end_mm <- factor(input$end_timfoc_month, levels = choices_months)
+      ss_end_mm <- as.integer(ss_end_mm)
+      state$end_day <- ifelse(ss_end_dd %in% seq(1,9,1), paste0("0",ss_end_dd), paste0(ss_end_dd))
+      state$end_month <- ifelse(ss_end_mm %in% seq(1,9,1), paste0("0",ss_end_mm), paste0(ss_end_mm))
       
       # gather as a vector
       state$period_timfoc <- c(paste0(state$start_month,"-",state$start_day), paste0(state$end_month,"-",state$end_day))
@@ -277,37 +277,38 @@ server <- function(input, output, session) {
       # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
-    } 
+    }
     
-    # update index range dates (index period)
-    # aux <- as.Date(state$episodes$date_start[1])
-    # state$yr_first_epi <- lubridate::year(aux)
-    # state$yr_first_epi <- as.numeric(state$yr_first_epi)
-    # aux_m <- ifelse(state$unit_var == "days", input$m)
-    # observe({
-    #   updateDateRangeInput(session, "daterange_index", start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), end = "2020-01-01")
-    # })
-
-    })
-  
+  })
   
   
   # Episodes: table print
-  output$contents_epi <- DT::renderDataTable({ 
-    DT::datatable(state$episodes, 
-                  rownames = FALSE, 
+  output$contents_epi <- DT::renderDataTable({
+    DT::datatable(state$episodes,
+                  rownames = FALSE,
                   options = list(
                     pageLength = 10,
                     autoWidth = FALSE,
                     scrollX = TRUE,
                     searching = TRUE,
-                    search = list(regex=TRUE, caseInsensitive=TRUE)
+                    search = list(regex=TRUE, caseInsensitive=TRUE),
+                    language = list(emptyTable = 'My Custom No Data Message')
                     )
-                  ) %>% 
-      formatRound(c(6,7,8,9,10), 2) %>% 
-      formatStyle(columns=c(1:4), 'text-align'='centre') 
-    })
-  
+                  ) %>%
+      formatRound(c(6,7,8,9,10), 2) %>%
+      formatStyle(columns=c(1:4), 'text-align'='centre')
+  })
+  # # A notification ID
+  # id <- NULL
+  # observeR(state$episode, { 
+  #   # if there's currently a notification, don't add another
+  #   if (!is.null(id)) return()
+  #   if (is.null(output$contents_epi)){
+  #     # save the ID for removal later
+  #     id <<- showNotification(paste("NNotification message"), duration = 0)
+  #   } 
+  # })
+
   
   # Episodes: table download .csv
   output$downloadTable_epi <- downloadHandler(
@@ -319,10 +320,10 @@ server <- function(input, output, session) {
     }
   )
   
-  
   # Episodes: plot print
   output$plot_epi_intensity <- renderPlotly({
     
+    if (state$episodes[1,1] != 0){
     x <- state$episodes$date_start
     y <- as.numeric(state$episodes[ , as.character(state$choices_int[1])])
     df <- data.frame(x,y)
@@ -353,13 +354,13 @@ server <- function(input, output, session) {
           lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
         }
       }
-      } else {
-        
-        lolliEp1 <- ggplot(df, aes(x, y)) +
-          geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
-          geom_point(color="black", size=2) +
-          labs(x=" ", y=" ", title = state$choices_int[1]) 
-      }
+    } else {
+      
+      lolliEp1 <- ggplot(df, aes(x, y)) +
+        geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+        geom_point(color="black", size=2) +
+        labs(x=" ", y=" ", title = state$choices_int[1]) 
+    }
     
     state$plot_epi_intensity <- lolliEp1 +
       scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
@@ -373,13 +374,12 @@ server <- function(input, output, session) {
         axis.text.y = element_text(size=9), 
         legend.position="right"
         )
-      
     ggplotly(state$plot_epi_intensity)
-      
-    })
+    } else {plot_ly(type='scatter3d')}
+  })
   
   output$plot_epi_duration <- renderPlotly({
-    
+    if (state$episodes[1,1] != 0){
     x <- state$episodes$date_start
     y <- as.numeric(state$episodes[ , "duration"])
     state$unit_var <- ifelse(input$unit_var=="1","days", ifelse(input$unit_var=="2", "months", "years"))
@@ -432,10 +432,9 @@ server <- function(input, output, session) {
         axis.text.y = element_text(size=9), 
         legend.position="right"
       )
-    
-    
+  
     ggplotly(state$plot_epi_duration)
-    
+    } else {plot_ly(type='scatter3d')}
   })
 
     

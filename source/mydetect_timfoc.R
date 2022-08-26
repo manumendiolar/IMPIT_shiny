@@ -27,6 +27,7 @@
 
 mydetect_timfoc <- function(episodes, timfoc_dates){
   
+  if (episodes[1,1] !=0) {
   # arrange format
   episodes$date_start <- as.Date(episodes$date_start, format = "%Y-%m-%d")
   episodes$date_peak <- as.Date(episodes$date_peak, format = "%Y-%m-%d")
@@ -36,72 +37,57 @@ mydetect_timfoc <- function(episodes, timfoc_dates){
   episodes$overlap <- FALSE
   episodes$overlap_days <- 0
   episodes$overlap_months <- 0
-  #episodes$overlap_date_start <- 0
-  #episodes$overlap_date_end <- 0
-  
-  for (ii in 1:dim(episodes)[1]){
-    
-    # extract info dates from episodes
-    Edates <- c(episodes$date_start[ii], episodes$date_end[ii])
-    
-    # Note: date format should already be YYYY-MM-DD
-    
-    # if episode covered more than a year (we analyze overlap in each year)
-    dates <- fun_getdates(Edates)
-  
-    overlap <- FALSE
-    overlap_duration_days <- 0
-    overlap_duration_months <- 0
-    dates_overlap <- NULL
-    
-    for (jj in 1:length(dates)){
-      
-      # add year info to Tdates
-      Tdates <- as.Date(paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-"), format = "%Y-%m-%d") 
-      #Tdates <- paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-")
-      
-      # get overlap info
-      out <- fun_overlap(dates[[jj]], Tdates)
-      
-      
-      if (out$overlap){
-        
-        # sufficient if entering once
-        overlap <- TRUE
-        
-        # number of days of overlap
-        overlap_duration_days <- overlap_duration_days + (as.Date(out$date_end_overlap) - as.Date(out$date_start_overlap) + 1)
-        
-        # number of months of overlap
-        overlap_duration_months <- overlap_duration_months + length(seq(lubridate::month(out$date_start_overlap),
-                                                                        lubridate::month(out$date_end_overlap),
-                                                                        1))
-        
-        # save dates when overlap
-        #dates_overlap <- rbind(dates_overlap, c(out$date_start_overlap, out$date_end_overlap) ) 
 
+  
+    
+    for (ii in 1:dim(episodes)[1]){
+      
+      # extract info dates from episodes
+      Edates <- c(episodes$date_start[ii], episodes$date_end[ii])
+      
+      # Note: date format should already be YYYY-MM-DD
+    
+      # if episode covered more than a year (we analyze overlap in each year)
+      dates <- fun_getdates(Edates)
+  
+      overlap <- FALSE
+      overlap_duration_days <- 0
+      overlap_duration_months <- 0
+      dates_overlap <- NULL
+    
+      for (jj in 1:length(dates)){
+        
+        # add year info to Tdates
+        Tdates <- as.Date(paste(lubridate::year(dates[[jj]]),timfoc_dates,sep="-"), format = "%Y-%m-%d") 
+        
+        # get overlap info
+        out <- fun_overlap(dates[[jj]], Tdates)
+        
+        if (out$overlap){
+          
+          # sufficient if entering once
+          overlap <- TRUE
+          
+          # number of days of overlap
+          overlap_duration_days <- overlap_duration_days + (as.Date(out$date_end_overlap) - as.Date(out$date_start_overlap) + 1)
+        
+          # number of months of overlap
+          overlap_duration_months <- overlap_duration_months + length(seq(lubridate::month(out$date_start_overlap),
+                                                                          lubridate::month(out$date_end_overlap),
+                                                                          1))
+          # save dates when overlap
+          #dates_overlap <- rbind(dates_overlap, c(out$date_start_overlap, out$date_end_overlap) ) 
+        }
       }
       
-    }
-    
-    # add overlap info to episodes data frame
-    if (overlap) {
-      episodes$overlap[ii] <- overlap
-      episodes$overlap_days[ii] <- overlap_duration_days
-      episodes$overlap_months[ii] <- overlap_duration_months
-      #episodes$overlap_date_start[ii] <- min(dates_overlap[ ,1])
-      #episodes$overlap_date_end[ii] <- max(dates_overlap[ ,2])
+      # add overlap info to episodes data frame
+      if (overlap) {
+        episodes$overlap[ii] <- overlap
+        episodes$overlap_days[ii] <- overlap_duration_days
+        episodes$overlap_months[ii] <- overlap_duration_months
+      }
     }
   }
-  
-  # columns we want
-  #col_names <- c("event_no","duration",
-  #               "date_start","date_peak","date_end",
-  #               "intensity_mean","intensity_median","intensity_max","intensity_min","intensity_log",
-  #               "overlap","overlap_days","overlap_months")
-  
-  # keep only columns we need
-  #episodes <- episodes[ ,col_names]
   
   return(episodes)
 }

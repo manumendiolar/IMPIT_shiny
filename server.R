@@ -18,7 +18,9 @@ library(shinyjs)
 library(plotly)
 library(mgcv)
 library(lubridate)
-
+library(shinyalert)
+library(shinyvalidate)
+library(validate)
 
 # source
 source("./source/mydetect_event.R")
@@ -74,105 +76,114 @@ server <- function(input, output, session) {
   # DATA TAB ----------------------------------------------------------------
   
   # Import environmental data 
-  data_input <- eventReactive(input$csv_input,
+  data_input <- eventReactive(input$csv_input, 
     {
-      if (is.null(input$csv_input)) return(NULL)
+      #if (is.null(input$csv_input)) return(NULL)
       
-      inFile <- input$csv_input
-      read.csv(inFile$datapath)
-    }
-  )
+      # check extension file
+      if (tools::file_ext(input$csv_input$datapath) != "csv") {
+        shinyalert("Invalid extension file", type = "error")
+      } else {
+        # read file
+        aux <- read.csv(input$csv_input$datapath)
+        # check format file
+        if ( (dim(aux)[2] != 4) | 
+             any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) |
+             any(is.na(aux)) | 
+             any(is.character(aux))|
+             !is.numeric(aux[ ,4]) ) {
+          shinyalert("Invalid format file", type = "error")
+        } else {
+          aux
+        }
+      }
+    })
   
-
-  # Environmental data: table
-  output$contents_data <- DT::renderDataTable({ 
+  # data_input(): table
+  output$contents_data <- DT::renderDataTable({
     DT::datatable(data_input(),
                   options = list(
-                    pageLength = 10,
-                    lengthMenu = c(5,10,30,50), 
+                    pageLength = 15,
+                    lengthMenu = c(5,10,15,20,25,30,50,100), 
                     autoWidth = FALSE,  
                     searching = TRUE,
-                    search = list(regex=TRUE, caseInsensitive=TRUE)
+                    search = list(regex = TRUE, caseInsensitive = TRUE)
                     ),
-                  rownames = FALSE) %>%
-      formatRound(c(4), 2) %>%
-      formatStyle(columns=c(1:4), 'text-align'='centre')
+                    rownames = FALSE) %>%
+        formatRound(c(4),2)
+  })
+  
+  # data_input(): plot
+  output$envPlot <- renderPlotly({
+    # xx with date format 
+    xx <- as.Date(paste0(data_input()[ ,1],"-",data_input()[ ,2],"-",data_input()[ ,3]), format = "%Y-%m-%d")
+    # yy environmental signal
+    yy <- data_input()[ ,4]
+    plot_ly( x = ~xx, y = ~yy) %>%
+      add_lines() %>%
+      layout(xaxis = list(title="Date", titlefont=list(size=12)),
+             yaxis = list(title=colnames(data_input())[4], titlefont=list(size=12)))
+  })
+  
+  # data_input(): summary
+  output$summary_contents_data <- renderPrint({
+    summary(data_input())
+  })
+  
+  # data_input(): str()
+  output$str_contents_data <- renderPrint({
+    str(data_input())
   })
   
   
-  # Environmental data: line plot
-  output$envPlot <- renderPlotly({
-    
-    withProgress(message = 'Creating plot', style = 'notification', value = 0.1, {
-      Sys.sleep(0.25)
-      
-      data_input_name <- colnames(data_input())
-      
-      # Set x and y axis and display data in line plot using plotly
-      xx <- as.Date(paste0(data_input()[ ,1],"-",data_input()[ ,2],"-",data_input()[ ,3]), format = "%Y-%m-%d")
-      yy <- data_input()[ ,4]
-      xx_name <- "Date"
-      yy_name <- data_input_name[4]
-      plot_ly( x = ~xx, y = ~yy) %>%
-        add_lines() %>% 
-        layout(xaxis = list(title=xx_name, titlefont=list(size=12)),
-               yaxis = list(title=yy_name, titlefont=list(size=12)))
-    }
-    )
-  }) 
-    
-
   
   
   # EPISODES TAB ------------------------------------------------------------
   
   state <- reactiveValues()
   
+  # minimum duration: check valid entry
+  observeEvent(input$duration_min, {
+    if ( !is.integer(input$duration_min) | input$duration_min < 0 ){
+      shinyalert(title = "Enter a positive integer as the minimum duration", type = "error")
+    }
+  })
+  
+  # special season: update fields
   months1 <- c("January","March","May","July","August","October","December") 
   months2 <- c("April","June","September","November") 
   months3 <- c("February") 
-  
-  
-  # Let's update days options according to month
+  # start
   observeEvent(input$start_timfoc_month,{
+    # days options according to month
     if (input$start_timfoc_month %in% months1) updateSelectInput(session, "start_timfoc_day", choices = 1:31, selected = 1)
     if (input$start_timfoc_month %in% months2) updateSelectInput(session, "start_timfoc_day", choices = 1:30, selected = 1)
     if (input$start_timfoc_month %in% months3) updateSelectInput(session, "start_timfoc_day", choices = 1:28, selected = 1)
   })
-  
+  # end
   observeEvent(input$end_timfoc_month,{
+    # days options according to month
     if (input$end_timfoc_month %in% months1) updateSelectInput(session, "end_timfoc_day", choices = 1:31, selected = 1)
     if (input$end_timfoc_month %in% months2) updateSelectInput(session, "end_timfoc_day", choices = 1:30, selected = 1)
     if (input$end_timfoc_month %in% months3) updateSelectInput(session, "end_timfoc_day", choices = 1:28, selected = 1)
   })
   
-  
-  # numbers <- reactive({
-  #   validate(
-  #     need(is.integer(input$duration_min), "Please input an integer")
-  #   )
-  # })
-  # output$value_duration_min <- renderPrint({ numbers() })
-  # 
-  
-  # A notification ID
-  id <- NULL
-  
-  # A notification if minimum duration is not an integer
-  observe({
-    if (!is.integer(input$duration_min) | (input$duration_min < 0)) {
-      #updateNumericInput(session, "duration_min", 'Minimum duration:', 1)
-      # If there's currently a notification, don't add another
-      if (!is.null(id))
-        return()
-      # Save the ID for removal later
-      id <<- showNotification(paste("Enter a positive and integer value for minimum duration"), type = "warning", duration = NULL)
-    } else {
-      if (!is.null(id))
-        removeNotification(id)
-      id <<- NULL
+  # special season: check valid entries
+  observeEvent(c(input$start_timfoc_month, input$start_timfoc_day, input$end_timfoc_month, input$end_timfoc_day), {
+    
+    months <- c("January","February","March","April","May","June","July","August","September","October","November","December")    
+    
+    # build start MM-DD
+    ss_start <- paste0("2000-",which(months == input$start_timfoc_month),"-",input$start_timfoc_day)
+    ss_start <- as.Date(ss_start)
+    ss_end <- paste0("2000-",which(months == input$end_timfoc_month),"-",input$end_timfoc_day)
+    ss_end <- as.Date(ss_end)
+
+    if (!(ss_start < ss_end)) {
+      shinyalert(title = "The end of the special season should be after the start", type = "error")
     }
   })
+  
   
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi,{
@@ -185,38 +196,57 @@ server <- function(input, output, session) {
       } else{
         thres_above <- FALSE
       }
-      
       # compute episodes/update if necessary 
       state$episodes <- mydetect_event(data_input(), thres_above, input$thres, input$duration_min)
-      
       state$choices_int <- c("intensity_mean","intensity_median","intensity_min","intensity_max","intensity_log")
-    } 
+   }
     
-    if (input$choice_epifile == '2'){ 
-      
-      # load episode list if already available
-      data_epi <- eventReactive(input$epifile_input,
+   if (input$choice_epifile == '2'){
+     
+     # load episode list if already available
+     data_epi <- eventReactive(input$epifile_input,
          {
-           if (is.null(input$epifile_input))  return(NULL)
-           inFile <- input$epifile_input
-           read.csv(inFile$datapath)
-         }
-      )
-      
-      #state$episodes <- data_epi()
-      state$episodes <- as.data.frame(data_epi())
-      state$episodes$date_start <- as.Date(state$episodes$date_start)
-      state$episodes$date_peak <- as.Date(state$episodes$date_peak)
-      state$episodes$date_end <- as.Date(state$episodes$date_end)
-      
-      # Let's update intensity functions choices
-      state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
-      new_choices_int <- str_remove(state$choices_int, "intensity_")
-      updateSelectInput(session, "choice_intensity", 
-                        label = "Intensity", 
-                        choices =  new_choices_int,
-                        selected = head(new_choices_int, 1)
-                        )
+           # if (is.null(input$epifile_input))  return(NULL)
+           # inFile <- input$epifile_input
+           # read.csv(inFile$datapath)
+           #check extension file
+               if (tools::file_ext(input$epifile_input$datapath) != "csv") {
+                 shinyalert("Invalid extension file", type = "error")
+               } else {
+                 # read file
+                 aux <- read.csv(input$epifile_input$datapath)
+                 # check format file
+                 conditions <- (dim(aux)[2] < 6) #|
+                   # !all(colnames(aux)[1:5] != c("event_no","duration","date_start","date_peak","date_end")) |
+                   # (length(grep("intensity_", colnames(aux))) < 1) |
+                   # (aux[ ,1:2]-floor(aux[ ,aux[ ,1:2]]) != 0) |
+                   # any(is.na(aux)) |
+                   # !is.Date(as.Date(aux[,3])) |
+                   # !is.Date(as.Date(aux[,4])) |
+                   # !is.Date(as.Date(aux[,5])) |
+                   # !is.numeric(aux[ ,6:dim(aux)[2]])
+                 if (conditions) {
+                   shinyalert("Invalid format file", type = "error")
+                  } else {
+                    aux
+                  }
+               }
+         })
+
+    #state$episodes <- data_epi()
+    state$episodes <- as.data.frame(data_epi())
+    state$episodes$date_start <- as.Date(state$episodes$date_start)
+    state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+    state$episodes$date_end <- as.Date(state$episodes$date_end)
+
+    # Let's update intensity functions choices
+    state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
+    new_choices_int <- str_remove(state$choices_int, "intensity_")
+    updateSelectInput(session, "choice_intensity",
+                      label = "Intensity",
+                      choices =  new_choices_int,
+                      selected = head(new_choices_int, 1)
+                      )
     }
     
     

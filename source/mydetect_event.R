@@ -11,7 +11,7 @@
 # duration_min: minimum duration of consecutive values above/below threshold. 
 
 # OUTPUT
-# data frame of epsiodes  
+# data frame of episodes  
 
 # Note
 # Depends on user defined functions fun_nu() and fun_w()

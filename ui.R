@@ -11,7 +11,9 @@ library(shinyhelper)
 library(tidyverse)
 library(DT)
 library(plotly)
-
+library(shinyalert)
+library(shinyvalidate)
+library(validate)
 
 # source
 source("./source/mydetect_event.R")
@@ -78,12 +80,12 @@ ui <- dashboardPage(
   
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Home", tabName = "home", icon = icon("home")),
+      menuItem("Home", tabName = "home", icon = icon("house")),
       menuItem("Data", tabName = "data", icon = icon("database")),
       menuItem("Episodes", tabName = "episodes", icon = icon("crosshairs")),
       menuItem("Index", tabName = "index", icon = icon("chart-line")),
       menuItem("Application", tabName = "application", icon = icon("brain")),
-      menuItem("About", tabName = "about", icon = icon("info-circle"))
+      menuItem("About", tabName = "about", icon = icon("info-circle",verify_fa = FALSE))
     )
   ),
   
@@ -103,8 +105,9 @@ ui <- dashboardPage(
         rel = "stylesheet",
         type = "text/css",
         href = "IMPITa_style.css")
-    ),
+      ),
 
+    useShinyalert(force = TRUE),
     
     # MAIN BODY ---------------------------------------------------------------
     
@@ -122,7 +125,7 @@ ui <- dashboardPage(
           box(
             width = 12, 
             height = "30em",
-            title = div(icon("home"), strong("Description")),
+            title = div(icon("house"), strong("Description")),
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
@@ -154,6 +157,8 @@ ui <- dashboardPage(
      
       tabItem(
         tabName = "data",
+        h4("Use this tab if you want to generate episodes using this app"),
+        br(),
         fluidRow(
           # Import data
           box(
@@ -171,9 +176,7 @@ ui <- dashboardPage(
               title = "Data format", 
               type = "markdown", 
               content = "source_data_help"
-              ),
-            br(),
-            div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")
+              )
             ),
           
           # Check data 
@@ -185,7 +188,12 @@ ui <- dashboardPage(
             status = "info",
             width = 9,
             height = "500px",
-            plotlyOutput("envPlot", height = 700)
+            tabsetPanel(
+              tabPanel("Plot", plotlyOutput("envPlot", height = 700)),
+              tabPanel("Table", div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")),
+              tabPanel("Summary", verbatimTextOutput("summary_contents_data")),
+              tabPanel("str()", verbatimTextOutput("str_contents_data"))
+              )
             )
           )
         ),

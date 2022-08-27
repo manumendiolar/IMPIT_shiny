@@ -22,6 +22,8 @@ library(shinyalert)
 library(shinyvalidate)
 library(validate)
 library(spsComps)
+library(shinyjs)
+
 
 # source
 source("./source/mydetect_event.R")
@@ -190,29 +192,39 @@ server <- function(input, output, session) {
     
     if (input$choice_epifile == '2'){
      
-       observeEvent(input$epifile_input,{
+       observeEvent(input$epifile_input, {
+         
         if (tools::file_ext(input$epifile_input$datapath) != "csv") {
           shinyjs::disable("run_button_epi")
           shinyCatch(stop("Invalid extension file"), blocking_level = "error")
         } else {
           # read file
           aux <- read.csv(input$epifile_input$datapath)
-          # check format file
-          conditions <- (dim(aux)[2]<6) | (!all(colnames(aux)[1:5] != c("event_no","duration","date_start","date_peak","date_end"))) #|
-          (length(grep("intensity_", colnames(aux))) < 1) | (aux[ ,1:2]-floor(aux[ ,aux[ ,1:2]]) != 0) | (any(is.na(aux))) |
-          (!is.Date(as.Date(aux[,3]))) | (!is.Date(as.Date(aux[,4]))) | (!is.Date(as.Date(aux[,5]))) | (!is.numeric(aux[ ,6:dim(aux)[2]]))
-          if (conditions) {
+          conditions_epifile1 <- !(dim(aux)[2]>5) | !(length(grep("intensity_", colnames(aux)))>0) | any(is.na(aux))
+          if (conditions_epifile1) {
             shinyjs::disable("run_button_epi")
             shinyCatch(stop("Invalid format file"), blocking_level = "error")
           } else {
-            shinyjs::enable("run_button_epi")
-          } 
+            if ( dim(aux)[2]>5 ) {
+              if ( !(all(colnames(aux)[1:5] == c("event_no","duration","date_start","date_peak","date_end"))) |
+                   !(all(aux[ ,1:2]-floor(aux[ ,1:2]) == 0)) |
+                   !all(is_convertible_to_date(aux[ ,3])) | 
+                   !all(is_convertible_to_date(aux[ ,4])) |
+                   !all(is_convertible_to_date(aux[ ,5])) |
+                   !all(apply(aux[ ,6:dim(aux)[2]], 2, is.numeric)) ){
+                shinyjs::disable("run_button_epi")
+                shinyCatch(stop("Invalid format file"), blocking_level = "error")
+              } else {
+                shinyjs::enable("run_button_epi")
+              }
+            }
+          }
         }
-      })
+       })
     }
   })
   
-  
+
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi, {
     
@@ -280,10 +292,10 @@ server <- function(input, output, session) {
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
     }
-    
   })
   
   
+      
   # Episodes: table print
   output$contents_epi <- DT::renderDataTable({
     DT::datatable(state$episodes,
@@ -498,9 +510,10 @@ server <- function(input, output, session) {
     # })
     
     # keep unit choice
-    state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
+    #state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
+    state$unit_var <- mydetect_timeunits(state$episodes)
     
-
+      
     # keep intensity choice
     state$intensity <- input$choice_intensity
     

@@ -15,6 +15,7 @@ library(shinyalert)
 library(shinyvalidate)
 library(validate)
 library(spsComps)
+library(shinyjs)
 
 # source
 source("./source/mydetect_event.R")

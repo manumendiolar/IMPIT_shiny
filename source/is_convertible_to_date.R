@@ -1,0 +1,1 @@
+is_convertible_to_date <- function(x) !is.na(as.Date(as.character(x), tz = 'UTC', format = '%Y-%m-%d'))

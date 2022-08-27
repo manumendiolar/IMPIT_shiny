@@ -14,6 +14,7 @@ library(plotly)
 library(shinyalert)
 library(shinyvalidate)
 library(validate)
+library(spsComps)
 
 # source
 source("./source/mydetect_event.R")
@@ -28,7 +29,7 @@ source("./source/fun_w2.R")
 source("./source/fun_w3.R")
 
 
-steps <- read_csv("./helpfiles/help.csv")
+steps <- read_csv("./helpfiles/help.csv", show_col_types = FALSE)
 choices_days <- as.character(1:31)
 choices_months <- c("January","February","March","April","May","June","July","August","September","October","November","December") 
 
@@ -38,6 +39,7 @@ choices_months <- c("January","February","March","April","May","June","July","Au
 ui <- dashboardPage(
   
   title = "IMPITa",
+  
    
   
   # HEADER ------------------------------------------------------------------
@@ -100,15 +102,15 @@ ui <- dashboardPage(
       theme = "blue_gradient"
     ),
     
-    tags$head(
-      tags$link(
-        rel = "stylesheet",
-        type = "text/css",
-        href = "IMPITa_style.css")
-      ),
+    # tags$head(
+    #   tags$link(
+    #     rel = "stylesheet",
+    #     type = "text/css",
+    #     href = "IMPITa_style.css")
+    #   ),
 
     useShinyalert(force = TRUE),
-    
+    useShinyjs(),
     # MAIN BODY ---------------------------------------------------------------
     
     tabItems(
@@ -209,7 +211,7 @@ ui <- dashboardPage(
         fluidRow(
           
           box(
-            title = div(icon("cogs"), strong("Set up")), 
+            title = div(icon("cogs", verify_fa = FALSE), strong("Set up")), 
             id = "box_list_epi",
             collapsible = TRUE,
             collapsed = FALSE,
@@ -355,7 +357,7 @@ ui <- dashboardPage(
           column(
             width = 3,
             box(
-              title = div(icon("user-cog"), strong("Set up")), 
+              title = div(icon("user-cog",verify_fa = FALSE), strong("Set up")), 
               width = NULL, 
               solidHeader = FALSE,
               collapsible = TRUE,

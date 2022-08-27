@@ -21,6 +21,7 @@ library(lubridate)
 library(shinyalert)
 library(shinyvalidate)
 library(validate)
+library(spsComps)
 
 # source
 source("./source/mydetect_event.R")
@@ -184,12 +185,33 @@ server <- function(input, output, session) {
     }
   })
   
+  # episode list: if upload... check file extension and format
   observeEvent(input$choice_epifile, {
+    
     if (input$choice_epifile == '2'){
-      
-    showNotification("This is a notification.")
+     
+       observeEvent(input$epifile_input,{
+        if (tools::file_ext(input$epifile_input$datapath) != "csv") {
+          shinyjs::disable("run_button_epi")
+          shinyCatch(stop("Invalid extension file"), blocking_level = "error")
+        } else {
+          # read file
+          aux <- read.csv(input$epifile_input$datapath)
+          # check format file
+          conditions <- (dim(aux)[2]<6) | (!all(colnames(aux)[1:5] != c("event_no","duration","date_start","date_peak","date_end"))) #|
+          (length(grep("intensity_", colnames(aux))) < 1) | (aux[ ,1:2]-floor(aux[ ,aux[ ,1:2]]) != 0) | (any(is.na(aux))) |
+          (!is.Date(as.Date(aux[,3]))) | (!is.Date(as.Date(aux[,4]))) | (!is.Date(as.Date(aux[,5]))) | (!is.numeric(aux[ ,6:dim(aux)[2]]))
+          if (conditions) {
+            shinyjs::disable("run_button_epi")
+            shinyCatch(stop("Invalid format file"), blocking_level = "error")
+          } else {
+            shinyjs::enable("run_button_epi")
+          } 
+        }
+      })
     }
   })
+  
   
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi, {
@@ -208,50 +230,30 @@ server <- function(input, output, session) {
     }
     
     if (input$choice_epifile == '2'){
-      
+     
       # load episode list 
       data_epi <- eventReactive(input$epifile_input,
-        {
-          # if (is.null(input$epifile_input))  return(NULL)
-          # inFile <- input$epifile_input
-          # read.csv(inFile$datapath)
-          # check extension file
-          if (tools::file_ext(input$epifile_input$datapath) != "csv") {
-            shinyalert("Invalid extension file", type = "error")
-          } else {
-            # read file
-            aux <- read.csv(input$epifile_input$datapath)
-            # check format file
-            conditions <- (dim(aux)[2] < 6) #|
-                   # !all(colnames(aux)[1:5] != c("event_no","duration","date_start","date_peak","date_end")) |
-                   # (length(grep("intensity_", colnames(aux))) < 1) |
-                   # (aux[ ,1:2]-floor(aux[ ,aux[ ,1:2]]) != 0) |
-                   # any(is.na(aux)) |
-                   # !is.Date(as.Date(aux[,3])) |
-                   # !is.Date(as.Date(aux[,4])) |
-                   # !is.Date(as.Date(aux[,5])) |
-                   # !is.numeric(aux[ ,6:dim(aux)[2]])
-            if (conditions) {
-              shinyalert("Invalid format file", type = "error")
-            } else {
-              aux
-            }
-          }
-        })
+         {
+           if (is.null(input$epifile_input))  return(NULL)
+           inFile <- input$epifile_input
+           read.csv(inFile$datapath)
+         })
       
       state$episodes <- as.data.frame(data_epi())
-      state$episodes$date_start <- as.Date(state$episodes$date_start)
-      state$episodes$date_peak <- as.Date(state$episodes$date_peak)
-      state$episodes$date_end <- as.Date(state$episodes$date_end)
-      
-      # update intensity choices
-      state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
-      new_choices_int <- str_remove(state$choices_int, "intensity_")
-      updateSelectInput(session, "choice_intensity",
-                        label = "Intensity",
-                        choices =  new_choices_int,
-                        selected = head(new_choices_int, 1)
-                        )
+      if (state$episodes[1,1] != 0) {
+        state$episodes$date_start <- as.Date(state$episodes$date_start)
+        state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+        state$episodes$date_end <- as.Date(state$episodes$date_end)
+
+        # update intensity choices
+        state$choices_int <- grep("intensity_", colnames(state$episodes), value = TRUE)
+        new_choices_int <- str_remove(state$choices_int, "intensity_")
+        updateSelectInput(session, "choice_intensity",
+                          label = "Intensity",
+                          choices =  new_choices_int,
+                          selected = head(new_choices_int, 1)
+        )
+      }
     }
     
     # special season
@@ -298,18 +300,7 @@ server <- function(input, output, session) {
       formatRound(c(6,7,8,9,10), 2) %>%
       formatStyle(columns=c(1:4), 'text-align'='centre')
   })
-  # # A notification ID
-  # id <- NULL
-  # observeR(state$episode, { 
-  #   # if there's currently a notification, don't add another
-  #   if (!is.null(id)) return()
-  #   if (is.null(output$contents_epi)){
-  #     # save the ID for removal later
-  #     id <<- showNotification(paste("NNotification message"), duration = 0)
-  #   } 
-  # })
 
-  
   # Episodes: table download .csv
   output$downloadTable_epi <- downloadHandler(
     filename = function() {

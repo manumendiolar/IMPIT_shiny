@@ -38,6 +38,10 @@ source("./source/fun_w2.R")
 source("./source/fun_w3.R")
 source("./source/subtract_mem.R")
 source("./source/fun_IMPITv2.R")
+source("./source/subtract_mem.R")
+source("./source/mydetect_timeunits.R")
+source("./source/is_convertible_to_date.R")
+source("./source/fun_IMPITv2.R")
 
 setBackgroundImage(src = NULL, shinydashboard = TRUE)
 
@@ -239,6 +243,14 @@ server <- function(input, output, session) {
       
       # intensity choices
       state$choices_int <- c("intensity_mean","intensity_median","intensity_min","intensity_max","intensity_log")
+      
+      # check units
+      dds <- unique(data_input()[ ,3])
+      mms <- unique(data_input()[ ,2])
+      
+      if ( all(dds == 1) & all(mms == 1) ) episodes_units <- "years"
+      if ( all(dds == 1) & any(mms != 1) ) episodes_units <- "months"
+      if ( any(dds != 1) ) episodes_units <- "days"
     }
     
     if (input$choice_epifile == '2'){
@@ -252,6 +264,7 @@ server <- function(input, output, session) {
          })
       
       state$episodes <- as.data.frame(data_epi())
+      
       if (state$episodes[1,1] != 0) {
         state$episodes$date_start <- as.Date(state$episodes$date_start)
         state$episodes$date_peak <- as.Date(state$episodes$date_peak)
@@ -265,8 +278,17 @@ server <- function(input, output, session) {
                           choices =  new_choices_int,
                           selected = head(new_choices_int, 1)
         )
+        
+        # check units
+        dds <- unique(lubridate::day(data_epi()[ ,3]))
+        mms <- unique(lubridate::month(data_epi()[ ,3]))
+        
+        if ( all(dds == 1) & all(mms == 1) ) episodes_units <- "years"
+        if ( all(dds == 1) & any(mms != 1) ) episodes_units <- "months"
+        if ( any(dds != 1) ) episodes_units <- "days"
       }
     }
+    
     
     # special season
     if (input$choice_timfoc == '1'){
@@ -291,6 +313,29 @@ server <- function(input, output, session) {
       # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
+    }
+    
+    state$episodes_units <- episodes_units
+    # update IMPIT index time units
+    if (state$episodes_units == "days"){
+      updateRadioButtons(session, "choice_index_unit",
+                         choices = list("years"=1, "months"=2, "days"=3),
+                         selected = 1
+      )
+    }
+    if (state$episodes_units == "months"){
+      updateRadioButtons(session, "choice_index_unit",
+                         #label = h5(strong("Index time units:")),
+                         choices = list("years"=1, "months"=2),
+                         selected = 1
+      )
+    }
+    if (state$episodes_units == "years"){
+      updateRadioButtons(session, "choice_index_unit",
+                         #label = h5(strong("Index time units:")),
+                         choices = list("years"=1),
+                         selected = 1
+      )
     }
   })
   
@@ -323,124 +368,134 @@ server <- function(input, output, session) {
     }
   )
   
-  # Episodes: plot print
+  # Episodes: plot intensity
   output$plot_epi_intensity <- renderPlotly({
     
-    if (state$episodes[1,1] != 0){
-    x <- state$episodes$date_start
-    y <- as.numeric(state$episodes[ , as.character(state$choices_int[1])])
-    df <- data.frame(x,y)
-    df$x <- as.Date(df$x)
-    d1 <- as.Date(head(df$x,1))
-    d2 <- as.Date(tail(df$x,1))
+    # pre-allocate with empty plot to avoid app crash when there is no episodes   
+    state$plot_epi_intensity <- plot_ly(type = 'scatter')
     
-    if (input$choice_timfoc == '1'){
+    if (state$episodes[1,1] != 0){
       
-      df$z <- state$episodes$overlap
-      df$z <- as.factor(df$z)
-      lolliEp1 <- ggplot(df, aes(x, y, col = z)) +
-        geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
-        geom_point(size=2) +
-        labs(x=" ", y=" ", title=state$choices_int[1], col="Overlap")
-      
-      if (length(levels(df$z)) > 1) {
-        levels(df$z) <- c("No","Yes")
-        lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
-      } else {
-        if (levels(df$z)[1] == "TRUE"){
-          levels(df$z)[1] <- "Yes"
-          levels(df$z)[2] <- "No"
-          lolliEp1 <- lolliEp1 + scale_color_manual(values = c("orange","black"))
-        } else {
-          levels(df$z)[1] <- "No"
-          levels(df$z)[2] <- "Yes"
-          lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
-        }
-      }
-    } else {
+      x <- state$episodes$date_start
+      y <- as.numeric(state$episodes[ , as.character(state$choices_int[1])])
+      df <- data.frame(x,y)
+      df$x <- as.Date(df$x)
+      d1 <- as.Date(head(df$x,1))
+      d2 <- as.Date(tail(df$x,1))
       
       lolliEp1 <- ggplot(df, aes(x, y)) +
         geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
         geom_point(color="black", size=2) +
         labs(x=" ", y=" ", title = state$choices_int[1]) 
-    }
     
-    state$plot_epi_intensity <- lolliEp1 +
-      scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
-      theme_light() +
-      theme(
-        panel.grid.major.x = element_blank(),
-        panel.border = element_blank(),
-        title = element_text(size=10),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_text(size= 9, angle=45, hjust=1),
-        axis.text.y = element_text(size=9), 
-        legend.position="right"
-        )
-    ggplotly(state$plot_epi_intensity)
-    } else {plot_ly(type='scatter3d')}
+      if (input$choice_timfoc == '1'){
+        
+        df$z <- state$episodes$overlap
+        df$z <- as.factor(df$z)
+        
+        lolliEp1 <- ggplot(df, aes(x, y, col = z)) +
+          geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+          geom_point(size=2) +
+          labs(x=" ", y=" ", title=state$choices_int[1], col="Overlap")
+        
+        if (length(levels(df$z)) > 1) {
+          levels(df$z) <- c("No","Yes")
+          lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
+        } else {
+          if (levels(df$z)[1] == "TRUE"){
+            levels(df$z)[1] <- "Yes"
+            levels(df$z)[2] <- "No"
+            lolliEp1 <- lolliEp1 + scale_color_manual(values = c("orange","black"))
+          } else {
+            levels(df$z)[1] <- "No"
+            levels(df$z)[2] <- "Yes"
+            lolliEp1 <- lolliEp1 + scale_color_manual(values = c("black","orange"))
+          }
+        }
+      } 
+      
+      state$plot_epi_intensity <- lolliEp1 +
+        scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
+        theme_light() +
+        theme(
+          panel.grid.major.x = element_blank(),
+          panel.border = element_blank(),
+          title = element_text(size=10),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_text(size= 9, angle=45, hjust=1),
+          axis.text.y = element_text(size=9), 
+          legend.position="right"
+          )
+      
+      ggplotly(state$plot_epi_intensity)
+    }
   })
   
+  # Episodes: plot duration
   output$plot_epi_duration <- renderPlotly({
-    if (state$episodes[1,1] != 0){
-    x <- state$episodes$date_start
-    y <- as.numeric(state$episodes[ , "duration"])
-    state$unit_var <- ifelse(input$unit_var=="1","days", ifelse(input$unit_var=="2", "months", "years"))
-    df <- data.frame(x,y)
-    df$x <- as.Date(df$x)
-    d1 <- as.Date(head(df$x,1))
-    d2 <- as.Date(tail(df$x,1))
     
-    if (input$choice_timfoc == '1'){
+    # pre-allocate with empty plot to avoid app crash when there is no episodes   
+    state$plot_epi_duration <- plot_ly(type = 'scatter')
+    
+    if (state$episodes[1,1] != 0){
       
-      df$z <- state$episodes$overlap
-      df$z <- as.factor(df$z)
-      lolliEp2 <- ggplot(df, aes(x, y, col = z)) +
-        geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
-        geom_point(size=2) +
-        labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration", col="Overlap")
-      
-      if (length(levels(df$z)) > 1) {
-        levels(df$z) <- c("No","Yes")
-        lolliEp2 <- lolliEp2 + scale_color_manual(values = c("black","orange"))
-      } else {
-        if (levels(df$z)[1] == "TRUE"){
-          levels(df$z)[1] <- "Yes"
-          levels(df$z)[2] <- "No"
-          lolliEp2 <- lolliEp2 + scale_color_manual(values = c("orange","black"))
-        } else {
-          levels(df$z)[1] <- "No"
-          levels(df$z)[2] <- "Yes"
-          lolliEp2 <- lolliEp2 + scale_color_manual(values = c("black","orange"))
-        }
-      }
-    } else {
+      x <- state$episodes$date_start
+      y <- as.numeric(state$episodes[ , "duration"])
+      #state$unit_var <- ifelse(input$unit_var=="1","days", ifelse(input$unit_var=="2", "months", "years"))
+      df <- data.frame(x,y)
+      df$x <- as.Date(df$x)
+      d1 <- as.Date(head(df$x,1))
+      d2 <- as.Date(tail(df$x,1))
       
       lolliEp2 <- ggplot(df, aes(x, y)) +
         geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
         geom_point(color="black", size=2) +
         labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration")
+      
+      if (input$choice_timfoc == '1'){
+        
+        df$z <- state$episodes$overlap
+        df$z <- as.factor(df$z)
+        lolliEp2 <- ggplot(df, aes(x, y, col = z)) +
+          geom_segment( aes(x=x, xend=x, y=0, yend=y), alpha = 0.5) +
+          geom_point(size=2) +
+          labs(x="date_start", y=paste0("[",state$unit_var,"]"), title="Duration", col="Overlap")
+      
+        if (length(levels(df$z)) > 1) {
+          levels(df$z) <- c("No","Yes")
+          lolliEp2 <- lolliEp2 + scale_color_manual(values = c("black","orange"))
+        } else {
+          if (levels(df$z)[1] == "TRUE"){
+            levels(df$z)[1] <- "Yes"
+            levels(df$z)[2] <- "No"
+            lolliEp2 <- lolliEp2 + scale_color_manual(values = c("orange","black"))
+          } else {
+            levels(df$z)[1] <- "No"
+            levels(df$z)[2] <- "Yes"
+            lolliEp2 <- lolliEp2 + scale_color_manual(values = c("black","orange"))
+          }
+        }
+      }
+      
+      state$plot_epi_duration <- lolliEp2 +
+        scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
+        theme_light() +
+        theme(
+          panel.grid.major.x = element_blank(),
+          panel.border = element_blank(),
+          title = element_text(size=10),
+          axis.ticks.x = element_blank(),
+          axis.text.x = element_text(size= 9, angle=45, hjust=1),
+          axis.text.y = element_text(size=9), 
+          legend.position="right"
+          )
+      
+      ggplotly(state$plot_epi_duration)
+      
     }
-    
-    
-    state$plot_epi_duration <- lolliEp2 +
-      scale_x_date(breaks=seq(d1, d2, by="5 years"), limits=c(d1,d2), date_labels="%Y") +
-      theme_light() +
-      theme(
-        panel.grid.major.x = element_blank(),
-        panel.border = element_blank(),
-        title = element_text(size=10),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_text(size= 9, angle=45, hjust=1),
-        axis.text.y = element_text(size=9), 
-        legend.position="right"
-      )
-  
-    ggplotly(state$plot_epi_duration)
-    } else {plot_ly(type='scatter3d')}
   })
-
-    
+  
+  
   # Episodes: plot intensity download .png
   output$downloadPlot_epi_intensity<- downloadHandler(
     filename = function(){
@@ -461,72 +516,28 @@ server <- function(input, output, session) {
     }
   )
 
-  # observeEvent(input$unit_var, {
-  #   if (input$unit_var == '2'){
-  #     updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1, "monthly?"=2))
-  #   } else {
-  #     if (input$unit_var == '3'){
-  #       updateRadioButtons(session,"choice_index_unit", choices = list("annually?"=1))
-  #      }
-  #   }
-  # })
-    
-    
-    # # # Let's update index display unit choices
-    # new_choices_index_unit2 <- list("annually?"=1, "monthly?"=2)
-    # new_choices_index_unit1 <- list("annually?"=1)
-    # 
-    # if(input$unit_var == '2'){
-    #   updateRadioButtons(
-    #     session, "choice_index_unit",
-    #     label = h5(strong("Display:")),
-    #     choices =  new_choices_int2,
-    #     selected = 1)
-    # } else {
-    #   if(input$unit_var == '3'){
-    #     updateRadioButtons(
-    #       session, "choice_index_unit",
-    #       label = h5(strong("Display:")),
-    #       choices =  new_choices_int1,
-    #       selected = 1)
-    #   }}
-    
-  #})
+ 
+  
+
   
   
   # INDEX TAB ---------------------------------------------------------------
 
-  
   observeEvent(input$run_button_index,{
     
-    state$episodes$date_start <- as.Date(state$episodes$date_start)
-    state$episodes$date_peak <- as.Date(state$episodes$date_peak)
-    state$episodes$date_end <- as.Date(state$episodes$date_end)
-    
-    # observe({
-    #   updateDateRangeInput(session, "daterange_index", 
-    #                        start = as.Date(paste0(state$yr_first_epi + input$m,"-01-01")), 
-    #                        end = "2020-01-01")
-    # })
-    
-    # keep unit choice
+    # Episodes: time units choice
     #state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
-    state$unit_var <- mydetect_timeunits(state$episodes)
+    #state$unit_var <- mydetect_timeunits(state$episodes)
+    state$unit_var <- episodes_units
     
-      
-    # keep intensity choice
+    # Episodes: intensity choice
     state$intensity <- input$choice_intensity
     
-    # build vector of dates (index period)
-    # yr_index_start <- lubridate::year(as.Date(input$daterange_index[1]))
-    # yr_index_end <- lubridate::year(as.Date(input$daterange_index[2]))
-    # state$yrs_index <- seq(yr_index_start, yr_index_end, 1)
-    
-    # compute d and tau (total units of special timing)
+    # Episodes: special timing
     state$d <- NULL
     state$tau <- NULL
     state$choice_timfoc <- FALSE
-    
+    # compute d and tau
     if (input$choice_timfoc == '1'){
       state$choice_timfoc <- TRUE
       state$d <- input$d_w3
@@ -544,7 +555,7 @@ server <- function(input, output, session) {
       }
     }
     
-    # compute IMPIT index
+    # IMPIT index: computation (original)
     # state$index <- fun_IMPIT(episodes = state$episodes,
     #                          unit = state$unit_var,
     #                          yrs = state$yrs_index,
@@ -556,29 +567,17 @@ server <- function(input, output, session) {
     #                          intensity = state$intensity,
     #                          time_focus = state$choice_timfoc,
     #                          tau = state$tau)
-    # 
-    # state$contents_index <- data.frame(time = state$yrs_index, index = state$index)
+   
+
     
-    # compute with new function
+    # IMPIT index: computation (new version)
     state$index_unit <- ifelse(input$choice_index_unit == '1','years', ifelse(input$choice_index_unit == '2', 'months', 'days'))
-    # if (input$unit_var == '1') {
-    #   state$index_unit <- ifelse(input$choice_index_unit == '1','years', ifelse(input$choice_index_unit == '2', 'months', 'days'))
-    # } else {
-    #   if (input$unit_var == '2'){
-    #     state$index_unit <- ifelse(input$choice_index_unit == '1','years', 'months')
-    #   } else{
-    #     state$index_unit <-  'years'
-    #   }
-    # }
-    print(input$choice_index_unit)
-    print(state$index_unit)
-    
+
     # period to compute index (YYYY-MM-DD)
     index_d1 <- as.Date(input$daterange_index[1])
     index_d2 <- as.Date(input$daterange_index[2])
     state$index_range <- seq(index_d1, index_d2, by = state$index_unit)
 
-    # compute IMPIT index
     state$index <- fun_IMPITv2(episodes = state$episodes,
                                unit = state$unit_var,
                                index_range = state$index_range,
@@ -591,32 +590,29 @@ server <- function(input, output, session) {
                                time_focus = state$choice_timfoc,
                                tau = state$tau)
 
-    # Arrange data frame index
+    # arrange data frame index
     state$contents_index <- data.frame(
       Year = lubridate::year(state$index_range),
       Month = lubridate::month(state$index_range),
       Day = lubridate::day(state$index_range),
       time = state$index_range,
       index = state$index)
-  })
-  
-  observeEvent(input$run_button_index,{
+
     
-    # Table index: print
+    # IMPIT index: print table
     output$contents_index <- DT::renderDataTable({ 
       DT::datatable(state$contents_index[, c("Year","Month","Day","index")], 
                     rownames = FALSE, 
                     options = list(
-                      pageLength=10,
+                      pageLength = 10,
                       autoWidth = TRUE,
                       searching = TRUE,
                       search = list(regex=TRUE, caseInsensitive=TRUE)
                       )
-                    ) %>%
-        formatRound(c(4), 2)
+                    ) %>% formatRound(c(4), 2)
     }) 
     
-    # Table index: download .csv
+    # IMPIT index: download table .csv  
     output$downloadTable_index <- downloadHandler(
       filename = function() {
         paste0("IMPIT_index_table.csv")
@@ -626,29 +622,26 @@ server <- function(input, output, session) {
       }
     )
     
-    # Plot index: print
+    # IMPIT index: print plot
     output$plot_index <- renderPlotly({
       
-      state$plot_index <- plot_ly(data = state$contents_index) %>%
-        add_lines(x = ~time, y = ~index) %>% 
-        layout(xaxis = list(title="Time"),
-               yaxis = list(title="IMPIT index"))
-      
-      state$plot_index
-    })
-    
-    
-    # Plot index: download .png
-    output$downloadPlot_index <- downloadHandler(
-      filename = function(){
-        paste0("IMPIT_index_plot",'.png')
-      },
-      content = function(file){
-        ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
+      if ( nrow(state$contents_index) != 0 ){
+        plot_ly(data = state$contents_index) %>%
+          add_lines(x = ~time, y = ~index) %>% 
+          layout(xaxis = list(title="Time"), yaxis = list(title="IMPIT index"))
+      } else {
+        plot_ly(type = 'scatter')
       }
+    })
+      
+    # IMPIT index: download .png
+    output$downloadPlot_index <- downloadHandler(
+      filename = function() paste0("IMPIT_index_plot",'.png'),
+      content = function(file) ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
     )
     
   })
+  
   
   
   

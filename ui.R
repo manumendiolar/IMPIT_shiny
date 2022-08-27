@@ -29,6 +29,10 @@ source("./source/fun_w1.R")
 source("./source/fun_w2.R")
 source("./source/fun_w3.R")
 
+source("./source/subtract_mem.R")
+source("./source/mydetect_timeunits.R")
+source("./source/is_convertible_to_date.R")
+source("./source/fun_IMPITv2.R")
 
 steps <- read_csv("./helpfiles/help.csv", show_col_types = FALSE)
 choices_days <- as.character(1:31)
@@ -444,7 +448,7 @@ ui <- dashboardPage(
                 type = "markdown",
                 content = "set_up_index_range_help"
                 ),
-              radioButtons("choice_index_unit", h5(strong("Display:")), choices = list("annually?"=1, "monthly?"=2, "daily?"=3)),
+              radioButtons("choice_index_unit", label = h5(strong("Index time units:")), choices = list("annually?"=1, "monthly?"=2, "daily?"=3)),
               actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
               ),
             ),

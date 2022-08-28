@@ -1,0 +1,1 @@
+Choose the start and end date of the period for computing IMPIT index. Format is YYYY-MM-DD.

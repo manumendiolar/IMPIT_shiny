@@ -20,18 +20,19 @@ $$
 
 
 *** 
-An example:
+An example of monthly data for the response variable:
 
 $$
+\\scriptsize
 \\begin{array}{rr}
   \\hline 
   \\text{Year} & \\text{Month} & \\text{Day} & \\text{catch_rate} \\\\
   \\hline 
-  \\text{1988} & \\text{01} & \\text{01} & 52.85 \\\\
-  \\text{1989} & \\text{02} & \\text{01} & 61.20 \\\\
-  \\text{1990} & \\text{02} & \\text{01} & 49.42 \\\\
-  \\vdots & \\vdots & \\vdots & \\vdots \\\\
-  \\text{2019} & \\text{02} &  \\text{01} & 15.94 \\\\
+  \\text{1988} & \\text{1} & \\text{1} &   52.85 \\\\
+  \\text{1989} & \\text{2} & \\text{1} &   61.20 \\\\
+  \\text{1990} & \\text{2} & \\text{1} &   49.42 \\\\
+       \\vdots &   \\vdots &   \\vdots & \\vdots \\\\
+  \\text{2019} & \\text{2} & \\text{1} &   15.94 \\\\
   \\hline 
 \\end{array}
 $$

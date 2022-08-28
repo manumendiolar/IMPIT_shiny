@@ -245,8 +245,8 @@ ui <- dashboardPage(
                      condition = "input.choice_epifile == '1'",
                      helper(
                        radioButtons("choice_thres", "Type of episodes:", choices = list("up-episodes"=1, "down-episodes"=2)),
-                       content = "source_epi_generate_help",
-                       title = "Format of generated episodes file",
+                       content = "help_type_episodes",
+                       title = "Type of episodes",
                        icon = "question",
                        size = "l",
                        type = "markdown"
@@ -254,7 +254,7 @@ ui <- dashboardPage(
                      fluidRow(
                        column(5,
                               helper(
-                                numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf),
+                                numericInput('thres', 'Threshold', 8, min = -Inf, max = Inf),
                                 content = "help_threshold",
                                 title = "Threshold",
                                 icon = "question",
@@ -266,7 +266,7 @@ ui <- dashboardPage(
                      fluidRow(
                        column(5,
                               helper(
-                                numericInput('duration_min','Minimum duration:', 1, min = 1, max = Inf),
+                                numericInput('duration_min','Minimum duration', 1, min = 1, max = Inf),
                                 content = "help_min_duration",
                                 title = "Minimum duration",
                                 icon = "question",
@@ -292,8 +292,8 @@ ui <- dashboardPage(
             column(width = 4,
                    helper(
                      radioButtons("choice_timfoc", "Episodes overlapping special season", choices=list("yes"=1,"no"=2)),
-                     content = "help_epi_units",
-                     title = "Episodes time units",
+                     content = "help_special_season",
+                     title = "Special season",
                      icon = "question",
                      size = "m",
                      type = "markdown"
@@ -370,7 +370,7 @@ ui <- dashboardPage(
               # Memory
               helper(
                 numericInput("m", label = "Memory", min=1, max=Inf, value=1),
-                content = "set_up_index_m_help",
+                content = "help_set_up_index_m",
                 title = "Memory",
                 icon = "question",
                 size = "m",
@@ -379,7 +379,7 @@ ui <- dashboardPage(
               # Intensity
               helper(
                 selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log")),
-                content = "set_up_index_intensity_help",
+                content = "help_set_up_index_intensity",
                 title = "Intensity",
                 icon = "question",
                 size = "m",
@@ -397,7 +397,7 @@ ui <- dashboardPage(
                     ),
                   tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=2, step = 0.01)))
                   ),
-                content = "set_up_index_a_help",
+                content = "help_set_up_index_a",
                 title = "Persistence",
                 icon = "question",
                 size = "m",
@@ -414,7 +414,7 @@ ui <- dashboardPage(
                   tags$div(id = "inline", column(5, numericInput("b_w2", label = 'b:', min=0, max=Inf, value=1.75, step = 0.01))),
                   tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0.25, step = 0.01)))
                   ),
-                content = "set_up_index_b_help",
+                content = "help_set_up_index_b_and_c",
                 title = "Recency: b and c",
                 icon = "question",
                 size = "m",
@@ -432,7 +432,7 @@ ui <- dashboardPage(
                     ),
                     tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=1, step = 0.01)))
                     ),
-                  content = "set_up_index_d_help",
+                  content = "help_set_up_index_d",
                   title = "Timing",
                   icon = "question",
                   size = "m",
@@ -444,8 +444,8 @@ ui <- dashboardPage(
               helper(
                 #dateRangeInput("daterange_index", p(h5(strong("Index period:")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
                 dateRangeInput("daterange_index", h5(strong("Index period:")), start="1900-01-01", end="2020-01-01"),
-                content = "set_up_index_range_help",
-                title = "Set up for constructing IMPIT index",
+                content = "help_set_up_index_time_range",
+                title = "Index time range",
                 icon = "question",
                 size = "m",
                 type = "markdown"
@@ -509,11 +509,11 @@ ui <- dashboardPage(
             height = "500px",
             helper(
               fileInput("index_file","Select CSV File to Import", accept = ".csv", placeholder = "ex: impit_index.csv"),
+              content = "help_source_index",
+              title = "Data format",
               icon = "question",
               size = "m",
-              title = "Data format",
-              type = "markdown",
-              content = "source_data_impit_help"
+              type = "markdown"
               )
             ),
           
@@ -553,11 +553,11 @@ ui <- dashboardPage(
             height = "500px",
             helper(
               fileInput("resp_file","Select CSV File to Import", accept = ".csv", placeholder = "ex: resp_variable.csv"),
+              content = "help_source_resp",
+              title = "Data format",
               icon = "question",
               size = "m",
-              title = "Data format",
-              type = "markdown",
-              content = "source_data_resp_help"
+              type = "markdown"
               )
             ),
           # table and plot of other variable (to check) and correlation analysis with IMPIT index

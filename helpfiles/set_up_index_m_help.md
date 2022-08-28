@@ -1,1 +1,0 @@
-A period of fixed and uninterrupted duration in the past with respect to the current observation in time. Note that units of the *memory* parameter coincides with the time units selected in Episodes tab.

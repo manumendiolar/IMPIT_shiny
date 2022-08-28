@@ -30,9 +30,9 @@ source("./source/fun_w2.R")
 source("./source/fun_w3.R")
 
 source("./source/subtract_mem.R")
-source("./source/mydetect_timeunits.R")
 source("./source/is_convertible_to_date.R")
 source("./source/fun_IMPITv2.R")
+source("./source/gather_timfoc_dates.R")
 
 steps <- read_csv("./helpfiles/help.csv", show_col_types = FALSE)
 choices_days <- as.character(1:31)

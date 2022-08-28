@@ -39,10 +39,9 @@ source("./source/fun_w3.R")
 source("./source/subtract_mem.R")
 source("./source/fun_IMPITv2.R")
 source("./source/subtract_mem.R")
-source("./source/mydetect_timeunits.R")
 source("./source/is_convertible_to_date.R")
 source("./source/fun_IMPITv2.R")
-
+source("./source/gather_timfoc_dates.R")
 setBackgroundImage(src = NULL, shinydashboard = TRUE)
 
 # Attach the folder where the 'QU-GENE' engine and QuLinePlus are stored.
@@ -111,7 +110,7 @@ server <- function(input, output, session) {
     DT::datatable(data_input(),
                   options = list(
                     pageLength = 15,
-                    lengthMenu = c(5,10,15,20,25,30,50,100), 
+                    #lengthMenu = c(5,10,15,20,25,30,50,100), 
                     autoWidth = FALSE,  
                     searching = TRUE,
                     search = list(regex = TRUE, caseInsensitive = TRUE)
@@ -289,6 +288,9 @@ server <- function(input, output, session) {
       }
     }
     
+    # save episodes time units
+    state$unit_var <- episodes_units
+    state$episodes_units <- episodes_units
     
     # special season
     if (input$choice_timfoc == '1'){
@@ -309,13 +311,16 @@ server <- function(input, output, session) {
       
       # gather as a vector
       state$period_timfoc <- c(paste0(state$start_month,"-",state$start_day), paste0(state$end_month,"-",state$end_day))
-      
+      # state$period_timfoc <- gather_timfoc_dates(input$start_timfoc_day, 
+      #                                            input$start_timfoc_month, 
+      #                                            input$end_timfoc_day,
+      #                                            input$end_timfoc_month)
       # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
     }
     
-    state$episodes_units <- episodes_units
+    
     # update IMPIT index time units
     if (state$episodes_units == "days"){
       updateRadioButtons(session, "choice_index_unit",
@@ -528,7 +533,7 @@ server <- function(input, output, session) {
     # Episodes: time units choice
     #state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
     #state$unit_var <- mydetect_timeunits(state$episodes)
-    state$unit_var <- episodes_units
+    #state$unit_var <- episodes_units
     
     # Episodes: intensity choice
     state$intensity <- input$choice_intensity

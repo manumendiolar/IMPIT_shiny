@@ -5,9 +5,9 @@ account: manumendiolar
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6802440
-bundleId: 6245186
+bundleId: 6245197
 url: https://manumendiolar.shinyapps.io/impit_shiny/
-when: 1661689876.82084
-lastSyncTime: 1661689876.82084
+when: 1661690355.35217
+lastSyncTime: 1661690355.35217
 asMultiple: FALSE
 asStatic: FALSE

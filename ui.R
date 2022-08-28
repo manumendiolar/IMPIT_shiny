@@ -196,7 +196,7 @@ ui <- dashboardPage(
             width = 9,
             height = "500px",
             tabsetPanel(
-              tabPanel("Plot", plotlyOutput("envPlot", height = 700)),
+              tabPanel("Plot", plotlyOutput("envPlot", height = 500)),
               tabPanel("Table", div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")),
               tabPanel("Summary", verbatimTextOutput("summary_contents_data")),
               tabPanel("str()", verbatimTextOutput("str_contents_data"))
@@ -466,12 +466,26 @@ ui <- dashboardPage(
               collapsed = FALSE,
               status = "info",
               height = "500px",
-              plotlyOutput("plot_index", width = "100%"),
-              br(),
-              fluidRow(
-                column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
-                column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+              tabsetPanel(
+                tabPanel("Plot",
+                         fluidRow(
+                           column(11, plotlyOutput("plot_index", width = "100%")),
+                           column( 3, downloadButton("downloadPlot_index", "Download Plot"), style="margin-top: 25px;")
+                         )
+                ),
+                tabPanel("Table",
+                         fluidRow(
+                           column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+                           column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+                         )
                 )
+              )
+              # plotlyOutput("plot_index", width = "100%"),
+              # br(),
+              # fluidRow(
+              #   column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+              #   column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+              #   )
               )
             )
           )
@@ -504,8 +518,7 @@ ui <- dashboardPage(
               title = "Data format",
               type = "markdown",
               content = "source_data_impit_help"
-              ),
-            div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
+              )
             ),
           
           # IMPIT index plot 
@@ -521,6 +534,9 @@ ui <- dashboardPage(
               tabPanel("Plot",
                        fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
+                       ),
+              tabPanel("Table",
+                       div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
                        )
               )
             )
@@ -546,8 +562,7 @@ ui <- dashboardPage(
               title = "Data format",
               type = "markdown",
               content = "source_data_resp_help"
-              ),
-            div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")
+              )
             ),
           
           # table and plot of other variable (to check) and correlation analysis with IMPIT index
@@ -564,6 +579,9 @@ ui <- dashboardPage(
                        fluidRow(column(10, plotlyOutput("plot_app_resp", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
                        ),
+              tabPanel("Table",
+                       div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")
+              ),
               tabPanel("Correlation analysis",
                        fluidRow(column(10, plotlyOutput("plot_corr_application", width="90%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))

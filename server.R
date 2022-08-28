@@ -228,6 +228,7 @@ server <- function(input, output, session) {
   })
   
 
+
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi, {
     
@@ -246,12 +247,19 @@ server <- function(input, output, session) {
       # check units
       dds <- unique(data_input()[ ,3])
       mms <- unique(data_input()[ ,2])
-      
       if ( all(dds == 1) & all(mms == 1) ) episodes_units <- "years"
       if ( all(dds == 1) & any(mms != 1) ) episodes_units <- "months"
       if ( any(dds != 1) ) episodes_units <- "days"
+      
+      # update index period
+      minyear <- min(data_input()[ ,1])
+      maxyear <- max(data_input()[ ,1])
+      date1 <- as.Date(paste0(minyear,"-01-01"))
+      date2 <- as.Date(paste0(maxyear,"-01-01"))
+      updateDateRangeInput(session, "daterange_index", start = date1, end = date2)
+      
     }
-    
+
     if (input$choice_epifile == '2'){
      
       # load episode list 
@@ -285,6 +293,13 @@ server <- function(input, output, session) {
         if ( all(dds == 1) & all(mms == 1) ) episodes_units <- "years"
         if ( all(dds == 1) & any(mms != 1) ) episodes_units <- "months"
         if ( any(dds != 1) ) episodes_units <- "days"
+        
+        # update index period
+        minyear <- min(data_epi()[ ,3])
+        maxyear <- max(data_epi()[ ,4])
+        date1 <- as.Date(paste0(minyear,"-01-01"))
+        date2 <- as.Date(paste0(maxyear,"-01-01"))
+        updateDateRangeInput(session, "daterange_index", start = date1, end = date2)
       }
     }
     
@@ -295,26 +310,11 @@ server <- function(input, output, session) {
     # special season
     if (input$choice_timfoc == '1'){
 
-      # start date format
-      ss_start_dd <- as.character(input$start_timfoc_day)
-      ss_start_mm <- factor(input$start_timfoc_month, levels = choices_months)
-      ss_start_mm <- as.integer(ss_start_mm)
-      state$start_day <- ifelse(ss_start_dd %in% seq(1,9,1), paste0("0",ss_start_dd), paste0(ss_start_dd))
-      state$start_month <- ifelse(ss_start_mm %in% seq(1,9,1), paste0("0",ss_start_mm), paste0(ss_start_mm))
-      
-      # end date format
-      ss_end_dd <- as.character(input$end_timfoc_day)
-      ss_end_mm <- factor(input$end_timfoc_month, levels = choices_months)
-      ss_end_mm <- as.integer(ss_end_mm)
-      state$end_day <- ifelse(ss_end_dd %in% seq(1,9,1), paste0("0",ss_end_dd), paste0(ss_end_dd))
-      state$end_month <- ifelse(ss_end_mm %in% seq(1,9,1), paste0("0",ss_end_mm), paste0(ss_end_mm))
-      
       # gather as a vector
-      state$period_timfoc <- c(paste0(state$start_month,"-",state$start_day), paste0(state$end_month,"-",state$end_day))
-      # state$period_timfoc <- gather_timfoc_dates(input$start_timfoc_day, 
-      #                                            input$start_timfoc_month, 
-      #                                            input$end_timfoc_day,
-      #                                            input$end_timfoc_month)
+      state$period_timfoc <- gather_timfoc_dates(input$start_timfoc_day,
+                                                 input$start_timfoc_month,
+                                                 input$end_timfoc_day,
+                                                 input$end_timfoc_month)
       # update episodes
       state$episodes <- mydetect_timfoc(episodes = state$episodes, timfoc_dates = state$period_timfoc)
       
@@ -344,8 +344,7 @@ server <- function(input, output, session) {
     }
   })
   
-  
-      
+
   # Episodes: table print
   output$contents_epi <- DT::renderDataTable({
     DT::datatable(state$episodes,
@@ -369,7 +368,7 @@ server <- function(input, output, session) {
       paste0("Episodes_table.csv")
     },
     content = function(file) {
-      write.csv(state$episodes, file, row.names = FALSE, col.names = TRUE)
+      write.csv(state$episodes, file, row.names = FALSE)
     }
   )
   
@@ -530,11 +529,6 @@ server <- function(input, output, session) {
 
   observeEvent(input$run_button_index,{
     
-    # Episodes: time units choice
-    #state$unit_var <- ifelse(input$unit_var == '1','days', ifelse(input$unit_var == '2', 'months', 'years'))
-    #state$unit_var <- mydetect_timeunits(state$episodes)
-    #state$unit_var <- episodes_units
-    
     # Episodes: intensity choice
     state$intensity <- input$choice_intensity
     
@@ -575,26 +569,29 @@ server <- function(input, output, session) {
    
 
     
-    # IMPIT index: computation (new version)
+    # IMPIT index: time units 
     state$index_unit <- ifelse(input$choice_index_unit == '1','years', ifelse(input$choice_index_unit == '2', 'months', 'days'))
 
-    # period to compute index (YYYY-MM-DD)
+    # IMPIT index: period to compute index (YYYY-MM-DD)
     index_d1 <- as.Date(input$daterange_index[1])
     index_d2 <- as.Date(input$daterange_index[2])
     state$index_range <- seq(index_d1, index_d2, by = state$index_unit)
 
+    # IMPIT index: computation (new version)
+   # withProgress(message = 'Computing index', value = 0, {
     state$index <- fun_IMPITv2(episodes = state$episodes,
-                               unit = state$unit_var,
-                               index_range = state$index_range,
-                               m = input$m,
-                               a = input$a_w1,
-                               b = input$b_w2,
-                               c = input$c_w2,
-                               d = state$d,
-                               intensity = state$intensity,
-                               time_focus = state$choice_timfoc,
-                               tau = state$tau)
-
+                                 unit = state$unit_var,
+                                 index_range = state$index_range,
+                                 m = input$m,
+                                 a = input$a_w1,
+                                 b = input$b_w2,
+                                 c = input$c_w2,
+                                 d = state$d,
+                                 intensity = state$intensity,
+                                 time_focus = state$choice_timfoc,
+                                 tau = state$tau) 
+    #})
+    
     # arrange data frame index
     state$contents_index <- data.frame(
       Year = lubridate::year(state$index_range),
@@ -630,6 +627,12 @@ server <- function(input, output, session) {
     # IMPIT index: print plot
     output$plot_index <- renderPlotly({
       
+      input$run_button_index # Re-run when button is clicked
+      
+      style <- isolate(input$style)
+      
+      withProgress(message = 'Creating plot', style = style, value = 0.1, {
+        
       if ( nrow(state$contents_index) != 0 ){
         plot_ly(data = state$contents_index) %>%
           add_lines(x = ~time, y = ~index) %>% 
@@ -637,8 +640,11 @@ server <- function(input, output, session) {
       } else {
         plot_ly(type = 'scatter')
       }
+
+      })
     })
-      
+    
+    
     # IMPIT index: download .png
     output$downloadPlot_index <- downloadHandler(
       filename = function() paste0("IMPIT_index_plot",'.png'),

@@ -226,93 +226,92 @@ ui <- dashboardPage(
             
             # Generate / Upload episodes 
             column(width = 4,
-                   radioButtons("choice_epifile",
-                                "You can generate or upload the list of episodes:", 
-                                choices = list("generate"=1,"upload"=2)
-                                ),
+                   radioButtons("choice_epifile", "List of episodes:", choices = list("generate"=1,"upload"=2)),
+                   actionButton("run_button_epi", "Compute", icon=icon("paper-plane"))
+                   ),
+            column(width = 4,
                    conditionalPanel(
                      condition = "input.choice_epifile == '2'",
                      helper(
                        fileInput("epifile_input","Select CSV to Import", accept=".csv", placeholder="ex: soi_episodes.csv"),
+                       content = "source_epi_upload_help",
+                       title = "Episodes data format",
                        icon = "question", 
                        size = "l",
-                       title = "Episodes data format",
-                       type = "markdown",
-                       content = "source_epi_upload_help"
+                       type = "markdown"
                        )
                      ),
                    conditionalPanel(
                      condition = "input.choice_epifile == '1'",
                      helper(
-                       radioButtons("choice_thres",
-                                    "Observations which exceed, or fall below a threshold:",
-                                    choices = list("up-episodes" = 1, "down-episodes" = 2)
-                                    ),
+                       radioButtons("choice_thres", "Type of episodes:", choices = list("up-episodes"=1, "down-episodes"=2)),
+                       content = "source_epi_generate_help",
+                       title = "Format of generated episodes file",
                        icon = "question",
                        size = "l",
-                       title = "Format of generated episodes file",
-                       type = "markdown",
-                       content = "source_epi_generate_help"
+                       type = "markdown"
                        ),
-                     fluidRow(column(5, 
-                                     helper(
-                                       numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf),
-                                       icon = "question",
-                                       size = "m",
-                                       title = "Threshold",
-                                       type = "markdown",
-                                       content = "help_threshold"
-                                     ))),
-                     fluidRow(column(5, 
-                                     helper(
-                                       numericInput('duration_min','Minimum duration:', 1, min = 1, max = Inf),
-                                       #verbatimTextOutput("value_duration_min"),
-                                       icon = "question",
-                                       size = "m",
-                                       title = "Minimum duration",
-                                       type = "markdown",
-                                       content = "help_min_duration"
-                                     )))
-                     ),
-                   actionButton("run_button_epi", "Compute", icon=icon("play"))
-                   ),
-            # Time units
-            column(width = 3,
-                   helper(
-                     radioButtons("unit_var", "Episodes time units", choices=list("days"=1,"months"=2,"years"=3)),
-                     icon = "question",
-                     size = "m",
-                     title = "Episodes time units",
-                     type = "markdown",
-                     content = "help_epi_units"
+                     fluidRow(
+                       column(5,
+                              helper(
+                                numericInput('thres', 'Threshold:', 8, min = -Inf, max = Inf),
+                                content = "help_threshold",
+                                title = "Threshold",
+                                icon = "question",
+                                size = "m",
+                                type = "markdown"
+                                )
+                              )
+                       ),
+                     fluidRow(
+                       column(5,
+                              helper(
+                                numericInput('duration_min','Minimum duration:', 1, min = 1, max = Inf),
+                                content = "help_min_duration",
+                                title = "Minimum duration",
+                                icon = "question",
+                                size = "m",
+                                type = "markdown"
+                                )
+                              )
+                       )
                      )
                    ),
+            # Time units
+            # column(width = 3,
+            #        helper(
+            #          radioButtons("unit_var", "Episodes time units", choices=list("days"=1,"months"=2,"years"=3)),
+            #          icon = "question",
+            #          size = "m",
+            #          title = "Episodes time units",
+            #          type = "markdown",
+            #          content = "help_epi_units"
+            #          )
+            #        ),
             # Timing
             column(width = 4,
                    helper(
-                     radioButtons("choice_timfoc", "Episodes overlapping special season", choices=list("yes"=1,"no"=2), selected=NULL),
+                     radioButtons("choice_timfoc", "Episodes overlapping special season", choices=list("yes"=1,"no"=2)),
+                     content = "help_epi_units",
+                     title = "Episodes time units",
                      icon = "question",
                      size = "m",
-                     title = "Episodes time units",
-                     type = "markdown",
-                     content = "help_epi_units"
-                   ),
+                     type = "markdown"
+                     ),
                    conditionalPanel(
                      condition = "input.choice_timfoc == '1'",
-                     strong("Special season start"),
                      fluidRow(
-                       column(5, selectInput("start_timfoc_month", "", choices=choices_months, selected=choices_months[1])),
-                       column(3, selectInput("start_timfoc_day", "", choices=choices_days, selected=choices_days[1]))
+                       column(5, selectInput("start_timfoc_month", "Start: Month", choices=choices_months, selected=choices_months[1])),
+                       column(3, selectInput("start_timfoc_day", "Start: Day", choices=choices_days, selected=choices_days[1]))
                        ),
-                     strong("Special season end"),
                      fluidRow(
-                       column(5, selectInput("end_timfoc_month", "", choices=choices_months, selected=choices_months[2])),
-                       column(3, selectInput("end_timfoc_day", "", choices=choices_days, selected=choices_days[1])),
+                       column(5, selectInput("end_timfoc_month", "End: Month", choices=choices_months, selected=choices_months[2])),
+                       column(3, selectInput("end_timfoc_day", "End: Day", choices=choices_days, selected=choices_days[1])),
                        )
                      )
                    )
             )
-          ),
+        ),
         
         # Explore episodes
         fluidRow(
@@ -371,37 +370,38 @@ ui <- dashboardPage(
               # Memory
               helper(
                 numericInput("m", label = "Memory", min=1, max=Inf, value=1),
+                content = "set_up_index_m_help",
+                title = "Memory",
                 icon = "question",
                 size = "m",
-                title = "Memory",
-                type = "markdown",
-                content = "set_up_index_m_help"
+                type = "markdown"
                 ),
               # Intensity
               helper(
-                selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log"), selected=NULL),
+                selectInput("choice_intensity", "Intensity", choices=c("mean","median","min","max","log")),
+                content = "set_up_index_intensity_help",
+                title = "Intensity",
                 icon = "question",
                 size = "m",
-                title = "Intensity",
-                type = "markdown",
-                content = "set_up_index_intensity_help"
+                type = "markdown"
                 ),
+              # 
               p(h5(strong("Weights")), style = "margin-top: 20px;"),
               # Weight: Persistence
               h5(em(strong("Persitence"))),
               helper(
                 fluidRow(
-                tags$head(
-                  tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
-                              #inline .form-group { display: table-row;}")
-                ),
-                tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=2, step = 0.01)))
-                ),
+                  tags$head(
+                    tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
+                    #inline .form-group { display: table-row;}")
+                    ),
+                  tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=2, step = 0.01)))
+                  ),
+                content = "set_up_index_a_help",
+                title = "Persistence",
                 icon = "question",
                 size = "m",
-                title = "Persistence",
-                type = "markdown",
-                content = "set_up_index_a_help"
+                type = "markdown"
                 ),
               # Weight: Recency
               h5(em(strong("Recency"))),
@@ -409,16 +409,16 @@ ui <- dashboardPage(
                 fluidRow(
                   tags$head(
                     tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle}
-                              #inline .form-group { display: table-row;}")
+                    #inline .form-group { display: table-row;}")
                     ),
                   tags$div(id = "inline", column(5, numericInput("b_w2", label = 'b:', min=0, max=Inf, value=1.75, step = 0.01))),
                   tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0.25, step = 0.01)))
                   ),
+                content = "set_up_index_b_help",
+                title = "Recency: b and c",
                 icon = "question",
                 size = "m",
-                title = "Recency: b and c",
-                type = "markdown",
-                content = "set_up_index_b_help"
+                type = "markdown"
                 ),
               # Weight: Timing
               conditionalPanel(
@@ -428,25 +428,27 @@ ui <- dashboardPage(
                   fluidRow(
                     tags$head(
                       tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
-                              #inline .form-group { display: table-row;}")
+                      #inline .form-group { display: table-row;}")
                     ),
                     tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=1, step = 0.01)))
-                  ),
+                    ),
+                  content = "set_up_index_d_help",
+                  title = "Timing",
                   icon = "question",
                   size = "m",
-                  title = "Timing",
-                  type = "markdown",
-                  content = "set_up_index_d_help"
+                  type = "markdown"
                   )
                 ),
+              br(),
               # Period time Index
               helper(
-                dateRangeInput("daterange_index", p(h5(strong("Index period (YYYY-MM-DD)")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
+                #dateRangeInput("daterange_index", p(h5(strong("Index period:")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
+                dateRangeInput("daterange_index", h5(strong("Index period:")), start="1900-01-01", end="2020-01-01"),
+                content = "set_up_index_range_help",
+                title = "Set up for constructing IMPIT index",
                 icon = "question",
                 size = "m",
-                title = "Set up for constructing IMPIT index",
-                type = "markdown",
-                content = "set_up_index_range_help"
+                type = "markdown"
                 ),
               radioButtons("choice_index_unit", label = h5(strong("Index time units:")), choices = list("annually?"=1, "monthly?"=2, "daily?"=3)),
               actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
@@ -477,15 +479,9 @@ ui <- dashboardPage(
                          fluidRow(
                            column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
                            column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
+                           )
                          )
                 )
-              )
-              # plotlyOutput("plot_index", width = "100%"),
-              # br(),
-              # fluidRow(
-              #   column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
-              #   column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
-              #   )
               )
             )
           )
@@ -564,7 +560,6 @@ ui <- dashboardPage(
               content = "source_data_resp_help"
               )
             ),
-          
           # table and plot of other variable (to check) and correlation analysis with IMPIT index
           box(
             title = div(icon("magnifying-glass", lib = "font-awesome"), strong("Explore association between IMPIT index and response variable")),
@@ -579,15 +574,12 @@ ui <- dashboardPage(
                        fluidRow(column(10, plotlyOutput("plot_app_resp", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
                        ),
-              tabPanel("Table",
-                       div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")
-              ),
+              tabPanel("Table", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
               tabPanel("Correlation analysis",
                        fluidRow(column(10, plotlyOutput("plot_corr_application", width="90%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
                        ),
-              tabPanel("Summary", 
-                       verbatimTextOutput("summary"))
+              tabPanel("Summary", verbatimTextOutput("summary"))
               )
             )
           )

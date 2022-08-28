@@ -109,21 +109,17 @@ server <- function(input, output, session) {
   output$contents_data <- DT::renderDataTable({
     DT::datatable(data_input(),
                   options = list(
-                    pageLength = 15,
-                    #lengthMenu = c(5,10,15,20,25,30,50,100), 
+                    pageLength = 10,
                     autoWidth = FALSE,  
                     searching = TRUE,
                     search = list(regex = TRUE, caseInsensitive = TRUE)
                     ),
-                    rownames = FALSE) %>%
-        formatRound(c(4),2)
+                    rownames = FALSE) %>% formatRound(c(4),2)
   })
   
   # data_input(): plot
   output$envPlot <- renderPlotly({
-    # xx with date format 
     xx <- as.Date(paste0(data_input()[ ,1],"-",data_input()[ ,2],"-",data_input()[ ,3]), format = "%Y-%m-%d")
-    # yy environmental signal
     yy <- data_input()[ ,4]
     plot_ly( x = ~xx, y = ~yy) %>%
       add_lines() %>%
@@ -226,9 +222,7 @@ server <- function(input, output, session) {
        })
     }
   })
-  
-
-
+ 
   # depending on generate / upload episode file
   observeEvent(input$run_button_epi, {
     
@@ -342,7 +336,7 @@ server <- function(input, output, session) {
                          selected = 1
       )
     }
-  })
+  
   
 
   # Episodes: table print
@@ -361,7 +355,7 @@ server <- function(input, output, session) {
       formatRound(c(6,7,8,9,10), 2) %>%
       formatStyle(columns=c(1:4), 'text-align'='centre')
   })
-
+  
   # Episodes: table download .csv
   output$downloadTable_epi <- downloadHandler(
     filename = function() {
@@ -519,7 +513,7 @@ server <- function(input, output, session) {
       ggsave(file, plot = state$plot_epi_duration, width = 26, height = 12, units = "cm", dpi = 300)
     }
   )
-
+  })
  
   
 

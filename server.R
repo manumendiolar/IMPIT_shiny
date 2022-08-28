@@ -289,8 +289,8 @@ server <- function(input, output, session) {
         if ( any(dds != 1) ) episodes_units <- "days"
         
         # update index period
-        minyear <- min(data_epi()[ ,3])
-        maxyear <- max(data_epi()[ ,4])
+        minyear <- min(lubridate::year(data_epi()[ ,3]))
+        maxyear <- max(lubridate::year(data_epi()[ ,4]))
         date1 <- as.Date(paste0(minyear,"-01-01"))
         date2 <- as.Date(paste0(maxyear,"-01-01"))
         updateDateRangeInput(session, "daterange_index", start = date1, end = date2)

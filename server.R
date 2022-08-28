@@ -513,11 +513,21 @@ server <- function(input, output, session) {
       ggsave(file, plot = state$plot_epi_duration, width = 26, height = 12, units = "cm", dpi = 300)
     }
   )
+  
+  if (state$episodes[1,1] == 0){
+    shinyjs::disable("run_button_index")
+    showNotification("No episodes available to compute index", type = "warning")
+    #shinyCatch(stop("No episodes available to compute index"), blocking_level = "warning")
+  } else {
+    shinyjs::enable("run_button_index")
+  }
+  
   })
- 
   
 
-  
+
+
+
   
   # INDEX TAB ---------------------------------------------------------------
 
@@ -641,8 +651,12 @@ server <- function(input, output, session) {
     
     # IMPIT index: download .png
     output$downloadPlot_index <- downloadHandler(
-      filename = function() paste0("IMPIT_index_plot",'.png'),
-      content = function(file) ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
+      filename = function() {
+        paste0("IMPIT_index_plot",'.png')
+        },
+      content = function(file) {
+        ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
+      }
     )
     
   })

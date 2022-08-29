@@ -196,10 +196,10 @@ ui <- dashboardPage(
             width = 9,
             height = "500px",
             tabsetPanel(
-              tabPanel("Plot", plotlyOutput("envPlot", height = 500)),
-              tabPanel("Table", div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")),
-              tabPanel("Summary", verbatimTextOutput("summary_contents_data")),
-              tabPanel("str()", verbatimTextOutput("str_contents_data"))
+              tabPanel("Plot", br(), plotlyOutput("envPlot", height = 500)),
+              tabPanel("Table", br(), div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")),
+              tabPanel("Summary", br(), verbatimTextOutput("summary_contents_data")),
+              tabPanel("str()", br(), verbatimTextOutput("str_contents_data"))
               )
             )
           )
@@ -327,21 +327,21 @@ ui <- dashboardPage(
               # Episodes: table
               tabPanel("Table",
                        fluidRow(
-                         column(12, div(DT::dataTableOutput("contents_epi"), style="font-size: 100%; width: 100%")),
+                         column(12, br(), div(DT::dataTableOutput("contents_epi"), style="font-size: 100%; width: 100%")),
                          column( 3, downloadButton("downloadTable_epi", "Download Table"), style="margin-top: 25px;")
                          )
                        ),
               # Episodes: plot
               tabPanel("Plot: Intensity",
                        fluidRow(
-                         column(11, plotlyOutput("plot_epi_intensity", height=500)),
+                         column(12, br(), plotlyOutput("plot_epi_intensity", height=500)),
                          column( 3, downloadButton("downloadPlot_epi_intensity", "Download Plot"), style="margin-top: 25px;")
                          )
                        ),
               # Episodes: plot
               tabPanel("Plot: Duration",
                        fluidRow(
-                         column(11, plotlyOutput("plot_epi_duration", height=500)),
+                         column(12, br(), plotlyOutput("plot_epi_duration", height=500)),
                          column( 3, downloadButton("downloadPlot_epi_duration", "Download Plot"), style="margin-top: 25px;")
                          )
                        )
@@ -471,13 +471,13 @@ ui <- dashboardPage(
               tabsetPanel(
                 tabPanel("Plot",
                          fluidRow(
-                           column(11, plotlyOutput("plot_index", width = "100%")),
+                           column(12, br(), plotlyOutput("plot_index", width = "100%")),
                            column( 3, downloadButton("downloadPlot_index", "Download Plot"), style="margin-top: 25px;")
                          )
                 ),
                 tabPanel("Table",
                          fluidRow(
-                           column(12, div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
+                           column(12, br(), div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
                            column( 3, downloadButton("downloadTable_index", "Download Table"), style = "margin-top: 25px;")
                            )
                          )
@@ -535,22 +535,22 @@ ui <- dashboardPage(
             height = "500px",
             tabsetPanel(
               tabPanel("Plot: IMPIT index",
-                       fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
+                       fluidRow(column(10, br(), plotlyOutput("plot_app_index", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
                        ),
-              tabPanel("Table: IMPIT index",
+              tabPanel("Table: IMPIT index", br(),
                        div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
                        ),
               tabPanel("Plot: Response",
-                       fluidRow(column(10, plotlyOutput("plot_app_resp", width = "100%"))),
+                       fluidRow(column(10, br(), plotlyOutput("plot_app_resp", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
               ),
-              tabPanel("Table: Response", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
+              tabPanel("Table: Response", br(), div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
               tabPanel("Correlation analysis",
-                       fluidRow(column(10, plotlyOutput("plot_corr_application", width="90%"))),
+                       fluidRow(column(10, br(), plotlyOutput("plot_corr_application", width="90%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
               ),
-              tabPanel("Summary", verbatimTextOutput("summary"))
+              tabPanel("Summary", br(), verbatimTextOutput("summary"))
               )
             )
           )

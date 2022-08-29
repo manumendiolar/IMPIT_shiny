@@ -865,7 +865,7 @@ server <- function(input, output, session) {
     } else {
       xx <- data_index()[ ,"index"]
       yy <- data_resp()[ ,4]
-      yy <- log(yy)
+      #yy <- log(yy)
       xx_name <- "IMPIT index"#colnames(data_index())[5]
       yy_name <- colnames(data_resp())[4]
       # linear model
@@ -923,7 +923,8 @@ server <- function(input, output, session) {
                         fillcolor = list(color="rgb(195, 195, 195)", opacity=0.4), 
                         line = list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
       pp <- add_lines(pp, x=xx, y=mod.pred$fit, name="Linear Regression", line=list(color=col.reg, width=2))
-      pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
+      pp <- add_trace(pp, y = yy, mode = 'markers', color = I('black'), showlegend = F)
+      #pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
       pp <- layout(pp, 
                    xaxis = list(title = xx_name), 
                    yaxis = list(title = yy_name),

@@ -94,16 +94,21 @@ server <- function(input, output, session) {
         # read file
         aux <- read.csv(input$csv_input$datapath)
         # check format file
-        if ( (dim(aux)[2] != 4) | 
-             any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) |
-             any(is.na(aux)) | 
-             any(is.character(aux))|
-             !is.numeric(aux[ ,4]) ) {
+        if ( dim(aux)[2] < 4 ) {
           shinyalert("Invalid format file", type = "error")
           NULL
         } else {
-          aux
-         
+          if ( is.character(aux[ ,1]) | is.character(aux[ ,1]) | is.character(aux[ ,1]) ){
+            shinyalert("Invalid format file", type = "error")
+            NULL
+          } else {
+            if ( any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) | any(is.na(aux)) | !is.numeric(aux[ ,4]) ) {
+              shinyalert("Invalid format file", type = "error")
+              NULL
+            } else {
+              aux
+            } 
+          }
         }
       }
     })
@@ -699,15 +704,21 @@ server <- function(input, output, session) {
       # read file
       aux <- read.csv(input$index_file$datapath)
       # check format file
-      if ( (dim(aux)[2] != 4) | 
-           any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) |
-           any(is.na(aux)) | 
-           any(is.character(aux))|
-           !is.numeric(aux[ ,4]) ) {
+      if ( dim(aux)[2] < 4 ) {
         shinyalert("Invalid format file", type = "error")
         NULL
       } else {
-        aux
+        if ( is.character(aux[ ,1]) | is.character(aux[ ,1]) | is.character(aux[ ,1]) ){
+          shinyalert("Invalid format file", type = "error")
+          NULL
+        } else {
+          if ( any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) | any(is.na(aux)) | !is.numeric(aux[ ,4]) ) {
+            shinyalert("Invalid format file", type = "error")
+            NULL
+          } else {
+            aux
+          } 
+        }
       }
     }
   })
@@ -785,15 +796,21 @@ server <- function(input, output, session) {
       # read file
       aux <- read.csv(input$resp_file$datapath)
       # check format file
-      if ( (dim(aux)[2] != 4) | 
-           any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) |
-           any(is.na(aux)) | 
-           any(is.character(aux))|
-           !is.numeric(aux[ ,4]) ) {
+      if ( dim(aux)[2] < 4 ) {
         shinyalert("Invalid format file", type = "error")
         NULL
       } else {
-        aux
+        if ( is.character(aux[ ,1]) | is.character(aux[ ,1]) | is.character(aux[ ,1]) ){
+          shinyalert("Invalid format file", type = "error")
+          NULL
+        } else {
+          if ( any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) | any(is.na(aux)) | !is.numeric(aux[ ,4]) ) {
+            shinyalert("Invalid format file", type = "error")
+            NULL
+          } else {
+            aux
+          } 
+        }
       }
     }
   })

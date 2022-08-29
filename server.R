@@ -77,7 +77,7 @@ server <- function(input, output, session) {
   }, deleteFile = FALSE)
   
   
-  
+  state <- reactiveValues()
   
   # DATA TAB ----------------------------------------------------------------
   
@@ -89,6 +89,7 @@ server <- function(input, output, session) {
       # check extension file
       if (tools::file_ext(input$csv_input$datapath) != "csv") {
         shinyalert("Invalid extension file", type = "error")
+        NULL
       } else {
         # read file
         aux <- read.csv(input$csv_input$datapath)
@@ -99,50 +100,68 @@ server <- function(input, output, session) {
              any(is.character(aux))|
              !is.numeric(aux[ ,4]) ) {
           shinyalert("Invalid format file", type = "error")
+          NULL
         } else {
           aux
+         
         }
       }
     })
   
   # data_input(): table
   output$contents_data <- DT::renderDataTable({
-    DT::datatable(data_input(),
-                  options = list(
-                    pageLength = 10,
-                    autoWidth = FALSE,  
-                    searching = TRUE,
-                    search = list(regex = TRUE, caseInsensitive = TRUE)
-                    ),
+    # check if there is data available
+    if ( is.null(data_input()) ){
+      return(invisible())
+    } else {
+      DT::datatable(data_input(), 
+                    options = list(
+                      pageLength = 10,
+                      autoWidth = FALSE,  
+                      searching = TRUE,
+                      search = list(regex = TRUE, caseInsensitive = TRUE)
+                      ),
                     rownames = FALSE) %>% formatRound(c(4),2)
+    }
   })
-  
+    
   # data_input(): plot
   output$envPlot <- renderPlotly({
-    xx <- as.Date(paste0(data_input()[ ,1],"-",data_input()[ ,2],"-",data_input()[ ,3]), format = "%Y-%m-%d")
-    yy <- data_input()[ ,4]
-    plot_ly( x = ~xx, y = ~yy) %>%
-      add_lines() %>%
-      layout(xaxis = list(title="Date", titlefont=list(size=12)),
-             yaxis = list(title=colnames(data_input())[4], titlefont=list(size=12)))
+    # check if there is data available
+    if ( is.null(data_input()) ) {
+      return(invisible())
+    } else {
+      xx <- as.Date(paste0(data_input()[ ,1],"-",data_input()[ ,2],"-",data_input()[ ,3]), format = "%Y-%m-%d")
+      yy <- data_input()[ ,4]
+      plot_ly( x = ~xx, y = ~yy) %>%
+        add_lines() %>%
+        layout(xaxis = list(title="Date", titlefont=list(size=12)),
+               yaxis = list(title=colnames(data_input())[4], titlefont=list(size=12)))
+    }
   })
   
   # data_input(): summary
   output$summary_contents_data <- renderPrint({
-    summary(data_input())
+    if ( is.null(data_input()) ) {
+      return(invisible())
+    } else {
+      summary(data_input())
+    }
   })
   
   # data_input(): str()
   output$str_contents_data <- renderPrint({
-    str(data_input())
+    if ( is.null(data_input()) ) {
+      return(invisible())
+    } else {
+      str(data_input())
+    }
   })
   
   
   
   
   # EPISODES TAB ------------------------------------------------------------
-  
-  state <- reactiveValues()
   
   # minimum duration: check valid entry
   observeEvent(input$duration_min, {
@@ -669,128 +688,175 @@ server <- function(input, output, session) {
   # Import IMPIT index 
   data_index <- eventReactive(input$index_file, {
     
-    if (is.null(input$index_file)) return(NULL)
-    
-    read.csv(file=input$index_file$datapath,
-             header=T, 
-             stringsAsFactors=F)
+    # if (is.null(input$index_file)) return(NULL)
+    # read.csv(file=input$index_file$datapath, header=T, stringsAsFactors=F)
+ 
+    # check extension file
+    if (tools::file_ext(input$index_file$datapath) != "csv") {
+      shinyalert("Invalid extension file", type = "error")
+      NULL
+    } else {
+      # read file
+      aux <- read.csv(input$index_file$datapath)
+      # check format file
+      if ( (dim(aux)[2] != 4) | 
+           any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) |
+           any(is.na(aux)) | 
+           any(is.character(aux))|
+           !is.numeric(aux[ ,4]) ) {
+        shinyalert("Invalid format file", type = "error")
+        NULL
+      } else {
+        aux
+      }
+    }
   })
   
   # IMPIT index: table
   output$contents_app_index <- DT::renderDataTable({
-    DT::datatable(data_index(),
-                  options = list(
-                    pageLength=5,
-                    autoWidth=TRUE,
-                    searching=TRUE,
-                    search=list(regex=TRUE, caseInsensitive=TRUE)
-                  ),
-                  rownames = FALSE) %>%
+    # To avoid error messages
+    if ( is.null(data_index()) ) {
+      return(invisible())
+    } else {
+      DT::datatable(data_index(),
+                    options = list(
+                      pageLength = 10,
+                      autoWidth = TRUE,
+                      searching = TRUE,
+                      search = list(regex = TRUE, caseInsensitive = TRUE)
+                      ),
+                    rownames = FALSE) %>%
       formatRound(c(4), 2) %>%
-      formatStyle(columns=c(1:2), 'text-align'='centre')
+      formatStyle(columns = c(1:2), 'text-align'='centre')
+    }
   })
-    
   
   # IMPIT index + trend
   output$plot_app_index <- renderPlotly({
     
-    # LOESS
-    # LOESS (Locally Estimated Scatterplot Smoother) combines local regression 
-    # with kernels by using locally weighted polynomial regression (by default, 
-    # quadratic regression with tri-cubic weights). It also allows estimation of
-    # approximate confidence intervals. However, it is important to note that 
-    # unlike smooth.spline or gam, loess does not use cross-validation. 
-    # By default, the span is set to 0.75; that is, the estimated smooth at each
-    # target value consists of a local regression constructed using 75% of the 
-    # data points closest to the target value. This span is fairly large and 
-    # results in estimated values that are smoother than those from other methods.
-    
-    xx <- as.Date(paste0(data_index()[ ,1],"-",data_index()[ ,2],"-",data_index()[ ,3]))
-    yy <- data_index()[ ,4]
-    xx <- as.integer(lubridate::year(xx))
-
-    ll.smooth = loess(yy ~ xx, span=0.75)
-    ll.pred = predict(ll.smooth, se = TRUE)
-    ll.df = data.frame(x=ll.smooth$x, fit=ll.pred$fit,
-                      lb = ll.pred$fit - (1.96 * ll.pred$se),
-                      ub = ll.pred$fit + (1.96 * ll.pred$se))
-    ll.df = ll.df[order(ll.df$xx),]
+    if ( is.null(data_index()) ) {
+      return(invisible())
+    } else {
+      
+      # LOESS
+      # LOESS (Locally Estimated Scatterplot Smoother) combines local regression 
+      # with kernels by using locally weighted polynomial regression (by default, 
+      # quadratic regression with tri-cubic weights). It also allows estimation of
+      # approximate confidence intervals. However, it is important to note that 
+      # unlike smooth.spline or gam, loess does not use cross-validation. 
+      # By default, the span is set to 0.75; that is, the estimated smooth at each
+      # target value consists of a local regression constructed using 75% of the 
+      # data points closest to the target value. This span is fairly large and 
+      # results in estimated values that are smoother than those from other methods.
+      
+      xx <- as.Date(paste0(data_index()[ ,1],"-",data_index()[ ,2],"-",data_index()[ ,3]))
+      yy <- data_index()[ ,4]
+      xx <- as.integer(lubridate::year(xx))
+      
+      ll.smooth = loess(yy ~ xx, span=0.75)
+      ll.pred = predict(ll.smooth, se = TRUE)
+      ll.df = data.frame(x = ll.smooth$x, fit = ll.pred$fit,
+                         lb = ll.pred$fit - (1.96 * ll.pred$se),
+                         ub = ll.pred$fit + (1.96 * ll.pred$se))
+      ll.df   = ll.df[order(ll.df$xx),]
      
-    p.llci = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
-    p.llci = add_lines(p.llci, x=xx, y=ll.pred$fit, name="Mean", line=list(color="black", width=1))
-    p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", 
-                         fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), 
-                         line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
-    p.llci = layout(p.llci, title = "LOESS with confidence intervals")
-    p.llci
-
+      p.llci = plot_ly(x=xx, y=yy, type="scatter", mode="lines", line=list(width=2), name="Data")
+      p.llci = add_ribbons(p.llci, x=ll.df$tt, ymin=ll.df$lb, ymax=ll.df$ub, name="95% CI", 
+                           fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), 
+                           line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
+      p.llci = add_lines(p.llci, x=xx, y=ll.pred$fit, name="Mean", line=list(color="black", width=1))
+      p.llci = layout(p.llci, title = "LOESS with confidence intervals")
+      p.llci
+    }
   })
   
  
   # Import Response variable 
   data_resp <- eventReactive(input$resp_file, {
     
-    if (is.null(input$resp_file)) return(NULL)
+    # if (is.null(input$resp_file)) return(NULL)
+    # read.csv(file=input$resp_file$datapath, header=TRUE, stringsAsFactors=FALSE)
     
-    read.csv(file=input$resp_file$datapath,
-             header=TRUE, 
-             stringsAsFactors=FALSE)
+    # check extension file
+    if (tools::file_ext(input$resp_file$datapath) != "csv") {
+      shinyalert("Invalid extension file", type = "error")
+      NULL
+    } else {
+      # read file
+      aux <- read.csv(input$resp_file$datapath)
+      # check format file
+      if ( (dim(aux)[2] != 4) | 
+           any(aux[ ,1:3]-floor(aux[ ,1:3]) != 0) |
+           any(is.na(aux)) | 
+           any(is.character(aux))|
+           !is.numeric(aux[ ,4]) ) {
+        shinyalert("Invalid format file", type = "error")
+        NULL
+      } else {
+        aux
+      }
+    }
   })
   
   # Response variable: table
   output$contents_app_resp <- DT::renderDataTable({
-    DT::datatable(data_resp(),
-                  options = list(
-                    pageLength=5,
-                    autoWidth=TRUE,
-                    searching=TRUE,
-                    search=list(regex=TRUE, caseInsensitive=TRUE)
-                  ),
-                  rownames = FALSE) %>%
-      formatRound(c(4), 2) %>%
-      formatStyle(columns=c(1:4), 'text-align'='centre')
-  }) 
+    if ( is.null(data_resp()) ) {
+      return(invisible())
+    } else {
+      DT::datatable(data_resp(),
+                    options = list(
+                      pageLength = 10,
+                      autoWidth = TRUE,
+                      searching = TRUE,
+                      search = list(regex = TRUE, caseInsensitive = TRUE)
+                      ),
+                    rownames = FALSE) %>%
+        formatRound(c(4), 2) %>%
+        formatStyle(columns=c(1:4), 'text-align'='centre')
+    }
+  })
   
-
   # Response variable: plot
   output$plot_app_resp <- renderPlotly({
     
-    xx <-  as.Date(paste0(data_resp()[ ,1],"-",data_resp()[ ,2],"-",data_resp()[ ,3])) #data_resp()[ ,1]
-    yy <- data_resp()[ ,4]
-    df_resp <- data.frame(xx, yy)
-    t1 <- head(xx,1)
-    t2 <- tail(xx,1)
-    data_resp_name <- colnames(data_resp())
-    
-    
-    #p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", col="purple")
-    p <- plot_ly(df_resp, x = ~xx, y = ~yy, type = 'scatter', mode = 'lines', 
-                 line = list(color = 'rgb(205, 12, 24)', width = 2)) 
-    p <- p %>% layout(
-      xaxis = list(title = "Time", titlefont = list(size=12)),
-      yaxis = list(title = data_resp_name[4], titlefont=list(size=12)))
-    p
-    
+    if ( is.null(data_resp()) ) {
+      return(invisible())
+    } else {
+      xx <-  as.Date(paste0(data_resp()[ ,1],"-",data_resp()[ ,2],"-",data_resp()[ ,3])) #data_resp()[ ,1]
+      yy <- data_resp()[ ,4]
+      df_resp <- data.frame(xx, yy)
+      t1 <- head(xx,1)
+      t2 <- tail(xx,1)
+      data_resp_name <- colnames(data_resp())
+      
+      #p <- plot_ly(x=xx, y=yy, type="scatter", mode="lines", col="purple")
+      p <- plot_ly(df_resp, x = ~xx, y = ~yy, type = 'scatter', mode = 'lines', 
+                   line = list(color = 'rgb(205, 12, 24)', width = 2)) 
+      p <- p %>% layout(
+        xaxis = list(title = "Time", titlefont = list(size=12)),
+        yaxis = list(title = data_resp_name[4], titlefont=list(size=12)))
+      p
+    }
   })
   
   
   # Correlation analysis (Response vs IMPIT index): plot
   output$plot_corr_application <- renderPlotly({
     
-    xx <- data_index()[ ,"index"]
-    yy <- data_resp()[ ,4]
-    yy <- log(yy)
-    
-    xx_name <- "IMPIT index"#colnames(data_index())[5]
-    yy_name <- colnames(data_resp())[4]
-    
-    # linear model
-    mod <- lm(yy ~ xx)
-    CI95 <- confint(mod, "xx", level = 0.95)
-    cor.out95 <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")
-
-    # data frame with results of LR
-    res.LR <-  data.frame(slope = as.numeric(coef(mod)[2]),
+    if ( is.null(data_index()) | is.null(data_resp()) ) {
+      return(invisible())
+    } else {
+      xx <- data_index()[ ,"index"]
+      yy <- data_resp()[ ,4]
+      yy <- log(yy)
+      xx_name <- "IMPIT index"#colnames(data_index())[5]
+      yy_name <- colnames(data_resp())[4]
+      # linear model
+      mod <- lm(yy ~ xx)
+      CI95 <- confint(mod, "xx", level = 0.95)
+      cor.out95 <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")
+      # data frame with results of LR
+      res.LR <-  data.frame(slope = as.numeric(coef(mod)[2]),
                             lb95 = CI95[ ,1],
                             ub95 = CI95[ ,2],
                             R2 = as.numeric(summary(mod)$r.squared),
@@ -799,67 +865,61 @@ server <- function(input, output, session) {
                             corr.lb95 = as.numeric(cor.out95$conf.int[1]),
                             corr.ub95 = as.numeric(cor.out95$conf.int[2]))
    
-    res.LR <- res.LR %>%
-      mutate(
-        xx= max(xx), yy = max(yy),
-        labelR2 =  glue("Corr = {round(corr, 2)}<br>*R*<sup>2</sup> = {round(R2, 2)} ")
-      )
-    
-    # extra for plotting
-    #col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
-    col.reg <- ifelse(res.LR$pVal <= 0.05, "blue", "grey40")
-    col.ann <- "#08519C"
-    col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
-    size.num <- 3
-    size.ann <- 3
-    year.text <- substr(as.character(data_resp()[ ,1]), nchar(as.character(data_resp()[ ,1]))-2+1, nchar(as.character(data_resp()[ ,1])))
-    
-    # state$plot_corr_application <- ggplot(data = data.frame(xx, yy), aes(x = xx, y = yy)) +
-    #   geom_smooth(method ='lm', se = TRUE, col = col.reg, alpha = 0.25) +
-    #   geom_text(aes(label = year.text), size = size.num) +
-    #   labs(x = "IMPIT index", y = "log( SCPUE )") +
-    #   geom_richtext(data =  res.LR, aes(label = labelR2),
-    #                 fill = after_scale(alpha(col.box,.2)),
-    #                 color =  col.box,
-    #                 text.colour = "black",
-    #                 size = 3.1, hjust = 1, vjust = 1) +
-    #   theme_bw(base_size = 11)
-    # 
-    # state$plot_corr_application
-    
-    
-    # save corr and p-value info
-    COR = c(res.LR$corr, res.LR$pVal)
-    
-    
-    # build plot
-    mod.pred = predict(mod, type="response", se.fit=TRUE)
-    mod.df = data.frame(x=xx, 
-                        y=mod.pred$fit,
-                        lb=as.numeric(mod.pred$fit - (1.96 * mod.pred$se.fit)),
-                        ub=as.numeric(mod.pred$fit + (1.96 * mod.pred$se.fit)))
-    mod.df = mod.df[order(mod.df$x),]
-    
-    pp <- plot_ly(x=xx, y=yy)
-    pp <- add_ribbons(pp, x=mod.df$x, ymin=mod.df$lb, ymax=mod.df$ub, name="95% CI", 
-                      fillcolor = list(color="rgb(195, 195, 195)", opacity=0.4), 
-                      line = list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
-    pp <- add_lines(pp, x=xx, y=mod.pred$fit, name="Linear Regression", line=list(color=col.reg, width=2))
-    pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
-    pp <- layout(pp, 
-                 xaxis = list(title = xx_name), 
-                 yaxis = list(title = yy_name),
-                 title = list(
-                   text = paste(c("R=","p="), signif(as.numeric(COR,3),3), collapse=" "),
-                   font = list(color="blue", size=11),
-                   y=0.75, x=0.90, 
-                   xanchor='center', yanchor='top'
+      res.LR <- res.LR %>%
+        mutate(
+          xx= max(xx), yy = max(yy),
+          labelR2 =  glue("Corr = {round(corr, 2)}<br>*R*<sup>2</sup> = {round(R2, 2)} ")
+        )
+      # extra for plotting
+      #col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
+      col.reg <- ifelse(res.LR$pVal <= 0.05, "blue", "grey40")
+      col.ann <- "#08519C"
+      col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
+      size.num <- 3
+      size.ann <- 3
+      year.text <- substr(as.character(data_resp()[ ,1]), nchar(as.character(data_resp()[ ,1]))-2+1, nchar(as.character(data_resp()[ ,1])))
+      # state$plot_corr_application <- ggplot(data = data.frame(xx, yy), aes(x = xx, y = yy)) +
+      # geom_smooth(method ='lm', se = TRUE, col = col.reg, alpha = 0.25) +
+      #   geom_text(aes(label = year.text), size = size.num) +
+      #   labs(x = "IMPIT index", y = "log( SCPUE )") +
+      #   geom_richtext(data =  res.LR, aes(label = labelR2),
+      #                 fill = after_scale(alpha(col.box,.2)),
+      #                 color =  col.box,
+      #                 text.colour = "black",
+      #                 size = 3.1, hjust = 1, vjust = 1) +
+      #   theme_bw(base_size = 11)
+      # 
+      # state$plot_corr_application
+     
+      # save corr and p-value info
+      COR = c(res.LR$corr, res.LR$pVal)
+      # build plot
+      mod.pred = predict(mod, type="response", se.fit=TRUE)
+      mod.df = data.frame(x=xx, 
+                          y=mod.pred$fit,
+                          lb=as.numeric(mod.pred$fit - (1.96 * mod.pred$se.fit)),
+                          ub=as.numeric(mod.pred$fit + (1.96 * mod.pred$se.fit)))
+      mod.df = mod.df[order(mod.df$x),]
+      
+      pp <- plot_ly(x=xx, y=yy)
+      pp <- add_ribbons(pp, x=mod.df$x, ymin=mod.df$lb, ymax=mod.df$ub, name="95% CI", 
+                        fillcolor = list(color="rgb(195, 195, 195)", opacity=0.4), 
+                        line = list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
+      pp <- add_lines(pp, x=xx, y=mod.pred$fit, name="Linear Regression", line=list(color=col.reg, width=2))
+      pp <- add_text(pp, text = ~year.text, textposition="top center", showlegend = F)
+      pp <- layout(pp, 
+                   xaxis = list(title = xx_name), 
+                   yaxis = list(title = yy_name),
+                   title = list(
+                     text = paste(c("R=","p="), signif(as.numeric(COR,3),3), collapse=" "),
+                     font = list(color="blue", size=11),
+                     y=0.75, x=0.90, 
+                     xanchor='center', yanchor='top'
+                     )
                    )
-                 )
-    pp
-    
+      pp
+    }
   })
-  
   
   # Save corr plot
   output$downloadPlot_app <- downloadHandler(
@@ -874,14 +934,17 @@ server <- function(input, output, session) {
   # Summary of regression analysis
   output$summary <- renderPrint({
     
-    xx <- data_index()[ ,4]
-    yy <- data_resp()[ ,4]
-    yy <- log(yy)
-    
-    # linear model
-    mod <- lm(yy ~ xx)
-    summary(mod)
-    
+    if ( is.null(data_index()) | is.null(data_resp()) ) {
+      return(invisible())
+    } else {
+      xx <- data_index()[ ,4]
+      yy <- data_resp()[ ,4]
+      yy <- log(yy)
+      
+      # linear model
+      mod <- lm(yy ~ xx)
+      summary(mod)
+    }
   })
 
   

@@ -306,7 +306,7 @@ ui <- dashboardPage(
                        ),
                      fluidRow(
                        column(5, selectInput("end_timfoc_month", "End: Month", choices=choices_months, selected=choices_months[2])),
-                       column(3, selectInput("end_timfoc_day", "End: Day", choices=choices_days, selected=choices_days[1])),
+                       column(3, selectInput("end_timfoc_day", "End: Day", choices=choices_days, selected=choices_days[1]))
                        )
                      )
                    )
@@ -443,14 +443,14 @@ ui <- dashboardPage(
               # Period time Index
               helper(
                 #dateRangeInput("daterange_index", p(h5(strong("Index period:")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
-                dateRangeInput("daterange_index", h5(strong("Index period:")), start="1900-01-01", end="2020-01-01"),
+                dateRangeInput("daterange_index", h5(strong("Index time domain")), start="1900-01-01", end="2020-01-01"),
                 content = "help_set_up_index_time_range",
                 title = "Index time range",
                 icon = "question",
                 size = "m",
                 type = "markdown"
                 ),
-              radioButtons("choice_index_unit", label = h5(strong("Index time units:")), choices = list("annually?"=1, "monthly?"=2, "daily?"=3)),
+              radioButtons("choice_index_unit", label = h5(strong("Index time units:")), choices = list("years"=1, "months"=2, "days"=3)),
               actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
               ),
             ),
@@ -493,13 +493,12 @@ ui <- dashboardPage(
       
       tabItem(
         tabName = "application",
-        
+        h4("Select CSV File to import and explore"),
         # Explore IMPIT index trend row
         fluidRow(
-          
-          # Import IMPIT index values
+          # Upload data
           box(
-            title = div(icon("upload"), strong("Source IMPIT index")),
+            title = div(icon("upload"), strong("Upload files")),
             id = "box_app_data_index",
             solidHeader = FALSE,
             collapsible = TRUE,
@@ -507,62 +506,27 @@ ui <- dashboardPage(
             status = "info",
             width = 3,
             height = "500px",
+            
             helper(
-              fileInput("index_file","Select CSV File to Import", accept = ".csv", placeholder = "ex: impit_index.csv"),
+              fileInput("index_file","IMPIT index", accept = ".csv", placeholder = "ex: impit_index.csv"),
               content = "help_source_index",
               title = "Data format",
               icon = "question",
               size = "m",
               type = "markdown"
-              )
-            ),
-          
-          # IMPIT index plot 
-          box(
-            title = div(icon("magnifying-glass"), strong("Explore trend in IMPIT index")),
-            solidHeader = FALSE,
-            collapsible = TRUE,
-            collapsed = FALSE,
-            status = "info",
-            width = 9,
-            height = "500px",
-            tabsetPanel(
-              tabPanel("Plot",
-                       fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
-                       fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
-                       ),
-              tabPanel("Table",
-                       div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
-                       )
-              )
-            )
-          ),
-        
-        # Explore association between IMPIT index and other variable
-        fluidRow(
-           
-          # upload other variable
-          box(
-            title = div(icon("upload"), strong("Source response")),
-            id = "box_app_data_resp",
-            solidHeader = FALSE,
-            collapsible = TRUE,
-            collapsed = FALSE,
-            status = "info",
-            width = 3,
-            height = "500px",
+              ),
             helper(
-              fileInput("resp_file","Select CSV File to Import", accept = ".csv", placeholder = "ex: resp_variable.csv"),
+              fileInput("resp_file","Response variable", accept = ".csv", placeholder = "ex: resp_variable.csv"),
               content = "help_source_resp",
               title = "Data format",
               icon = "question",
               size = "m",
               type = "markdown"
-              )
+            )
             ),
-          # table and plot of other variable (to check) and correlation analysis with IMPIT index
+          # Explore 
           box(
-            title = div(icon("magnifying-glass", lib = "font-awesome"), strong("Explore association between IMPIT index and response variable")),
+            title = div(icon("magnifying-glass"), strong("Explore")),
             solidHeader = FALSE,
             collapsible = TRUE,
             collapsed = FALSE,
@@ -570,21 +534,29 @@ ui <- dashboardPage(
             width = 9,
             height = "500px",
             tabsetPanel(
-              tabPanel("Plot",
+              tabPanel("Plot: IMPIT index",
+                       fluidRow(column(10, plotlyOutput("plot_app_index", width = "100%"))),
+                       fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
+                       ),
+              tabPanel("Table: IMPIT index",
+                       div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
+                       ),
+              tabPanel("Plot: Response",
                        fluidRow(column(10, plotlyOutput("plot_app_resp", width = "100%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
-                       ),
-              tabPanel("Table", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
+              ),
+              tabPanel("Table: Response", div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
               tabPanel("Correlation analysis",
                        fluidRow(column(10, plotlyOutput("plot_corr_application", width="90%"))),
                        fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
-                       ),
+              ),
               tabPanel("Summary", verbatimTextOutput("summary"))
               )
             )
           )
         ),
-      
+        
+        
       
       
       # ABOUT US TAB ------------------------------------------------------------

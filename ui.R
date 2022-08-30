@@ -164,7 +164,7 @@ ui <- dashboardPage(
      
       tabItem(
         tabName = "data",
-        h4("Use this tab if you want to generate episodes using this app"),
+        h4("Use this tab if you want to generate episodes. Otherwise, go to Episodes tab."),
         br(),
         fluidRow(
           # Import data
@@ -226,7 +226,7 @@ ui <- dashboardPage(
             
             # Generate / Upload episodes 
             column(width = 4,
-                   radioButtons("choice_epifile", "List of episodes:", choices = list("generate"=1,"upload"=2)),
+                   radioButtons("choice_epifile", "List of episodes", choices = list("generate"=1,"upload"=2)),
                    actionButton("run_button_epi", "Compute", icon=icon("paper-plane"))
                    ),
             column(width = 4,
@@ -244,9 +244,9 @@ ui <- dashboardPage(
                    conditionalPanel(
                      condition = "input.choice_epifile == '1'",
                      helper(
-                       radioButtons("choice_thres", "Type of episodes:", choices = list("up-episodes"=1, "down-episodes"=2)),
+                       radioButtons("choice_thres", "Threshold crossing episodes", choices = list("up-episodes"=1, "down-episodes"=2)),
                        content = "help_type_episodes",
-                       title = "Type of episodes",
+                       title = "Threshold crossing episodes",
                        icon = "question",
                        size = "l",
                        type = "markdown"
@@ -293,7 +293,7 @@ ui <- dashboardPage(
                    helper(
                      radioButtons("choice_timfoc", "Episodes overlapping special season", choices=list("yes"=1,"no"=2)),
                      content = "help_special_season",
-                     title = "Special season",
+                     title = "Episodes overlapping special season",
                      icon = "question",
                      size = "m",
                      type = "markdown"
@@ -331,20 +331,8 @@ ui <- dashboardPage(
                          column( 3, downloadButton("downloadTable_epi", "Download Table"), style="margin-top: 25px;")
                          )
                        ),
-              # Episodes: plot
-              tabPanel("Plot: Intensity",
-                       fluidRow(
-                         column(12, br(), plotlyOutput("plot_epi_intensity", height=500)),
-                         column( 3, downloadButton("downloadPlot_epi_intensity", "Download Plot"), style="margin-top: 25px;")
-                         )
-                       ),
-              # Episodes: plot
-              tabPanel("Plot: Duration",
-                       fluidRow(
-                         column(12, br(), plotlyOutput("plot_epi_duration", height=500)),
-                         column( 3, downloadButton("downloadPlot_epi_duration", "Download Plot"), style="margin-top: 25px;")
-                         )
-                       )
+              tabPanel("Plot: Intensity", br(), plotlyOutput("plot_epi_intensity", height=500)),
+              tabPanel("Plot: Duration", br(), plotlyOutput("plot_epi_duration", height=500))
               )
             )
           )
@@ -395,10 +383,10 @@ ui <- dashboardPage(
                     tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; }
                     #inline .form-group { display: table-row;}")
                     ),
-                  tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=Inf, value=2, step = 0.01)))
+                  tags$div(id = "inline", column(5, numericInput("a_w1", label = 'a:', min=0, max=5, value=2, step = 0.01)))
                   ),
                 content = "help_set_up_index_a",
-                title = "Persistence",
+                title = "Persistence weight",
                 icon = "question",
                 size = "m",
                 type = "markdown"
@@ -415,7 +403,7 @@ ui <- dashboardPage(
                   tags$div(id = "inline", column(5, numericInput("c_w2", label = 'c:', min=0, max=1, value=0.25, step = 0.01)))
                   ),
                 content = "help_set_up_index_b_and_c",
-                title = "Recency: b and c",
+                title = "Recency weight",
                 icon = "question",
                 size = "m",
                 type = "markdown"
@@ -433,7 +421,7 @@ ui <- dashboardPage(
                     tags$div(id = "inline", column(5, numericInput("d_w3", label = 'd:', min=0, max=Inf, value=1, step = 0.01)))
                     ),
                   content = "help_set_up_index_d",
-                  title = "Timing",
+                  title = "Timing weight",
                   icon = "question",
                   size = "m",
                   type = "markdown"
@@ -445,12 +433,12 @@ ui <- dashboardPage(
                 #dateRangeInput("daterange_index", p(h5(strong("Index period:")), style = "margin-top: 30px;"), start="1900-01-01", end="2020-01-01"),
                 dateRangeInput("daterange_index", h5(strong("Index time domain")), start="1900-01-01", end="2020-01-01"),
                 content = "help_set_up_index_time_range",
-                title = "Index time range",
+                title = "Index time domain",
                 icon = "question",
                 size = "m",
                 type = "markdown"
                 ),
-              radioButtons("choice_index_unit", label = h5(strong("Index time units:")), choices = list("years"=1, "months"=2, "days"=3)),
+              radioButtons("choice_index_unit", label = h5(strong("Index time units")), choices = list("years"=1, "months"=2, "days"=3)),
               actionButton("run_button_index", "Compute", icon=icon("paper-plane"))
               ),
             ),
@@ -469,12 +457,7 @@ ui <- dashboardPage(
               status = "info",
               height = "500px",
               tabsetPanel(
-                tabPanel("Plot",
-                         fluidRow(
-                           column(12, br(), plotlyOutput("plot_index", width = "100%")),
-                           column( 3, downloadButton("downloadPlot_index", "Download Plot"), style="margin-top: 25px;")
-                         )
-                ),
+                tabPanel("Plot", br(), plotlyOutput("plot_index")),
                 tabPanel("Table",
                          fluidRow(
                            column(12, br(), div(DT::dataTableOutput("contents_index"), style = "font-size: 100%; width: 100%")),
@@ -501,8 +484,8 @@ ui <- dashboardPage(
             title = div(icon("upload"), strong("Upload files")),
             id = "box_app_data_index",
             solidHeader = FALSE,
-            collapsible = TRUE,
             collapsed = FALSE,
+            collapsible = TRUE,
             status = "info",
             width = 3,
             height = "500px",
@@ -528,28 +511,17 @@ ui <- dashboardPage(
           box(
             title = div(icon("magnifying-glass"), strong("Explore")),
             solidHeader = FALSE,
-            collapsible = TRUE,
             collapsed = FALSE,
+            collapsible = TRUE,
             status = "info",
             width = 9,
             height = "500px",
             tabsetPanel(
-              tabPanel("Plot: IMPIT index",
-                       fluidRow(column(10, br(), plotlyOutput("plot_app_index", width = "100%"))),
-                       fluidRow(column( 3, downloadButton("downloadPlot_app_index", "Download"), style="margin-top: 25px;"))
-                       ),
-              tabPanel("Table: IMPIT index", br(),
-                       div(DT::dataTableOutput("contents_app_index"), style="font-size: 100%; width: 100%")
-                       ),
-              tabPanel("Plot: Response",
-                       fluidRow(column(10, br(), plotlyOutput("plot_app_resp", width = "100%"))),
-                       fluidRow(column( 3, downloadButton("downloadPlot_app_resp", "Download"), style="margin-top: 25px;"))
-              ),
-              tabPanel("Table: Response", br(), div(DT::dataTableOutput("contents_app_resp"), style="font-size: 100%; width: 100%")),
-              tabPanel("Correlation analysis",
-                       fluidRow(column(10, br(), plotlyOutput("plot_corr_application", width="90%"))),
-                       fluidRow(column( 3, downloadButton("downloadPlot_app", "Download"), style="margin-top: 25px;"))
-              ),
+              tabPanel("Plot: IMPIT index", br(), plotlyOutput("plot_app_index")),
+              tabPanel("Table: IMPIT index", br(), DT::dataTableOutput("contents_app_index")),
+              tabPanel("Plot: Response", br(), plotlyOutput("plot_app_resp")),
+              tabPanel("Table: Response", br(), DT::dataTableOutput("contents_app_resp")),
+              tabPanel("Correlation analysis", br(), plotlyOutput("plot_corr_application", width= "750px")),
               tabPanel("Summary", br(), verbatimTextOutput("summary"))
               )
             )
@@ -564,7 +536,6 @@ ui <- dashboardPage(
       tabItem(
         tabName = "about",
         h4("Created with R Shiny"),
-        br(),
         "2022 August",
         br(),
         br(),
@@ -579,8 +550,8 @@ ui <- dashboardPage(
             h5(strong("Contact")),
             h5("IMPIT-a is created and mantained by Manuela Mendiolar. Bugs reports and features requests can be communicated in two ways:"),
             uiOutput("githubissues"),
-            uiOutput("mm_email"),
-            br(),
+            #uiOutput("mm_email"),
+            h5("* Email: m.mendiolar@uq.edu.au"), 
             h5(strong("Source")),
             uiOutput("githublink")
             )

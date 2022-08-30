@@ -32,6 +32,8 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
   dat <- dat %>%  mutate(date = paste0(year,"-",month,"-",day))
   dat <- dat %>%  mutate(date = as.Date(date,"%Y-%m-%d")) 
   dat <- dat[order(dat$date), ] # order rows according to date
+  ind <- NULL
+  
   
   # identify episodes (detect "blocks" of values exceeding thresh)
   if (thres_above) {
@@ -44,7 +46,14 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
     ind <- split(aa, cumsum(c(1, diff(aa) != 1)))
     
     # if also interested on block with a minimum length
-    if (!is.null(duration_min)) ind <- ind[sapply(ind, function(x) length(x) >= duration_min)]
+    if (!is.null(duration_min)) {
+      bb <- sapply(ind, function(x) length(x) >= duration_min)
+      if (any(bb)) {
+        ind <- ind[bb]
+      } else {
+        ind <- NULL
+      }
+    }
     
     if (length(ind) != 0){
       
@@ -90,7 +99,7 @@ mydetect_event <- function(dat, thres_above, thres, duration_min){
         intensity_median <- median(t(dat[ind[[ii]],"EnvSignal"]))
         intensity_max    <- max(t(dat[ind[[ii]],"EnvSignal"]))
         intensity_min    <- min(t(dat[ind[[ii]],"EnvSignal"]))
-        intensity_log    <- ifelse(thres_above, log(sum(dat[ind[[ii]],"EnvSignal"])), -log(abs(sum(dat[ind[[ii]],"EnvSignal"]))))
+        intensity_log    <- ifelse(sum(dat[ind[[ii]],"EnvSignal"]) > 0, log(sum(dat[ind[[ii]],"EnvSignal"])), -log(abs(sum(dat[ind[[ii]],"EnvSignal"]))))
         
         # save info
         episodes$event_no[ii] <- ii

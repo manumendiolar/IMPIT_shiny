@@ -10,16 +10,17 @@ library(shinydashboardPlus)
 library(shinyFiles)
 library(shinyhelper)
 library(shinyWidgets)
+library(shinyalert)
+library(shinyvalidate)
 library(tidyverse)
 library(DT)
-library(glue)
-library(ggtext)
+#library(glue)
+#library(ggtext)
 library(shinyjs)
 library(plotly)
 library(mgcv)
 library(lubridate)
-library(shinyalert)
-library(shinyvalidate)
+
 library(validate)
 library(spsComps)
 library(shinyjs)
@@ -78,6 +79,7 @@ server <- function(input, output, session) {
   
   
   state <- reactiveValues()
+  
   
   # DATA TAB ----------------------------------------------------------------
   
@@ -140,8 +142,8 @@ server <- function(input, output, session) {
       yy <- data_input()[ ,4]
       plot_ly( x = ~xx, y = ~yy) %>%
         add_lines() %>%
-        layout(xaxis = list(title="Date", titlefont=list(size=12)),
-               yaxis = list(title=colnames(data_input())[4], titlefont=list(size=12)))
+        layout(xaxis = list(title="Date", font=list(size=12)),
+               yaxis = list(title=colnames(data_input())[4], font=list(size=12)))
     }
   })
   
@@ -259,6 +261,7 @@ server <- function(input, output, session) {
       # compute episodes 
       state$episodes <- mydetect_event(data_input(), thres_above, input$thres, input$duration_min)
       
+      
       # intensity choices
       state$choices_int <- c("intensity_mean","intensity_median","intensity_min","intensity_max","intensity_log")
       
@@ -276,6 +279,11 @@ server <- function(input, output, session) {
       date2 <- as.Date(paste0(maxyear,"-01-01"))
       updateDateRangeInput(session, "daterange_index", start = date1, end = date2)
       
+      if (state$episodes[1,1] != 0) {
+        state$episodes$date_start <- as.Date(state$episodes$date_start)
+        state$episodes$date_peak <- as.Date(state$episodes$date_peak)
+        state$episodes$date_end <- as.Date(state$episodes$date_end)
+      }
     }
 
     if (input$choice_epifile == '2'){
@@ -518,38 +526,15 @@ server <- function(input, output, session) {
   })
   
   
-  # Episodes: plot intensity download .png
-  output$downloadPlot_epi_intensity<- downloadHandler(
-    filename = function(){
-      paste0("Episodes_LolliChart_intensity",'.png')
-    },
-    content = function(file){
-      ggsave(file, plot = state$plot_epi_intensity, width = 26, height = 12, units = "cm", dpi = 300)
-    }
-  )
-  
-  # Episodes: plot intensity download .png
-  output$downloadPlot_epi_duration <- downloadHandler(
-    filename = function(){
-      paste0("Episodes_LolliChart_duration",'.png')
-    },
-    content = function(file){
-      ggsave(file, plot = state$plot_epi_duration, width = 26, height = 12, units = "cm", dpi = 300)
-    }
-  )
-  
   if (state$episodes[1,1] == 0){
     shinyjs::disable("run_button_index")
     showNotification("No episodes available to compute index", type = "warning")
-    #shinyCatch(stop("No episodes available to compute index"), blocking_level = "warning")
   } else {
     shinyjs::enable("run_button_index")
   }
   
   })
   
-
-
 
 
   
@@ -561,11 +546,13 @@ server <- function(input, output, session) {
     state$intensity <- input$choice_intensity
     
     # Episodes: special timing
-    state$d <- NULL
-    state$tau <- NULL
-    state$choice_timfoc <- FALSE
-    # compute d and tau
+    if (input$choice_timfoc == '2'){
+      state$d <- NULL
+      state$tau <- NULL
+      state$choice_timfoc <- FALSE
+    }
     if (input$choice_timfoc == '1'){
+      # compute d and tau
       state$choice_timfoc <- TRUE
       state$d <- input$d_w3
       # alternative to compute tau
@@ -595,7 +582,19 @@ server <- function(input, output, session) {
     #                          time_focus = state$choice_timfoc,
     #                          tau = state$tau)
    
-
+    # warnings for parameter inputs
+    observeEvent(input$a_w1, {
+      if (input$a_w1 < 0) showNotification("Warning: a should be a positive number.", type= "warning", duration = 0)
+    })
+    observeEvent(input$b_w2, {
+      if (input$b_w2 < 0) showNotification("Warning: b should be a positive number.", type= "warning", duration = 0)
+    })
+    observeEvent(input$c_w2, {
+      if (input$c_w2 < 0 | input$c_w2 > 1) showNotification("Warning: c should be a positive number less than 1.", type= "warning", duration = 0)
+    })
+    observeEvent(input$d_w3, {
+      if (input$d_w3 < 0) showNotification("Warning: d should be a positive number.", type= "warning", duration = 0)
+    })
     
     # IMPIT index: time units 
     state$index_unit <- ifelse(input$choice_index_unit == '1','years', ifelse(input$choice_index_unit == '2', 'months', 'days'))
@@ -606,19 +605,17 @@ server <- function(input, output, session) {
     state$index_range <- seq(index_d1, index_d2, by = state$index_unit)
 
     # IMPIT index: computation (new version)
-   # withProgress(message = 'Computing index', value = 0, {
     state$index <- fun_IMPITv2(episodes = state$episodes,
-                                 unit = state$unit_var,
-                                 index_range = state$index_range,
-                                 m = input$m,
-                                 a = input$a_w1,
-                                 b = input$b_w2,
-                                 c = input$c_w2,
-                                 d = state$d,
-                                 intensity = state$intensity,
-                                 time_focus = state$choice_timfoc,
-                                 tau = state$tau) 
-    #})
+                               unit = state$unit_var,
+                               index_range = state$index_range,
+                               m = input$m,
+                               a = input$a_w1,
+                               b = input$b_w2,
+                               c = input$c_w2,
+                               d = state$d,
+                               intensity = state$intensity,
+                               time_focus = state$choice_timfoc,
+                               tau = state$tau) 
     
     # arrange data frame index
     state$contents_index <- data.frame(
@@ -663,7 +660,7 @@ server <- function(input, output, session) {
         
       if ( nrow(state$contents_index) != 0 ){
         plot_ly(data = state$contents_index) %>%
-          add_lines(x = ~time, y = ~index) %>% 
+          add_lines(x = ~time, y = ~index) %>%
           layout(xaxis = list(title="Time"), yaxis = list(title="IMPIT index"))
       } else {
         plot_ly(type = 'scatter')
@@ -671,17 +668,6 @@ server <- function(input, output, session) {
 
       })
     })
-    
-    
-    # IMPIT index: download .png
-    output$downloadPlot_index <- downloadHandler(
-      filename = function() {
-        paste0("IMPIT_index_plot",'.png')
-        },
-      content = function(file) {
-        ggsave(file, plot = state$plot_index, width = 24, height = 12, units = "cm", dpi = 300)
-      }
-    )
     
   })
   
@@ -776,7 +762,7 @@ server <- function(input, output, session) {
                            fillcolor=list(color="rgb(195, 195, 195)", opacity=0.4), 
                            line=list(color="rgb(195, 195, 195)", opacity=0.4, width=0))
       p.llci = add_lines(p.llci, x=xx, y=ll.pred$fit, name="Mean", line=list(color="black", width=1))
-      p.llci = layout(p.llci, title = "LOESS with confidence intervals")
+      p.llci = layout(p.llci, title = list(text = "LOESS with confidence intervals", font = list(size=11)))
       p.llci
     }
   })
@@ -850,72 +836,44 @@ server <- function(input, output, session) {
       p <- plot_ly(df_resp, x = ~xx, y = ~yy, type = 'scatter', mode = 'lines', 
                    line = list(color = 'rgb(205, 12, 24)', width = 2)) 
       p <- p %>% layout(
-        xaxis = list(title = "Time", titlefont = list(size=12)),
-        yaxis = list(title = data_resp_name[4], titlefont=list(size=12)))
+        xaxis = list(title = "Time", font = list(size=12)),
+        yaxis = list(title = data_resp_name[4], font=list(size=12)))
       p
     }
   })
   
   
-  # Correlation analysis (Response vs IMPIT index): plot
+  # Correlation analysis: plot
   output$plot_corr_application <- renderPlotly({
     
     if ( is.null(data_index()) | is.null(data_resp()) ) {
       return(invisible())
     } else {
-      xx <- data_index()[ ,"index"]
+      xx <- data_index()[ ,4]
       yy <- data_resp()[ ,4]
-      #yy <- log(yy)
-      xx_name <- "IMPIT index"#colnames(data_index())[5]
-      yy_name <- colnames(data_resp())[4]
-      # linear model
+      nobs <- min(length(xx), length(yy))
+      # run analysis with first nobs points in each var
+      xx <- xx[1:nobs]
+      yy <- yy[1:nobs]
+      # save corr and p-value info
       mod <- lm(yy ~ xx)
-      CI95 <- confint(mod, "xx", level = 0.95)
       cor.out95 <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")
-      # data frame with results of LR
-      res.LR <-  data.frame(slope = as.numeric(coef(mod)[2]),
-                            lb95 = CI95[ ,1],
-                            ub95 = CI95[ ,2],
-                            R2 = as.numeric(summary(mod)$r.squared),
-                            pVal = as.numeric(anova(mod)$'Pr(>F)'[1]),
-                            corr = as.numeric(cor.out95$estimate),
-                            corr.lb95 = as.numeric(cor.out95$conf.int[1]),
-                            corr.ub95 = as.numeric(cor.out95$conf.int[2]))
-   
-      res.LR <- res.LR %>%
-        mutate(
-          xx= max(xx), yy = max(yy),
-          labelR2 =  glue("Corr = {round(corr, 2)}<br>*R*<sup>2</sup> = {round(R2, 2)} ")
-        )
+      corr95 <- as.numeric(cor.out95$estimate)
+      pval <- as.numeric(anova(mod)$'Pr(>F)'[1])
       # extra for plotting
-      #col.reg <- ifelse(res.LR$pVal <= 0.05, "#4292C6", "grey40")
-      col.reg <- ifelse(res.LR$pVal <= 0.05, "blue", "grey40")
+      xx_name <- "IMPIT index"#colnames(data_index())[5]
+      yy_name <- "Response variable"#colnames(data_resp())[4]
+      col.reg <- ifelse(pval <= 0.05, "blue", "gray")
       col.ann <- "#08519C"
-      col.box <- ifelse(res.LR$pVal <= 0.05, "#9ECAE1", "grey60")
       size.num <- 3
       size.ann <- 3
-      year.text <- substr(as.character(data_resp()[ ,1]), nchar(as.character(data_resp()[ ,1]))-2+1, nchar(as.character(data_resp()[ ,1])))
-      # state$plot_corr_application <- ggplot(data = data.frame(xx, yy), aes(x = xx, y = yy)) +
-      # geom_smooth(method ='lm', se = TRUE, col = col.reg, alpha = 0.25) +
-      #   geom_text(aes(label = year.text), size = size.num) +
-      #   labs(x = "IMPIT index", y = "log( SCPUE )") +
-      #   geom_richtext(data =  res.LR, aes(label = labelR2),
-      #                 fill = after_scale(alpha(col.box,.2)),
-      #                 color =  col.box,
-      #                 text.colour = "black",
-      #                 size = 3.1, hjust = 1, vjust = 1) +
-      #   theme_bw(base_size = 11)
-      # 
-      # state$plot_corr_application
-     
-      # save corr and p-value info
-      COR = c(res.LR$corr, res.LR$pVal)
+      #year.text <- substr(as.character(data_resp()[ ,1]), nchar(as.character(data_resp()[ ,1]))-2+1, nchar(as.character(data_resp()[ ,1])))
       # build plot
+      ppcaption <- "Shaded area denotes 95% confidence intervals. " 
       mod.pred = predict(mod, type="response", se.fit=TRUE)
-      mod.df = data.frame(x=xx, 
-                          y=mod.pred$fit,
-                          lb=as.numeric(mod.pred$fit - (1.96 * mod.pred$se.fit)),
-                          ub=as.numeric(mod.pred$fit + (1.96 * mod.pred$se.fit)))
+      mod.df = data.frame(x = xx, y = mod.pred$fit,
+                          lb = as.numeric(mod.pred$fit - (1.96 * mod.pred$se.fit)),
+                          ub = as.numeric(mod.pred$fit + (1.96 * mod.pred$se.fit)))
       mod.df = mod.df[order(mod.df$x),]
       
       pp <- plot_ly(x=xx, y=yy)
@@ -929,25 +887,18 @@ server <- function(input, output, session) {
                    xaxis = list(title = xx_name), 
                    yaxis = list(title = yy_name),
                    title = list(
-                     text = paste(c("R=","p="), signif(as.numeric(COR,3),3), collapse=" "),
-                     font = list(color="blue", size=11),
-                     y=0.75, x=0.90, 
-                     xanchor='center', yanchor='top'
+                     text = paste(c("R=","p="), signif(c(corr95,pval),3), collapse=" "),
+                     font = list(size=12),
+                     y = 0.75, x = 0.90, 
+                     xanchor = 'center', 
+                     yanchor = 'top'
                      )
                    )
       pp
+      
     }
   })
   
-  # Save corr plot
-  output$downloadPlot_app <- downloadHandler(
-    filename = function(){
-      paste0("Plot_application",'.png')
-    },
-    content = function(file){
-      ggsave(file, plot = state$plot_corr_application, width = 14, height = 14, units = "cm", dpi = 300)
-    }
-  )
   
   # Summary of regression analysis
   output$summary <- renderPrint({
@@ -957,7 +908,10 @@ server <- function(input, output, session) {
     } else {
       xx <- data_index()[ ,4]
       yy <- data_resp()[ ,4]
-      yy <- log(yy)
+      nobs <- min(length(xx), length(yy))
+      # run analysis with first nobs points in each var
+      xx <- xx[1:nobs]
+      yy <- yy[1:nobs]
       
       # linear model
       mod <- lm(yy ~ xx)
@@ -969,7 +923,7 @@ server <- function(input, output, session) {
   # APPLICATION TAB ---------------------------------------------------------
   
   output$Rsession <- renderPrint(
-    print(sessionInfo())
+    print(sessionInfo(),locale = FALSE)
   )
   
   # ABOUT TAB ---------------------------------------------------------------
@@ -983,12 +937,12 @@ server <- function(input, output, session) {
     tagList("* Github:", url_gitissues)
   })
   
-  url_mm_email <- a("m.mendiolar@uq.edu.au",href="m.mendiolar@uq.edu.au")
-  output$mm_email <- renderUI({
-    tagList("* Email:", url_mm_email)
-  })
-  
-  
+  # url_mm_email <- a("m.mendiolar@uq.edu.au", href="m.mendiolar@uq.edu.au")
+  # output$mm_email <- renderUI({
+  #   tagList("* Email:", url_mm_email)
+  # })
+
 }
+
 
 #shinyApp(ui, server)

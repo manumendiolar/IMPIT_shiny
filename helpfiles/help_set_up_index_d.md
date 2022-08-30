@@ -1,2 +1,2 @@
-Parameter $d$ is associated with the *timing* weight of the episode. This value can be adjusted based on the extent of the episode's overlap with a special period. Timing weight is monotone increasing with $d$. The functional form for the timing weight is:
-    $$ w_3(n_k,m) = 1 - exp\\left(-d\\left(\\frac{\\tau_k}{n_k}\\right)\\right)$$
+The value of $d$ can be adjusted based on the extent of the episode's overlap with a special period. This value can be any positive real number. Large values of $d$ will give weights close to 1. Default range $d \in [0,5]$.
+

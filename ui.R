@@ -196,7 +196,7 @@ ui <- dashboardPage(
             width = 9,
             height = "500px",
             tabsetPanel(
-              tabPanel("Plot", br(), plotlyOutput("envPlot", height = 500)),
+              tabPanel("Plot", br(), plotlyOutput("envPlot")),
               tabPanel("Table", br(), div(DT::dataTableOutput("contents_data"), style = "font-size: 100%; width: 100%")),
               tabPanel("Summary", br(), verbatimTextOutput("summary_contents_data")),
               tabPanel("str()", br(), verbatimTextOutput("str_contents_data"))

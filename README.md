@@ -20,22 +20,26 @@ shiny::runGitHub("manumendiolar/IMPIT_shiny")
 #### Other Dependencies
 
 The app also relies on the following packages,
-[`shinydashboard`](https://dplyr.tidyverse.org/),
-[`shinydashboardPlus`](https://cran.r-project.org/web/packages/XML/index.html),
-[`shinyFiles`](https://cran.r-project.org/web/packages/rvest/),
-[`shinyhelper`](https://cran.r-project.org/web/packages/rvest/),
-[`dashboardthemes`](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html),
-[`tidyverse`](https://cran.r-project.org/web/packages/rvest/),
-[`DT`](https://cran.r-project.org/web/packages/rvest/) and
-[`plotly`](https://cran.r-project.org/web/packages/rvest/).
-
+[`shinydashboard`](https://rstudio.github.io/shinydashboard/index.html),
+[`shinydashboardPlus`](https://rinterface.github.io/shinydashboardPlus/),
+[`shinyFiles`](https://github.com/thomasp85/shinyFiles),
+[`shinyhelper`](https://github.com/cwthom/shinyhelper),
+[`shinyalert`](https://github.com/daattali/shinyalert),
+[`shinyvalidate`](https://rstudio.github.io/shinyvalidate/),
+[`dashboardthemes`](https://cran.r-project.org/web/packages/dashboardthemes/index.html),
+[`tidyverse`](https://www.tidyverse.org/),
+[`DT`](https://rstudio.github.io/DT/),
+[`plotly`](https://plotly.com/r/),
+[`spsComps`](https://github.com/lz100/spsComps) and
+[`shinyjs`](https://deanattali.com/shinyjs/)
 
 To install these packages:
 ``` r
 # Run it in R
 get.packages <- function (){
-  pkglist = c("shinydashboard", "shinydashboardPlus", "shinyFiles", "DT",
-              "shinyhelper", "dashboardthemes", "tidyverse", "plotly")
+  pkglist = c("shinydashboard", "shinydashboardPlus", "shinyFiles","shinyhelper",
+              "shinyalert", "shinyvalidate","dashboardthemes", "tidyverse","DT",
+                "plotly","spsComps","shinyjs")
   inst.pkgs = rownames(installed.packages())
   newpkgs <- pkglist[!pkglist %in% inst.pkgs]
   if (length(newpkgs) > 0) {

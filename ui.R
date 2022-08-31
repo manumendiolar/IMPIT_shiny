@@ -3,19 +3,22 @@
 # Manuela M.
 
 # packages
-library(shinydashboard) # which version of this 
-library(dashboardthemes)
+library(shinydashboard) 
 library(shinydashboardPlus)
 library(shinyFiles)
 library(shinyhelper)
+library(shinyalert)
+library(shinyvalidate)
+library(shinyjs)
+library(shinyWidgets)
+library(dashboardthemes)
 library(tidyverse)
 library(DT)
 library(plotly)
-library(shinyalert)
-library(shinyvalidate)
-library(validate)
 library(spsComps)
-library(shinyjs)
+library(lubridate)
+#library(validate)
+
 
 # source
 source("./source/mydetect_event.R")
@@ -28,7 +31,6 @@ source("./source/fun_nu3.R")
 source("./source/fun_w1.R")
 source("./source/fun_w2.R")
 source("./source/fun_w3.R")
-
 source("./source/subtract_mem.R")
 source("./source/is_convertible_to_date.R")
 source("./source/fun_IMPITv2.R")

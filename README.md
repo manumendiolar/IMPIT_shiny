@@ -26,20 +26,22 @@ The app also relies on the following packages,
 [`shinyhelper`](https://github.com/cwthom/shinyhelper),
 [`shinyalert`](https://github.com/daattali/shinyalert),
 [`shinyvalidate`](https://rstudio.github.io/shinyvalidate/),
+[`shinyjs`](https://deanattali.com/shinyjs/)
+[`shinyWidgets`](https://github.com/dreamRs/shinyWidgets),
 [`dashboardthemes`](https://cran.r-project.org/web/packages/dashboardthemes/index.html),
 [`tidyverse`](https://www.tidyverse.org/),
 [`DT`](https://rstudio.github.io/DT/),
 [`plotly`](https://plotly.com/r/),
 [`spsComps`](https://github.com/lz100/spsComps) and
-[`shinyjs`](https://deanattali.com/shinyjs/)
+[`lubridate`](https://lubridate.tidyverse.org/)
 
 To install these packages:
 ``` r
 # Run it in R
 get.packages <- function (){
   pkglist = c("shinydashboard", "shinydashboardPlus", "shinyFiles","shinyhelper",
-              "shinyalert", "shinyvalidate","dashboardthemes", "tidyverse","DT",
-                "plotly","spsComps","shinyjs")
+              "shinyalert", "shinyvalidate",,"shinyjs""dashboardthemes", "shinyWidgets",
+              "tidyverse","DT","plotly","spsComps","lubridate")
   inst.pkgs = rownames(installed.packages())
   newpkgs <- pkglist[!pkglist %in% inst.pkgs]
   if (length(newpkgs) > 0) {

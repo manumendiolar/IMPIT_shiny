@@ -3,27 +3,6 @@
 # Manuela M.
 
 
-# packages
-library(shinydashboard)
-library(dashboardthemes)
-library(shinydashboardPlus)
-library(shinyFiles)
-library(shinyhelper)
-library(shinyWidgets)
-library(shinyalert)
-library(shinyvalidate)
-library(tidyverse)
-library(DT)
-#library(glue)
-#library(ggtext)
-library(shinyjs)
-library(plotly)
-library(mgcv)
-library(lubridate)
-
-library(validate)
-library(spsComps)
-library(shinyjs)
 
 
 # source

@@ -46,7 +46,7 @@ $$
   \\text{1950} &  \\text{1} &   \\text{1} &     5.1 \\\\
   \\text{1950} &  \\text{2} &   \\text{1} &    17.6 \\\\
   \\vdots      &    \\vdots &     \\vdots & \\vdots \\\\
-  \\text{2022} & \\text{12} &  \\text{31} &     8.2 \\\\
+  \\text{2022} & \\text{12} &  \\text{1} &     8.2 \\\\
   \\hline 
 \\end{array}
 $$

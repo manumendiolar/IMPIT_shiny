@@ -1,5 +1,5 @@
 # `IMPIT-a` <img src="www/images/icon_explore_2.svg" width="25" height="25">
-Provides a smooth workflow from importing raw data, exploring and defining episodes, to constructing IMPIT indices. Offers, as well, a suite of tools for index exploration before exporting it for posterior use. IMPIT-a was built in [R](https://www.r-project.org), an open source programming language using the [Shiny package](https://shiny.rstudio.com), a web application framework for R. Users will need to download [R](https://cran.uni-muenster.de/) in order to use IMPIT-a and we suggest the use of [RStudio](https://www.rstudio.com). R is completely free to use. 
+IMPIT-a provides a smooth workflow from importing raw signal data, exploring and defining episodes, to constructing IMPIT indices. It also offers a suite of tools for index exploration before exporting for posterior use. IMPIT-a is built in [R](https://www.r-project.org) with an package [Shiny](https://shiny.rstudio.com), a web application framework for R.  [RStudio](https://www.rstudio.com) provides an integrated environment for R. We suggest users can run IMPIT-a easily in Rstudio.
 
 -----
 
@@ -126,11 +126,11 @@ dublinRTPI::runShiny()
 * Add the FRDC report?
 -->
 
-## Authors
+## About Authors
 
 <img src="www/images/UQ_logo.png" width="150"/> 
 
-IMPIT-a was created at the School of Mathematics and Physics of the [University of Queensland](https://www.uq.edu.au/) by [Manuela Mendiolar](https://smp.uq.edu.au/profile/8282/manuela-mendiolar), PhD Student.
+[Manuela Mendiolar](https://smp.uq.edu.au/profile/8282/manuela-mendiolar) is currently a PhD candidate at the [University of Queensland's](https://www.uq.edu.au/) School of Mathematics and Physics.
 
 <!--
 ## Copyright

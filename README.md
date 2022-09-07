@@ -1,17 +1,12 @@
 # `IMPIT-a` <img src="www/images/icon_explore_2.svg" width="25" height="25">
-IMPIT-a provides a smooth workflow from importing raw signal data, exploring and defining episodes, to constructing IMPIT indices. It also offers a suite of tools for index exploration before exporting for posterior use. IMPIT-a is built in [R](https://www.r-project.org) with an package [Shiny](https://shiny.rstudio.com), a web application framework for R.  [RStudio](https://www.rstudio.com) provides an integrated environment for R. We suggest users can run IMPIT-a easily in Rstudio.
+IMPIT-a provides a smooth workflow from importing raw signal data, exploring and defining episodes, to constructing IMPIT indices. It also offers a suite of tools for index exploration before exporting for posterior use. IMPIT-a is built in [R](https://www.r-project.org) with an package [Shiny](https://shiny.rstudio.com), a web application framework for R.  [RStudio](https://www.rstudio.com) provides an integrated environment for R. We suggest users can run IMPIT-a in Rstudio.
 
 -----
 
-## Shiny App
+## Install IMPIT-a
 
-The code is located in [ShinyApp](/https://github.com/manumendiolar/IMPIT_shiny).
+Copy and paste the code to the R console in RStudio to download the IMPIT-a code from github. *The [shiny](https://shiny.rstudio.com/) library must be installed.*
 
-### Run Locally
-
-The Shiny app can be run locally from within R or R Studio. *The [shiny](https://shiny.rstudio.com/) library must be installed.*
-
-Run the following from an R console:
 ``` r
 if(!require("devtools"))  install.packages("devtools")
 shiny::runGitHub("manumendiolar/IMPIT_shiny")

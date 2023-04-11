@@ -121,6 +121,10 @@ dublinRTPI::runShiny()
 * Add the FRDC report?
 -->
 
+## Further reading
+
+* Mendiolar, M., Filar, J. A., Yang, W. H., Leahy, S., & Courtney, A. (2023). Capturing episodic impacts of environmental signals. arXiv preprint arXiv:2303.16073. [link](https://arxiv.org/abs/2303.16073)
+
 ## About Authors
 
 <img src="www/images/UQ_logo.png" width="150"/> 

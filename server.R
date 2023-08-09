@@ -894,20 +894,7 @@ server <- function(input, output, session) {
       
       # linear model
       mod <- lm(yy ~ xx)
-      print(summary(mod))
-      
-      rho.pearson <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="pearson")$estimate
-      rho.spearman <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="spearman", exact = FALSE)$estimate
-      rho.kendall <- cor.test(yy, xx, alternative="two.sided", conf.level=0.95, method="kendall", exact = FALSE)$estimate
-      
-      cat("","\n")
-      cat("","\n")
-      cat("Correlation coefficient |   Value   ","\n")
-      cat("------------------------------------- ","\n")
-      cat("Pearson                 |  ", round(rho.pearson,3),"\n")
-      cat("Spearman                |  ", round(rho.spearman,3),"\n")
-      cat("Kendall                 |  ", round(rho.kendall,3),"\n")
-      cat("------------------------------------- ","\n")
+      summary(mod)
     }
   })
 

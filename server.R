@@ -24,7 +24,7 @@ source("./source/fun_IMPITv2.R")
 source("./source/gather_timfoc_dates.R")
 setBackgroundImage(src = NULL, shinydashboard = TRUE)
 
-# Attach the folder where the 'QU-GENE' engine and QuLinePlus are stored.
+# Get the working directory.
 IMPIT_base <- paste0(getwd(),"/")
 
 

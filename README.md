@@ -58,72 +58,9 @@ A list of example .csv files have been provided. Please use this [link to downlo
 
 -----
 
-<!--## R Package
-
-The code located in [Rlib](/Rlib) contains an R package named
-`dublinRTPI`. This can be installed using the `devtools` package.
-
-The package contains functions to retrieve live info for Dart and Dublin
-Bus. A light version of the main shiny app is also included in the
-package.
-
-``` r
-# install.packages("devtools")
-devtools::install_github("manumendiolar/IMPIT_shiny", subdir = "Rlib")
-
- # Get info about bus stop number 334
-dublinRTPI::db_info(334)
-
- # Run shiny app
-dublinRTPI::runShiny()
-```
-
-
-
-
-<!--### Input variables for **IMPIT-a**
-
-#### Environmental signal data
-| Variable             	| Detail                                                                           	|
-|----------------------	|----------------------------------------------------------------------------------	|
-| ddtime | Time variable. Could be year, month or day and it should be in the format YYYY-MM-DD. |
-| EnvSignal | Environmental signal |
-
-#### Episodes data
-| Variable             	| Detail                                                                           	|
-|----------------------	|----------------------------------------------------------------------------------	|
-| event_no | Number to identify the event / Unique identifier for the event. |
-| duration | Duration of the event. |
-| date_start | Date when the event starts. |
-| date_peak | Date when the event attains its maximum intensity. |
-| date_end | Date when the event ends. |
-| intensity_mean | Mean value. |
-| intensity_median | Median value.  |
-| intensity_max | Maximum value. |
-| intensity_min | Minimum value.  |
-| intensity_log | Natural logarithm of the sum. |
-
-
-#### IMPIT index data
-| Variable             	| Detail                                                                           	|
-|----------------------	|----------------------------------------------------------------------------------	|
-| Memory | Time window memory. |
-| Intensity | Intensity function. |
-| $a$ | Parameter associated with *Persistence* importance weight.|
-| $b$ | Parameter associated with *Recency* importance weight. Dampening parameter. |
-| $c$ | Parameter associated with *Recency* importance weight. |
-| $d$ | Parameter associated with *Timing* importance weight. |
-
-
-# Further reading
-
-* Add the published paper here.
-* Add the FRDC report?
--->
-
 ## Further reading
 
-* Mendiolar, M., Filar, J. A., Yang, W.-H., Leahy, S., & Courtney, A. (2023). Capturing episodic impacts of environmental signals. arXiv preprint arXiv:2303.16073. [link](https://arxiv.org/abs/2303.16073)
+* Mendiolar, M., Filar, J. A., Yang, W.-H., Leahy, S., & Courtney, A.J. (2023). Capturing episodic impacts of environmental signals. _Environmental Modelling & Software, 105837_ [[link]](https://www.sciencedirect.com/science/article/pii/S1364815223002232)
 
 ## About Authors
 
